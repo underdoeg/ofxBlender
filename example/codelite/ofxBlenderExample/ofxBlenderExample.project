@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Project Name="ofxBlenderExample" InternalType="">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+  </Plugins>
+  <VirtualDirectory Name="libs">
+    <VirtualDirectory Name="LinearMath">
+      <VirtualDirectory Name="include">
+        <VirtualDirectory Name="LinearMath">
+          <File Name="../../../libs/LinearMath/include/LinearMath/btQuadWord.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btGeometryUtil.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btList.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btQuickprof.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btRandom.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btDefaultMotionState.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btAlignedObjectArray.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btVector3.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btConvexHull.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btMotionState.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btHashMap.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btAabbUtil2.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btMatrix3x3.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btPoolAllocator.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btTransform.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btSerializer.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btMinMax.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btAlignedAllocator.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btIDebugDraw.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btScalar.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btTransformUtil.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btPoint3.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btQuaternion.h"/>
+          <File Name="../../../libs/LinearMath/include/LinearMath/btStackAlloc.h"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+      <VirtualDirectory Name="src">
+        <File Name="../../../libs/LinearMath/src/btConvexHull.cpp"/>
+        <File Name="../../../libs/LinearMath/src/btQuickprof.cpp"/>
+        <File Name="../../../libs/LinearMath/src/btGeometryUtil.cpp"/>
+        <File Name="../../../libs/LinearMath/src/btAlignedAllocator.cpp"/>
+        <File Name="../../../libs/LinearMath/src/btSerializer.cpp"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="BlenderSerialize">
+      <VirtualDirectory Name="src">
+        <File Name="../../../libs/BlenderSerialize/src/bMain.cpp"/>
+        <File Name="../../../libs/BlenderSerialize/src/bDNA.cpp"/>
+        <File Name="../../../libs/BlenderSerialize/src/dna263-64bit.cpp"/>
+        <File Name="../../../libs/BlenderSerialize/src/bBlenderFile.cpp"/>
+        <File Name="../../../libs/BlenderSerialize/src/bFile.cpp"/>
+        <File Name="../../../libs/BlenderSerialize/src/dna263-32bit.cpp"/>
+        <File Name="../../../libs/BlenderSerialize/src/bChunk.cpp"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="include">
+        <File Name="../../../libs/BlenderSerialize/include/Blender.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bMain.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bBlenderFile.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bChunk.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bFile.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bCommon.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bDefines.h"/>
+        <File Name="../../../libs/BlenderSerialize/include/bDNA.h"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="example">
+    <VirtualDirectory Name="src">
+      <File Name="../../src/main.cpp"/>
+      <File Name="../../src/testApp.cpp"/>
+      <File Name="../../src/testApp.h"/>
+    </VirtualDirectory>
+    <File Name="../../Makefile"/>
+    <File Name="../../config.make"/>
+    <File Name="../../addons.make"/>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="src">
+    <File Name="../../../src/ofxBlender.h"/>
+    <File Name="../../../src/ofxBlender.cpp"/>
+    <File Name="../../../src/ofxBlenderObject.h"/>
+    <File Name="../../../src/ofxBlenderObject.cpp"/>
+    <File Name="../../../src/ofxBlenderMesh.h"/>
+    <File Name="../../../src/ofxBlenderMesh.cpp"/>
+    <File Name="../../../src/ofxBlenderScene.h"/>
+    <File Name="../../../src/ofxBlenderScene.cpp"/>
+    <File Name="../../../src/ofxBlenderCamera.h"/>
+    <File Name="../../../src/ofxBlenderCamera.cpp"/>
+    <File Name="../../../src/ofxBlenderMaterial.h"/>
+    <File Name="../../../src/ofxBlenderMaterial.cpp"/>
+    <File Name="../../../src/ofxBlenderLight.h"/>
+    <File Name="../../../src/ofxBlenderLight.cpp"/>
+  </VirtualDirectory>
+  <Settings Type="Dynamic Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g" C_Options="-g" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="./Debug" Command="./example_debug" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="yes">
+        <RebuildCommand/>
+        <CleanCommand>make clean</CleanCommand>
+        <BuildCommand>make Debug</BuildCommand>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory>$(WorkspacePath)/..</WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="" C_Options="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="-O2" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="yes">
+        <RebuildCommand/>
+        <CleanCommand>make clean</CleanCommand>
+        <BuildCommand>make Release</BuildCommand>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory>$(WorkspacePath)</WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

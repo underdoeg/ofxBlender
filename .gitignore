@@ -1,0 +1,8 @@
+*~
+obj/
+*.blend*
+*.tags
+*.so
+*.session
+example/bin/exampl*
+*workspace.*
