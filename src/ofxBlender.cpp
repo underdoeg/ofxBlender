@@ -112,14 +112,25 @@ ofxBlenderMesh* ofxBlender::parseMesh(Blender::Mesh* bMesh)
 {
 	ofLogNotice(OFX_BLENDER_LOG_CHANNEL) << "creating mesh";
 	ofxBlenderMesh* mesh = new ofxBlenderMesh();
-	
+		
 	//convert vertices
 	for(int i=0;i<bMesh->totvert;i++){
 		mesh->mesh.addVertex(convertVector(bMesh->mvert[i].co));
-		mesh->mesh.addNormal(convertVector(bMesh->mvert[i].no));
+		mesh->mesh.addNormal(convertVector(bMesh->mvert[i].no).getNormalized());
 	}
 	
 	MLoop* loops = bMesh->mloop;
+	
+	//this is a workaround to gt the average model smoothing. This value is used for the whole model for now. //TODO: make this work for individual tris
+	int curSmoothCount  = 0;
+	for(int i=0;i<bMesh->totpoly;i++){
+		if(bMesh->mpoly[i].flag & 1)
+			curSmoothCount++;
+		else
+			curSmoothCount--;
+	}
+	if(curSmoothCount<0)
+		mesh->isSmooth = false;
 	
 	//convert faces
 	for(int i=0;i<bMesh->totpoly;i++){

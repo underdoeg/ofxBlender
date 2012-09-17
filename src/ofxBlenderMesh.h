@@ -9,7 +9,9 @@ public:
 	ofxBlenderMesh();
 	~ofxBlenderMesh();
 	void customDraw();
-	ofMesh  mesh;
+	ofMesh  mesh;	
+	ofMaterial* material;
+	bool isSmooth;
 };
 
 #endif // OFXBLENDERMESH_H

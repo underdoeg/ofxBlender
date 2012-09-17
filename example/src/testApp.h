@@ -22,4 +22,6 @@ class testApp : public ofBaseApp{
 		ofxBlender blendFile;
 		
 		ofEasyCam cam;
+		
+		ofLight light;
 };

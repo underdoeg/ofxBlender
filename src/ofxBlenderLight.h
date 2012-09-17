@@ -10,6 +10,8 @@ public:
 	ofxBlenderLight();
 	~ofxBlenderLight();
 	void begin();
+	void end();
+	void onPositionChanged();
 	ofLight light;
 };
 
