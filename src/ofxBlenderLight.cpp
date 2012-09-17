@@ -4,7 +4,7 @@ ofxBlenderLight::ofxBlenderLight()
 {
 	light.setParent(*this);
 	light.setup();
-	light.setAttenuation(.9, 0, 0);
+	light.setAttenuation(1.1, 0, 0);
 }
 
 ofxBlenderLight::~ofxBlenderLight()
