@@ -2,7 +2,7 @@
 
 ofxBlenderCamera::ofxBlenderCamera()
 {
-	camera.setParent(*this);
+
 }
 
 ofxBlenderCamera::~ofxBlenderCamera()
@@ -11,5 +11,9 @@ ofxBlenderCamera::~ofxBlenderCamera()
 }
 
 void ofxBlenderCamera::begin(){
-	camera.begin();
+	ofCamera::begin();
+}
+void ofxBlenderCamera::end()
+{
+	ofCamera::end();
 }

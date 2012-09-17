@@ -3,15 +3,14 @@
 
 #include "ofxBlenderObject.h" // Base class: ofxBlenderObject
 
-class ofxBlenderCamera: public ofxBlenderObject
+class ofxBlenderCamera: public ofxBlenderObject, public ofCamera
 {
 public:
 	ofxBlenderCamera();
 	~ofxBlenderCamera();
 	
 	void begin();
-	
-	ofCamera camera;
+	void end();
 };
 
 #endif // OFXBLENDERCAMERA_H

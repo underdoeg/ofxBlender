@@ -3,17 +3,14 @@
 
 #include "ofMain.h"
 
-class ofxBlenderObject: public ofNode
+class ofxBlenderObject
 {
 public:
 	ofxBlenderObject();
 	~ofxBlenderObject();
-	virtual void customDraw(){
-		//ofPushMatrix();ofScale(.05, .05, .05);ofNode::customDraw();ofPopMatrix();
-	};
+	virtual void draw(){};
 	virtual void begin(){};
 	virtual void end(){};
-	
 	string name;
 	int type;
 };

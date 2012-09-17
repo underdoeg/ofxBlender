@@ -3,11 +3,12 @@
 
 #include "ofxBlenderObject.h" // Base class: ofxBlenderObject
 
-class ofxBlenderMesh : public ofxBlenderObject
+class ofxBlenderMesh : public ofxBlenderObject, public ofNode
 {
 public:
 	ofxBlenderMesh();
 	~ofxBlenderMesh();
+	void draw();
 	void customDraw();
 	ofMesh  mesh;	
 	ofMaterial* material;

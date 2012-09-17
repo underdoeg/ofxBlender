@@ -16,6 +16,11 @@ ofxBlenderMesh::~ofxBlenderMesh()
 {
 }
 
+void ofxBlenderMesh::draw()
+{
+	ofNode::draw();
+}
+
 void ofxBlenderMesh::customDraw()
 {
 	if(isSmooth)
@@ -28,3 +33,4 @@ void ofxBlenderMesh::customDraw()
 	if(material)
 		material->end();
 }
+

@@ -50,6 +50,7 @@ public:
 	ofxBlenderCamera* getCamera(string name);
 	ofxBlenderLight* getLight(string name);
 	ofxBlenderScene* getActiveScene();
+	ofxBlenderMaterial* getMaterial(string name);
 	
 private:
 	//utils
@@ -68,6 +69,8 @@ private:
 	ofxBlenderMesh* parseMesh(Blender::Mesh* mesh);
 	ofxBlenderCamera* parseCamera(Blender::Camera* bCam);
 	ofxBlenderLight* parseLight(Blender::Lamp* bLamp);
+	void parseMaterials(bParse::bListBasePtr* mats);
+	ofxBlenderMaterial* parseMaterial(Blender::Material* bMat);
 	
 	//storage
 	std::map<string, ofxBlenderObject*> objectMap;

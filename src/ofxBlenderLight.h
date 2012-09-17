@@ -4,7 +4,7 @@
 #include "ofMain.h"
 #include "ofxBlenderObject.h"
 
-class ofxBlenderLight: public ofxBlenderObject
+class ofxBlenderLight: public ofxBlenderObject, public ofLight
 {
 public:
 	ofxBlenderLight();
@@ -12,7 +12,7 @@ public:
 	void begin();
 	void end();
 	void onPositionChanged();
-	ofLight light;
+
 };
 
 #endif // OFXBLENDERLIGHT_H
