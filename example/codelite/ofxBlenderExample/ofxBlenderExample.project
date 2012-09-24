@@ -5,6 +5,170 @@
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="openFrameworks">
+    <VirtualDirectory Name="sound">
+      <File Name="../../../../../libs/openFrameworks/sound/ofBaseSoundStream.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofOpenALSoundPlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofBaseSoundPlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofPASoundStream.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofOpenALSoundPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofBaseSoundStream.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofRtAudioSoundStream.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofFmodSoundPlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofPASoundStream.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofSoundStream.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofFmodSoundPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofSoundStream.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofSoundPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofSoundPlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofBaseSoundPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/sound/ofRtAudioSoundStream.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="window">
+      <File Name="../../../../../libs/openFrameworks/window/ofDisplay.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/window/ofDisplay.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="graphics">
+      <File Name="../../../../../libs/openFrameworks/graphics/ofPath.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofBitmapFont.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofTessellator.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofRendererCollection.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofGraphics.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofPath.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofPixels.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofPolyline.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofTessellator.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofCairoRenderer.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofImage.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofImage.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofPixels.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofGraphics.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofTrueTypeFont.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofCairoRenderer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofBitmapFont.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofPolyline.h"/>
+      <File Name="../../../../../libs/openFrameworks/graphics/ofTrueTypeFont.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="utils">
+      <File Name="../../../../../libs/openFrameworks/utils/ofSystemUtils.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofUtils.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofThread.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofFileUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofNoise.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofLog.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofURLFileLoader.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofConstants.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofURLFileLoader.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofLog.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofFileUtils.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofThread.h"/>
+      <File Name="../../../../../libs/openFrameworks/utils/ofSystemUtils.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="math">
+      <File Name="../../../../../libs/openFrameworks/math/ofVec2f.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofVec2f.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofVectorMath.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofMath.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofVec4f.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofVec4f.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofMatrix3x3.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofMatrix4x4.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofQuaternion.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofVec3f.h"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofMatrix4x4.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofMatrix3x3.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofMath.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/math/ofQuaternion.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="app">
+      <File Name="../../../../../libs/openFrameworks/app/ofAppRunner.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/app/ofAppRunner.h"/>
+      <File Name="../../../../../libs/openFrameworks/app/ofAppBaseWindow.h"/>
+      <File Name="../../../../../libs/openFrameworks/app/ofAppGlutWindow.h"/>
+      <File Name="../../../../../libs/openFrameworks/app/ofBaseApp.h"/>
+      <File Name="../../../../../libs/openFrameworks/app/ofAppGlutWindow.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="events">
+      <File Name="../../../../../libs/openFrameworks/events/ofEventUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/events/ofEvents.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/events/ofEvents.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="video">
+      <File Name="../../../../../libs/openFrameworks/video/ofGstVideoPlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofDirectShowGrabber.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofGstVideoGrabber.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofDirectShowGrabber.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQuickTimePlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofVideoPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQtUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofGstUtils.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQuickTimePlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQuickTimeGrabber.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQuickTimeGrabber.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQtUtils.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofGstVideoPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofGstUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofVideoPlayer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofGstVideoGrabber.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofVideoGrabber.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/QTKitMovieRenderer.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQTKitPlayer.h"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofVideoGrabber.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/video/ofQTKitGrabber.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="gl">
+      <File Name="../../../../../libs/openFrameworks/gl/ofVboMesh.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofVbo.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofTexture.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofVboMesh.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofMaterial.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofLight.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofShader.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofFbo.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofGLUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofVbo.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofMaterial.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofGLRenderer.h"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofGLRenderer.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofFbo.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofTexture.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofLight.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/gl/ofShader.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="3d">
+      <File Name="../../../../../libs/openFrameworks/3d/ofCamera.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofEasyCam.h"/>
+      <File Name="../../../../../libs/openFrameworks/3d/of3dUtils.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofEasyCam.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofMesh.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofCamera.h"/>
+      <File Name="../../../../../libs/openFrameworks/3d/of3dUtils.h"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofMesh.h"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofNode.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/3d/ofNode.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="communication">
+      <File Name="../../../../../libs/openFrameworks/communication/ofArduino.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/communication/ofSerial.h"/>
+      <File Name="../../../../../libs/openFrameworks/communication/ofArduino.h"/>
+      <File Name="../../../../../libs/openFrameworks/communication/ofSerial.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="types">
+      <File Name="../../../../../libs/openFrameworks/types/ofColor.h"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofRectangle.h"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofRectangle.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofPoint.h"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofBaseTypes.h"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofTypes.h"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofBaseTypes.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofPoint.cpp"/>
+      <File Name="../../../../../libs/openFrameworks/types/ofColor.cpp"/>
+    </VirtualDirectory>
+    <File Name="../../../../../libs/openFrameworks/.project"/>
+    <File Name="../../../../../libs/openFrameworks/ofMain.h"/>
+    <File Name="../../../../../libs/openFrameworks/.cproject"/>
+  </VirtualDirectory>
   <VirtualDirectory Name="libs">
     <VirtualDirectory Name="LinearMath">
       <VirtualDirectory Name="include">
@@ -111,7 +275,9 @@
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="" IntermediateDirectory="./Debug" Command="./example_debug" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
+        <![CDATA[
+      
+      ]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -148,7 +314,9 @@
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
+        <![CDATA[
+      
+      ]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -178,4 +346,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

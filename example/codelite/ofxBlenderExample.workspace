@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="ofxBlenderExample" Database="./ofxBlenderExample.tags">
   <Project Name="ofxBlenderExample" Path="ofxBlenderExample/ofxBlenderExample.project" Active="Yes"/>
+  <Project Name="openframeworksLib" Path="../../../../libs/openFrameworksCompiled/project/linux64/codelite-project/openframeworksLib.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="ofxBlenderExample" ConfigName="Debug"/>
+      <Project Name="openframeworksLib" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="ofxBlenderExample" ConfigName="Release"/>
+      <Project Name="openframeworksLib" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
