@@ -6,3 +6,4 @@ obj/
 *.session
 example/bin/exampl*
 *workspace.*
+.DS_Store
