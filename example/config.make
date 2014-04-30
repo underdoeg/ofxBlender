@@ -10,7 +10,7 @@ OF_ROOT = ../../..
 # for example search paths like:
 # USER_CFLAGS = -I src/objects
 
-USER_CFLAGS = 
+USER_CFLAGS = -std=c++11 -Wall -W -pedantic -O2 -Wno-unused-variable
 
 
 # USER_LDFLAGS allows to pass custom flags to the linker
@@ -28,9 +28,9 @@ USER_COMPILER_OPTIMIZATION = -march=native -mtune=native -Os
 
 
 # android specific, in case you want to use different optimizations
-USER_LIBS_ARM = 
-USER_LIBS_ARM7 = 
-USER_LIBS_NEON = 
+USER_LIBS_ARM =
+USER_LIBS_ARM7 =
+USER_LIBS_NEON =
 
 # android optimizations
 

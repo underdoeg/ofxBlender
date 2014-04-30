@@ -7,3 +7,5 @@ obj/
 example/bin/exampl*
 *workspace.*
 .DS_Store
+/example/bin/data/structure.html
+*.codelite
