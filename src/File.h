@@ -13,9 +13,23 @@ namespace blender {
 class DNAName {
 public:
 	DNAName(string n) {
+		isPointer = false;
+		isArray = false;
+		arraySize = 0;
+
 		name=n;
+
+		//now analyze the name
+		if(name[0] == "*")
+			isPointer = true;
+		if(name[1] == "*")
+			isPointer = true;
 	}
+
 	std::string name;
+	bool isPointer;
+	bool isArray;
+	unsigned int arraySize;
 };
 
 class DNAType {
@@ -75,6 +89,7 @@ public:
 		unsigned int SDNAIndex;
 		unsigned int count;
 		streampos fileOffset;
+		DNAStructure* structure;
 	};
 
 	File();
@@ -96,6 +111,7 @@ private:
 	std::string readString(streamsize length);
 	void readHeader(File::Block& block);
 	void seek(streamoff to);
+	void parseBlock(Block* block);
 
 	//function that retreives the pointer type
 	std::function<unsigned long()> readPointer;
@@ -104,6 +120,7 @@ private:
 	std::vector<Block> blocks;
 	DNACatalog catalog;
 	std::ifstream file;
+	std::map<std::string, std::function<void(Block* block)> > parsers;
 };
 
 }

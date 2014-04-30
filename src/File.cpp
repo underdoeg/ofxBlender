@@ -15,7 +15,7 @@ void align(ifstream& stream) {
 
 ///////////////////////////////// PARSER HELPER
 
-class DNAStructureReader{
+class DNAStructureReader {
 public:
 	DNAStructureReader(File* file, DNAStructure* structure);
 };
@@ -186,24 +186,22 @@ bool File::load(string path) {
 	}
 	align(file);
 
+	//now link all structures with the File Blocks
 	vector<Block>::iterator it = blocks.begin();
 	while(it != blocks.end()) {
-		DNAStructure& structure = catalog.structures[(*it).SDNAIndex];
-
-		if(structure.type->name == "Mesh") {
-			for(unsigned int i=0; i<structure.fields.size(); i++) {
-
-			}
-			file.seekg((*it).fileOffset);
-		}
+		(*it).structure = &catalog.structures[(*it).SDNAIndex];
 		it++;
 	}
 
-	//read<unsigned int>(file) << endl;
 	return true;
 }
 
 Scene* File::getScene(unsigned int index) {
+	return NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////// PARSERS
+void File::parseBlock(Block* block) {
 
 }
 
