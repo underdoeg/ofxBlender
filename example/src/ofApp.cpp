@@ -5,7 +5,8 @@ void ofApp::setup() {
 
 	ofx::blender::File file;
 	file.load("test.blend");
-	//file.exportStructure();
+	file.exportStructure();
+	ofExit(0);
 }
 
 void ofApp::update() {

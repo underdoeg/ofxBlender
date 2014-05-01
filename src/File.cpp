@@ -17,7 +17,20 @@ void align(ifstream& stream) {
 
 class DNAStructureReader {
 public:
-	DNAStructureReader(File* file, DNAStructure* structure);
+
+	DNAStructureReader(File* f, DNAStructure* s){
+		file = f;
+		structure = s;
+	};
+
+	template<typename Type>
+	Type read(string fieldName){
+
+	}
+
+private:
+	File* file;
+	DNAStructure* structure;
 };
 
 ////////////////////
@@ -220,7 +233,9 @@ void File::exportStructure(string path) {
 	html << "h2{padding:0;margin: 20px 0 5px 0;}" << endl;
 	html << "h3{padding:0;margin: 10px 0 5px 0;}" << endl;
 	html << "h3.type{font-weight:normal;}" << endl;
-	html << "th,td{text-align:left;border-bottom:1px solid #ccc;padding: 5px;}" << endl;
+	html << "tr{}" << endl;
+	html << "th,td{text-align:left;padding: 7px;border-bottom:1px solid #ccc;}" << endl;
+	html << "td.center{text-align:center;}" << endl;
 	html << "</style></head><body>";
 
 	html << "<h1>ofxBlender</h1>" << endl;
@@ -240,10 +255,11 @@ void File::exportStructure(string path) {
 		html << "<h3 class='type'><a id=\"" << (*it).type->name << "\">";
 		html << "<b>" << (*it).type->name << "</b> (" << (*it).type->size << ")";
 		html << "</a></h3>";
-		html << "<table><tr><th>TYPE</th><th>NAME</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
+		html << "<table cellspacing='0'><tr><th>TYPE</th><th>NAME CLEAN</th><th>NAME</th><th>[]</th><th>*</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
 		for(vector<DNAField>::iterator jt = (*it).fields.begin(); jt<(*it).fields.end(); jt++) {
 			html << "<tr>";
 			html << "<td>";
+			//TYPE
 			bool makeLink = catalog.hasStructure((*jt).type->name);
 			if(makeLink)
 				html << "<a href=\"#" << (*jt).type->name << "\">";
@@ -251,7 +267,24 @@ void File::exportStructure(string path) {
 			if(makeLink)
 				html << "</a>";
 			html << "</td>";
+
+			//NAME
+			html << "<td>" << (*jt).name->nameStriped << "</td>";
 			html << "<td>" << (*jt).name->name << "</td>";
+
+			//IS ARRAY
+			string arrayTxt = "";
+			if((*jt).name->isArray)
+				arrayTxt = "" + ofToString((*jt).name->arrayDimensions) + "";
+			html << "<td class='center'>" << arrayTxt << "</td>";
+
+			//IS POINTER
+			string ptrTxt = "";
+			if((*jt).name->isPointer)
+				ptrTxt = "&#10003;";
+			html << "<td class='center'>" << ptrTxt << "</td>";
+
+			//SIZE
 			html << "<td>" << (*jt).type->size << "</td>";
 			html << "<td>" << (*jt).offset << "</td>";
 			html << "</tr>" << endl;
@@ -261,7 +294,7 @@ void File::exportStructure(string path) {
 
 	//write all data blocks
 	html << "<h2>Blocks</h2>" << endl;
-	html << "<table><tr><th>NAME</th><th>TYPE</th><th>COUNT</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
+	html << "<table cellspacing='0'><tr><th>NAME</th><th>TYPE</th><th>COUNT</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
 	for(vector<Block>::iterator it = blocks.begin(); it<blocks.end(); it++) {
 		html << "<tr>";
 		html << "<td>" << (*it).code << "</td>";

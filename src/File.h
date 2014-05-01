@@ -15,21 +15,41 @@ public:
 	DNAName(string n) {
 		isPointer = false;
 		isArray = false;
-		arraySize = 0;
+		arrayDimensions = 0;
 
 		name=n;
 
+
 		//now analyze the name
-		if(name[0] == "*")
+		unsigned int len = name.size();
+		if(name[0] == '*')
 			isPointer = true;
-		if(name[1] == "*")
-			isPointer = true;
+		if(len > 2 && name[1] == '*'){
+			isArray = true;
+			arrayDimensions = 1;
+		}
+
+		unsigned int numSquareBracks = ofStringTimesInString(name, "[");
+		if(numSquareBracks != 0){
+			isArray = true;
+			if(numSquareBracks == 1){
+				arrayDimensions = 1;
+			}else if(numSquareBracks == 2){
+				arrayDimensions = 2;
+			}
+		}
+
+		//strip the name
+		nameStriped = name;
+		ofStringReplace(nameStriped, "*", "");
+		nameStriped = ofSplitString(nameStriped, "[")[0];
 	}
 
 	std::string name;
+	std::string nameStriped;
 	bool isPointer;
 	bool isArray;
-	unsigned int arraySize;
+	unsigned int arrayDimensions;
 };
 
 class DNAType {
