@@ -5,4 +5,11 @@
 
 #define OFX_BLENDER "ofxBlender"
 
+namespace ofx {
+namespace blender {
+
+	std::string &trim(std::string &s);
+
+}
+}
 #endif // LOADER_H

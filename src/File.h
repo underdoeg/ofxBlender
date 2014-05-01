@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include <functional>
 #include "Scene.h"
+#include "Object.h"
 
 namespace ofx {
 namespace blender {
@@ -13,52 +14,27 @@ namespace blender {
 class DNAName {
 public:
 	DNAName(string n) {
-		isPointer = false;
-		isArray = false;
-		arrayDimensions = 0;
-
 		name=n;
 
-
-		//now analyze the name
-		unsigned int len = name.size();
-		if(name[0] == '*')
-			isPointer = true;
-		if(len > 2 && name[1] == '*'){
-			isArray = true;
-			arrayDimensions = 1;
-		}
-
-		unsigned int numSquareBracks = ofStringTimesInString(name, "[");
-		if(numSquareBracks != 0){
-			isArray = true;
-			if(numSquareBracks == 1){
-				arrayDimensions = 1;
-			}else if(numSquareBracks == 2){
-				arrayDimensions = 2;
-			}
-		}
-
 		//strip the name
-		nameStriped = name;
-		ofStringReplace(nameStriped, "*", "");
-		nameStriped = ofSplitString(nameStriped, "[")[0];
+		nameClean = name;
+		ofStringReplace(nameClean, "*", "");
+		nameClean = ofSplitString(nameClean, "[")[0];
 	}
 
 	std::string name;
-	std::string nameStriped;
-	bool isPointer;
-	bool isArray;
-	unsigned int arrayDimensions;
+	std::string nameClean;
 };
 
 class DNAType {
 public:
-	DNAType(string n) {
-		name=n;
+	DNAType(string n, unsigned int i) {
+		id = i;
+		name = n;
 	};
 	string name;
 	unsigned short size;
+	unsigned int id;
 };
 
 class DNAField {
@@ -67,17 +43,78 @@ public:
 		name=n;
 		type=t;
 		offset=off;
+
+		isPointer = false;
+		isArray = false;
+		arrayDimensions = 0;
+
+		//now analyze the name
+		unsigned int len = name->name.size();
+		if(name->name[0] == '*')
+			isPointer = true;
+		if(len > 2 && name->name[1] == '*') {
+			isArray = true;
+			arrayDimensions = 1;
+		}
+
+		unsigned int numSquareBracks = ofStringTimesInString(name->name, "[");
+		if(numSquareBracks != 0) {
+			isArray = true;
+			if(numSquareBracks == 1) {
+				arrayDimensions = 1;
+			} else if(numSquareBracks == 2) {
+				arrayDimensions = 2;
+			}
+
+			//now extract array sizes from brackets
+			if(arrayDimensions > 0){
+				std::vector<std::string> parts = ofSplitString(name->name, "[");
+				arraySizes.push_back(ofToInt(ofSplitString(parts[1], "]")[0]));
+				if(arrayDimensions > 1)
+					arraySizes.push_back(ofToInt(ofSplitString(parts[2], "]")[0]));
+			}
+		}
+
+		//check if arraySizes is filled up properly
+		if(isArray && arrayDimensions != arraySizes.size()){
+			for(unsigned int i=arraySizes.size(); i<arrayDimensions; i++){
+				arraySizes.push_back(-1);
+			}
+		}
 	};
+
 	DNAName* name;
 	DNAType* type;
 	unsigned int offset;
+
+	bool isPointer;
+	bool isArray;
+	unsigned int arrayDimensions;
+	std::vector<int> arraySizes;
 };
 
 class DNAStructure {
 public:
 	DNAStructure(DNAType* t) {
 		type = t;
-	};
+	}
+
+	bool hasField(string fieldName) {
+		for(DNAField& field: fields) {
+			if(field.name->nameClean == fieldName)
+				return true;
+		}
+		return false;
+	}
+
+	DNAField& getField(string fieldName) {
+		for(DNAField& field: fields) {
+			if(field.name->nameClean == fieldName)
+				return field;
+		}
+		return fields[0];
+	}
+
 	DNAType* type;
 	std::vector<DNAField> fields;
 };
@@ -95,12 +132,33 @@ public:
 		}
 		return false;
 	}
+
+	DNAStructure* getStructure(std::string name){
+		for(vector<DNAStructure>::iterator it = structures.begin(); it<structures.end(); it++) {
+			if((*it).type->name == name)
+				return &(*it);
+		}
+		ofLogWarning(OFX_BLENDER) << "Structure " << name << " not found in DNA Catalogue";
+		return NULL;
+	}
 };
 
 ///
 
 class File {
 public:
+
+	File();
+	~File();
+
+	bool load(string path);
+	void exportStructure(string path="structure.html");
+	unsigned int getNumberOfScenes();
+	Scene* getScene(unsigned int index);
+	unsigned int getNumberOfObjects();
+	Object* getObject(unsigned int index);
+
+private:
 	class Block {
 	public:
 		string code;
@@ -108,30 +166,31 @@ public:
 		unsigned long oldAddress;
 		unsigned int SDNAIndex;
 		unsigned int count;
-		streampos fileOffset;
+		streampos offset;
 		DNAStructure* structure;
 	};
 
-	File();
-	~File();
+	class ParsedBlock{
+		Block* block;
+		void* result;
+	};
 
-	bool load(string path);
-	void exportStructure(string path="structure.html");
-	Scene* getScene(unsigned int index);
-
-private:
 	//templated read function
 	template<typename Type>
-	Type read(){
+	Type read() {
 		Type ret;
 		file.read((char*)&ret, sizeof(Type));
 		return ret;
 	}
 	char* readChar(streamsize length);
-	std::string readString(streamsize length);
+	std::string readString(streamsize length=0);
 	void readHeader(File::Block& block);
 	void seek(streamoff to);
-	void parseBlock(Block* block);
+	void* parseBlock(Block& block);
+
+	unsigned int getNumberOfTypes(string typeName);
+	std::vector<Block*> getByType(string typeName);
+	Block& getByType(string typeName, unsigned int pos);
 
 	//function that retreives the pointer type
 	std::function<unsigned long()> readPointer;
@@ -140,7 +199,118 @@ private:
 	std::vector<Block> blocks;
 	DNACatalog catalog;
 	std::ifstream file;
-	std::map<std::string, std::function<void(Block* block)> > parsers;
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////// ALL ABOUT PARSING //////////////////////////////////////////////////////
+
+	//helper class to read structures
+	class DNAStructureReader {
+	public:
+
+		DNAStructureReader(File* f, File::Block* b) {
+			file = f;
+			block = b;
+			reset();
+		};
+
+		void reset(){
+			setStructure(block->structure, block->offset);
+		}
+
+		void setStructure(DNAStructure* s, streamoff offset){
+			structure = s;
+			currentOffset = offset;
+		}
+
+		//set another structure according to the provided field name
+		void setStructure(string fieldName){
+			if(!structure->hasField(fieldName)){
+				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
+				return;
+			}
+			DNAField& field = structure->getField(fieldName);
+			DNAStructure* s = file->catalog.getStructure(field.type->name);
+			if(!s)
+				return;
+			setStructure(s, currentOffset + std::streampos(field.offset));
+		}
+
+		template<typename Type>
+		Type readArray(string fieldName) {
+			bool isPointer = std::is_pointer<Type>::value;
+			if(!structure->hasField(fieldName)) {
+				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
+				if(isPointer)
+					return NULL;
+				else
+					return Type();
+			}
+			DNAField& field = structure->getField(fieldName);
+
+			//read the file contents
+			file->seek(currentOffset + std::streampos(field.offset));
+			return file->read<Type>();
+		}
+
+		template<typename Type>
+		Type read(string fieldName) {
+			bool isPointer = std::is_pointer<Type>::value;
+			if(!structure->hasField(fieldName)) {
+				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
+				if(isPointer)
+					return NULL;
+				else
+					return Type();
+			}
+			DNAField& field = structure->getField(fieldName);
+
+			//seek to the fields position
+			file->seek(currentOffset + std::streampos(field.offset));
+
+			if(isPointer){
+				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " is a pointer - not implemented yet - returning NULL";
+				return NULL;
+			}
+
+			//check if the type is a string, strings are actually char arrays
+			if(std::is_same<Type, std::string>::value){
+				if(field.isArray){
+					//if(field.arraySizes[0] != -1){
+						string ret = file->readString();
+
+						//strings are usually object names or paths, objects names have the object type prepending, check and remove
+						if(ret.size() >= block->code.size() && block->code == ret.substr(0, block->code.size()-2)){
+							ret = ret.substr(block->code.size());
+						}
+						return ret;
+					//}
+				}
+				ofLogWarning(OFX_BLENDER) << "Could not read string " << fieldName;
+				return "undefined";
+			}
+
+			if(field.isArray){
+				cout << "IT IS AN ARRAY!" << endl;
+				return Type();
+			}
+
+			//read the file contents
+			return file->read<Type>();
+		}
+
+	private:
+		File* file;
+		DNAStructure* structure;
+		File::Block* block;
+		streamoff currentOffset;
+	};
+
+	void* parseScene(DNAStructureReader& reader);
+	void* parseObject(DNAStructureReader& reader);
+
+	typedef std::map<std::string, std::function<void*(DNAStructureReader&)> > ParserList;
+	ParserList parsers;
+
 };
 
 }

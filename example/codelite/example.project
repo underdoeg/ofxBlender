@@ -112,6 +112,9 @@
         <File Name="../../src/Utils.h"/>
         <File Name="../../src/File.h"/>
         <File Name="../../src/File.cpp"/>
+        <File Name="../../src/Object.h"/>
+        <File Name="../../src/Object.cpp"/>
+        <File Name="../../src/Utils.cpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

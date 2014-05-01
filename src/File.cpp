@@ -1,6 +1,14 @@
 #include "File.h"
 #include <fstream>
 
+//all the names of the blender object types
+#define BL_SCENE "Scene"
+#define BL_OBJECT "Object"
+#define BL_MESH "Mesh"
+#define BL_CAMERA "Camera"
+
+
+class file;
 namespace ofx {
 
 namespace blender {
@@ -15,27 +23,13 @@ void align(ifstream& stream) {
 
 ///////////////////////////////// PARSER HELPER
 
-class DNAStructureReader {
-public:
-
-	DNAStructureReader(File* f, DNAStructure* s){
-		file = f;
-		structure = s;
-	};
-
-	template<typename Type>
-	Type read(string fieldName){
-
-	}
-
-private:
-	File* file;
-	DNAStructure* structure;
-};
 
 ////////////////////
 
 File::File() {
+	//register parsers
+	using namespace std::placeholders;
+	parsers[BL_SCENE] = std::bind(&File::parseScene, this, _1);
 }
 
 File::~File() {
@@ -59,9 +53,10 @@ std::string File::readString(streamsize length) {
 			res += cur;
 			cur = readChar(1)[0];
 		}
-		return res;
+		return trim(res);
 	} else {
-		return string(readChar(length), length);
+		string ret = string(readChar(length), length);
+		return trim(ret);
 	}
 	return "";
 }
@@ -74,13 +69,13 @@ void File::readHeader(File::Block& block) {
 		block.oldAddress = readPointer();
 		block.SDNAIndex = read<unsigned int>();
 		block.count = read<unsigned int>();
-		block.fileOffset = file.tellg();
+		block.offset = file.tellg();
 	} else {
 		block.size = read<unsigned int>();
 		block.oldAddress = 0;
 		block.SDNAIndex = 0;
 		block.count = 0;
-		block.fileOffset = file.tellg();
+		block.offset = file.tellg();
 	}
 }
 
@@ -163,7 +158,7 @@ bool File::load(string path) {
 	unsigned int numTypes = read<unsigned int>();
 	//cout << "FOUND TYPES " << numTypes << endl;
 	for(unsigned int i=0; i<numTypes; i++) {
-		catalog.types.push_back(DNAType(readString(0)));
+		catalog.types.push_back(DNAType(readString(0), i));
 	}
 	align(file);
 
@@ -171,6 +166,8 @@ bool File::load(string path) {
 	readString(4);;
 	for(unsigned int i=0; i<numTypes; i++) {
 		catalog.types[i].size = read<unsigned short>();
+		if(catalog.types[i].size == 0) //assume it is a pointer
+			catalog.types[i].size = pointerSize;
 	}
 	align(file);
 
@@ -194,7 +191,31 @@ bool File::load(string path) {
 			DNAType* type = &catalog.types[typeIndex];
 			DNAName* name = &catalog.names[nameIndex];
 			structure.fields.push_back(DNAField(type, name, curOffset));
-			curOffset += type->size;
+
+			//if the field is a pointer, then only add the pointer size to offset
+			bool offsetSet = false;
+			if(structure.fields.back().isPointer){
+				curOffset += pointerSize;
+				offsetSet = true;
+			}else if(structure.fields.back().isArray){//arrays add n times the size to offset
+				float multi = 0;
+				for(int s: structure.fields.back().arraySizes){
+					if(s!=-1){
+						if(multi == 0)
+							multi += s;
+						else
+							multi *= s;
+					}
+				}
+
+				if(multi != 0)
+					offsetSet = true;
+
+				curOffset += type->size * multi;
+			}
+			if(!offsetSet){
+				curOffset += type->size;
+			}
 		}
 	}
 	align(file);
@@ -209,13 +230,75 @@ bool File::load(string path) {
 	return true;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////
+unsigned int File::getNumberOfTypes(string typeName) {
+	unsigned int count = 0;
+	for(Block& block: blocks) {
+		if(block.structure->type->name == typeName)
+			count++;
+	}
+	return count;
+}
+
+std::vector<File::Block*> File::getByType(string typeName) {
+	std::vector<Block*> ret;
+	for(Block& block: blocks) {
+		if(block.structure->type->name == typeName)
+			ret.push_back(&block);
+	}
+	return ret;
+}
+
+File::Block& File::getByType(string typeName, unsigned int pos) {
+	unsigned int maxNum = getNumberOfTypes(typeName);
+	if(maxNum <= pos){
+		ofLogWarning(OFX_BLENDER) << typeName << " " << pos << " not found";
+		pos = maxNum - 1;
+	}
+	return *getByType(typeName)[pos];
+}
+
+////////
+unsigned int File::getNumberOfScenes() {
+	return getNumberOfTypes(BL_SCENE);
+}
+
 Scene* File::getScene(unsigned int index) {
-	return NULL;
+	return static_cast<Scene*>(parseBlock(getByType(BL_SCENE, index)));
+}
+
+unsigned int File::getNumberOfObjects() {
+	return getNumberOfTypes(BL_OBJECT);
+}
+
+Object* File::getObject(unsigned int index) {
+	return static_cast<Object*>(parseBlock(getByType(BL_SCENE, index)));
 }
 
 ///////////////////////////////////////////////////////////////////////////// PARSERS
-void File::parseBlock(Block* block) {
+void* File::parseBlock(Block& block) {
+	if(parsers.find(block.structure->type->name) != parsers.end()){
+		DNAStructureReader reader = DNAStructureReader(this, &block);
+		void* obj = parsers[block.structure->type->name](reader);
+		return obj;
+	}
+	return NULL;
+}
 
+void* File::parseScene(DNAStructureReader& reader) {
+	Scene* scene = new Scene();
+	reader.setStructure("id");
+	cout << "READING " << reader.read<string>("name") << endl;
+	//scene->name = reader.read<char>("name");
+	return scene;
+}
+
+void* File::parseObject(DNAStructureReader& reader) {
+	Object* scene = new Object();
+	reader.setStructure("id");
+	//cout << "READING " << reader.read<string>("name") << endl;
+	//scene->name = reader.read<char>("name");
+	return scene;
 }
 
 //////////////////////////////////////////////////////////////////////////// EXPORT HTML
@@ -234,8 +317,8 @@ void File::exportStructure(string path) {
 	html << "h3{padding:0;margin: 10px 0 5px 0;}" << endl;
 	html << "h3.type{font-weight:normal;}" << endl;
 	html << "tr{}" << endl;
-	html << "th,td{text-align:left;padding: 7px;border-bottom:1px solid #ccc;}" << endl;
-	html << "td.center{text-align:center;}" << endl;
+	html << "th,td{text-align:left;padding: 7px;border-bottom:1px solid #ccc;margin:0;}" << endl;
+	html << "td.center, th.center{text-align:center;}" << endl;
 	html << "</style></head><body>";
 
 	html << "<h1>ofxBlender</h1>" << endl;
@@ -253,9 +336,9 @@ void File::exportStructure(string path) {
 
 	for(vector<DNAStructure>::iterator it = catalog.structures.begin(); it<catalog.structures.end(); it++) {
 		html << "<h3 class='type'><a id=\"" << (*it).type->name << "\">";
-		html << "<b>" << (*it).type->name << "</b> (" << (*it).type->size << ")";
+		html << (*it).type->id << " <b>" << (*it).type->name << "</b> (" << (*it).type->size << ")";
 		html << "</a></h3>";
-		html << "<table cellspacing='0'><tr><th>TYPE</th><th>NAME CLEAN</th><th>NAME</th><th>[]</th><th>*</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
+		html << "<table cellspacing='0'><tr><th>TYPE</th><th>NAME CLEAN</th><th>NAME</th><th class='center'>[]</th><th class='center'>*</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
 		for(vector<DNAField>::iterator jt = (*it).fields.begin(); jt<(*it).fields.end(); jt++) {
 			html << "<tr>";
 			html << "<td>";
@@ -269,18 +352,24 @@ void File::exportStructure(string path) {
 			html << "</td>";
 
 			//NAME
-			html << "<td>" << (*jt).name->nameStriped << "</td>";
+			html << "<td>" << (*jt).name->nameClean << "</td>";
 			html << "<td>" << (*jt).name->name << "</td>";
 
 			//IS ARRAY
 			string arrayTxt = "";
-			if((*jt).name->isArray)
-				arrayTxt = "" + ofToString((*jt).name->arrayDimensions) + "";
+			if((*jt).isArray){
+				//arrayTxt = "" + ofToString((*jt).arrayDimensions) + "";
+				arrayTxt = "[";
+				for(int i: (*jt).arraySizes)
+					arrayTxt += ofToString(i) + ",";
+				arrayTxt = arrayTxt.substr(0, arrayTxt.size()-1);
+				arrayTxt += "]";
+			}
 			html << "<td class='center'>" << arrayTxt << "</td>";
 
 			//IS POINTER
 			string ptrTxt = "";
-			if((*jt).name->isPointer)
+			if((*jt).isPointer)
 				ptrTxt = "&#10003;";
 			html << "<td class='center'>" << ptrTxt << "</td>";
 
@@ -298,21 +387,11 @@ void File::exportStructure(string path) {
 	for(vector<Block>::iterator it = blocks.begin(); it<blocks.end(); it++) {
 		html << "<tr>";
 		html << "<td>" << (*it).code << "</td>";
-
 		DNAStructure& structure = catalog.structures[(*it).SDNAIndex];
 		html << "<td><a href=\"#" << structure.type->name << "\">" << structure.type->name << "</a></td>";
-		/*
-		bool makeLink = catalog.hasStructure((*jt).type->name);
-		if(makeLink)
-			html << "<a href=\"#" << (*jt).type->name << "\">";
-		html << (*jt).type->name;
-		if(makeLink)
-			html << "</a>";
-		*/
-
 		html << "<td>" << (*it).count << "</td>";
 		html << "<td>" << (*it).size << "</td>";
-		html << "<td>" << (*it).fileOffset << "</td>";
+		html << "<td>" << (*it).offset << "</td>";
 		html << "</tr>" << endl;
 	}
 	html << "</table>" << endl;

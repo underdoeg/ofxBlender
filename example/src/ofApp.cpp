@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include "Scene.h"
 
 void ofApp::setup() {
 	ofSetLogLevel("ofxBlender", OF_LOG_VERBOSE);
@@ -6,7 +7,7 @@ void ofApp::setup() {
 	ofx::blender::File file;
 	file.load("test.blend");
 	file.exportStructure();
-	ofExit(0);
+	ofx::blender::Scene* scene = file.getScene(0);
 }
 
 void ofApp::update() {

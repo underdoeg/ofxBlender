@@ -15,6 +15,7 @@ public:
 	Scene();
 	~Scene();
 	ofNode rootNode;
+	string name;
 };
 
 }
