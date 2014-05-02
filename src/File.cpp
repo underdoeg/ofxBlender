@@ -1,11 +1,6 @@
 #include "File.h"
 #include <fstream>
-
-//all the names of the blender object types
-#define BL_SCENE "Scene"
-#define BL_OBJECT "Object"
-#define BL_MESH "Mesh"
-#define BL_CAMERA "Camera"
+#include "Parser.h"
 
 
 class file;
@@ -27,9 +22,7 @@ void align(ifstream& stream) {
 ////////////////////
 
 File::File() {
-	//register parsers
-	using namespace std::placeholders;
-	parsers[BL_SCENE] = std::bind(&File::parseScene, this, _1);
+	Parser::init();
 }
 
 File::~File() {
@@ -63,7 +56,15 @@ std::string File::readString(streamsize length) {
 
 void File::readHeader(File::Block& block) {
 	block.code = readString(4);
-	ofStringReplace(block.code, " ", "");
+
+	//clean the code of potential 0s at end
+	string cleanCode = "";
+	for(char c: block.code){
+		if(c != 0)
+			cleanCode += c;
+	}
+	block.code = cleanCode;
+
 	if(block.code != "ENDB") {
 		block.size = read<unsigned int>();
 		block.oldAddress = readPointer();
@@ -109,7 +110,7 @@ bool File::load(string path) {
 	}
 
 	bool littleEndianness;
-	char structPre;
+	char structPre = ' ';
 	tempString = readString(1);
 	if(tempString == "v") {
 		littleEndianness = true;
@@ -126,7 +127,7 @@ bool File::load(string path) {
 	ofLogVerbose(OFX_BLENDER) << "Version is " << version;
 
 	//now go through all them blocks
-	blocks.push_back(Block());
+	blocks.push_back(Block(this));
 
 	//read the first block
 	readHeader(blocks.back());
@@ -137,7 +138,7 @@ bool File::load(string path) {
 		file.seekg(file.tellg() + streamoff(blocks.back().size));
 
 		//read a new block
-		blocks.push_back(Block());
+		blocks.push_back(Block(this));
 		readHeader(blocks.back());
 	}
 
@@ -240,7 +241,7 @@ unsigned int File::getNumberOfTypes(string typeName) {
 	return count;
 }
 
-std::vector<File::Block*> File::getByType(string typeName) {
+std::vector<File::Block*> File::getBlockByType(string typeName) {
 	std::vector<Block*> ret;
 	for(Block& block: blocks) {
 		if(block.structure->type->name == typeName)
@@ -249,13 +250,13 @@ std::vector<File::Block*> File::getByType(string typeName) {
 	return ret;
 }
 
-File::Block& File::getByType(string typeName, unsigned int pos) {
+File::Block& File::getBlockByType(string typeName, unsigned int pos) {
 	unsigned int maxNum = getNumberOfTypes(typeName);
 	if(maxNum <= pos){
 		ofLogWarning(OFX_BLENDER) << typeName << " " << pos << " not found";
 		pos = maxNum - 1;
 	}
-	return *getByType(typeName)[pos];
+	return *getBlockByType(typeName)[pos];
 }
 
 ////////
@@ -264,7 +265,7 @@ unsigned int File::getNumberOfScenes() {
 }
 
 Scene* File::getScene(unsigned int index) {
-	return static_cast<Scene*>(parseBlock(getByType(BL_SCENE, index)));
+	return static_cast<Scene*>(Parser::parseFileBlock(&getBlockByType(BL_SCENE, index)));
 }
 
 unsigned int File::getNumberOfObjects() {
@@ -272,34 +273,11 @@ unsigned int File::getNumberOfObjects() {
 }
 
 Object* File::getObject(unsigned int index) {
-	return static_cast<Object*>(parseBlock(getByType(BL_SCENE, index)));
+	return static_cast<Object*>(Parser::parseFileBlock(&getBlockByType(BL_SCENE, index)));
 }
 
 ///////////////////////////////////////////////////////////////////////////// PARSERS
-void* File::parseBlock(Block& block) {
-	if(parsers.find(block.structure->type->name) != parsers.end()){
-		DNAStructureReader reader = DNAStructureReader(this, &block);
-		void* obj = parsers[block.structure->type->name](reader);
-		return obj;
-	}
-	return NULL;
-}
 
-void* File::parseScene(DNAStructureReader& reader) {
-	Scene* scene = new Scene();
-	reader.setStructure("id");
-	cout << "READING " << reader.read<string>("name") << endl;
-	//scene->name = reader.read<char>("name");
-	return scene;
-}
-
-void* File::parseObject(DNAStructureReader& reader) {
-	Object* scene = new Object();
-	reader.setStructure("id");
-	//cout << "READING " << reader.read<string>("name") << endl;
-	//scene->name = reader.read<char>("name");
-	return scene;
-}
 
 //////////////////////////////////////////////////////////////////////////// EXPORT HTML
 void File::exportStructure(string path) {

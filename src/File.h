@@ -1,16 +1,22 @@
 #ifndef FILE_H
 #define FILE_H
 
+
 #include "Utils.h"
-#include <functional>
 #include "Scene.h"
+#include <functional>
 #include "Object.h"
 
 namespace ofx {
 namespace blender {
 
+//all the names of the blender object types
+#define BL_SCENE "Scene"
+#define BL_OBJECT "Object"
+#define BL_MESH "Mesh"
+#define BL_CAMERA "Camera"
 
-//DNA TYPE STUFF
+/////////////////////////////////////////////////////////////////////////////////////////////////////// DNA
 class DNAName {
 public:
 	DNAName(string n) {
@@ -67,7 +73,7 @@ public:
 			}
 
 			//now extract array sizes from brackets
-			if(arrayDimensions > 0){
+			if(arrayDimensions > 0) {
 				std::vector<std::string> parts = ofSplitString(name->name, "[");
 				arraySizes.push_back(ofToInt(ofSplitString(parts[1], "]")[0]));
 				if(arrayDimensions > 1)
@@ -76,8 +82,8 @@ public:
 		}
 
 		//check if arraySizes is filled up properly
-		if(isArray && arrayDimensions != arraySizes.size()){
-			for(unsigned int i=arraySizes.size(); i<arrayDimensions; i++){
+		if(isArray && arrayDimensions != arraySizes.size()) {
+			for(unsigned int i=arraySizes.size(); i<arrayDimensions; i++) {
 				arraySizes.push_back(-1);
 			}
 		}
@@ -133,7 +139,7 @@ public:
 		return false;
 	}
 
-	DNAStructure* getStructure(std::string name){
+	DNAStructure* getStructure(std::string name) {
 		for(vector<DNAStructure>::iterator it = structures.begin(); it<structures.end(); it++) {
 			if((*it).type->name == name)
 				return &(*it);
@@ -143,7 +149,8 @@ public:
 	}
 };
 
-///
+////////////////////////////////////////////////////////////////////////////////////////// FILE
+class DNAStructureReader;
 
 class File {
 public:
@@ -161,6 +168,10 @@ public:
 private:
 	class Block {
 	public:
+		Block(File* f) {
+			file = f;
+		}
+		File* file;
 		string code;
 		unsigned int size;
 		unsigned long oldAddress;
@@ -170,7 +181,7 @@ private:
 		DNAStructure* structure;
 	};
 
-	class ParsedBlock{
+	class ParsedBlock {
 		Block* block;
 		void* result;
 	};
@@ -189,8 +200,8 @@ private:
 	void* parseBlock(Block& block);
 
 	unsigned int getNumberOfTypes(string typeName);
-	std::vector<Block*> getByType(string typeName);
-	Block& getByType(string typeName, unsigned int pos);
+	std::vector<Block*> getBlockByType(string typeName);
+	Block& getBlockByType(string typeName, unsigned int pos);
 
 	//function that retreives the pointer type
 	std::function<unsigned long()> readPointer;
@@ -203,113 +214,8 @@ private:
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////// ALL ABOUT PARSING //////////////////////////////////////////////////////
 
-	//helper class to read structures
-	class DNAStructureReader {
-	public:
-
-		DNAStructureReader(File* f, File::Block* b) {
-			file = f;
-			block = b;
-			reset();
-		};
-
-		void reset(){
-			setStructure(block->structure, block->offset);
-		}
-
-		void setStructure(DNAStructure* s, streamoff offset){
-			structure = s;
-			currentOffset = offset;
-		}
-
-		//set another structure according to the provided field name
-		void setStructure(string fieldName){
-			if(!structure->hasField(fieldName)){
-				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
-				return;
-			}
-			DNAField& field = structure->getField(fieldName);
-			DNAStructure* s = file->catalog.getStructure(field.type->name);
-			if(!s)
-				return;
-			setStructure(s, currentOffset + std::streampos(field.offset));
-		}
-
-		template<typename Type>
-		Type readArray(string fieldName) {
-			bool isPointer = std::is_pointer<Type>::value;
-			if(!structure->hasField(fieldName)) {
-				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
-				if(isPointer)
-					return NULL;
-				else
-					return Type();
-			}
-			DNAField& field = structure->getField(fieldName);
-
-			//read the file contents
-			file->seek(currentOffset + std::streampos(field.offset));
-			return file->read<Type>();
-		}
-
-		template<typename Type>
-		Type read(string fieldName) {
-			bool isPointer = std::is_pointer<Type>::value;
-			if(!structure->hasField(fieldName)) {
-				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
-				if(isPointer)
-					return NULL;
-				else
-					return Type();
-			}
-			DNAField& field = structure->getField(fieldName);
-
-			//seek to the fields position
-			file->seek(currentOffset + std::streampos(field.offset));
-
-			if(isPointer){
-				ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " is a pointer - not implemented yet - returning NULL";
-				return NULL;
-			}
-
-			//check if the type is a string, strings are actually char arrays
-			if(std::is_same<Type, std::string>::value){
-				if(field.isArray){
-					//if(field.arraySizes[0] != -1){
-						string ret = file->readString();
-
-						//strings are usually object names or paths, objects names have the object type prepending, check and remove
-						if(ret.size() >= block->code.size() && block->code == ret.substr(0, block->code.size()-2)){
-							ret = ret.substr(block->code.size());
-						}
-						return ret;
-					//}
-				}
-				ofLogWarning(OFX_BLENDER) << "Could not read string " << fieldName;
-				return "undefined";
-			}
-
-			if(field.isArray){
-				cout << "IT IS AN ARRAY!" << endl;
-				return Type();
-			}
-
-			//read the file contents
-			return file->read<Type>();
-		}
-
-	private:
-		File* file;
-		DNAStructure* structure;
-		File::Block* block;
-		streamoff currentOffset;
-	};
-
-	void* parseScene(DNAStructureReader& reader);
-	void* parseObject(DNAStructureReader& reader);
-
-	typedef std::map<std::string, std::function<void*(DNAStructureReader&)> > ParserList;
-	ParserList parsers;
+	friend class DNAStructureReader;
+	friend class Parser;
 
 };
 
