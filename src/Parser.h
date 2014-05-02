@@ -168,17 +168,16 @@ public:
 	}
 
 	static void* parseFileBlock(File::Block* block) {
-		if(handlers.find(block->structure->type->name) != handlers.end()) {
-			DNAStructureReader reader = DNAStructureReader(block);
-			return handlers[block->structure->type->name]->call(reader);
-		}
-		return NULL;
+		return parseFileBlock(block, NULL);
 	}
 
 	static void* parseFileBlock(File::Block* block, void* obj) {
 		if(handlers.find(block->structure->type->name) != handlers.end()) {
 			DNAStructureReader reader = DNAStructureReader(block);
-			return handlers[block->structure->type->name]->call(reader, obj);
+			if(obj == NULL)
+				return handlers[block->structure->type->name]->call(reader);
+			else
+				return handlers[block->structure->type->name]->call(reader, obj);
 		}
 		return NULL;
 	}

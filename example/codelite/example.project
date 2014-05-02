@@ -107,8 +107,6 @@
       <VirtualDirectory Name="src">
         <File Name="../../src/Scene.h"/>
         <File Name="../../src/Scene.cpp"/>
-        <File Name="../../src/Node.h"/>
-        <File Name="../../src/Node.cpp"/>
         <File Name="../../src/Utils.h"/>
         <File Name="../../src/File.h"/>
         <File Name="../../src/File.cpp"/>

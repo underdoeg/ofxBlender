@@ -8,7 +8,7 @@ namespace blender
 
 Scene::Scene()
 {
-	name = "HELLO";
+
 }
 
 Scene::~Scene()
