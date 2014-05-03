@@ -251,13 +251,22 @@ std::vector<File::Block*> File::getBlockByType(string typeName) {
 	return ret;
 }
 
-File::Block& File::getBlockByType(string typeName, unsigned int pos) {
+File::Block* File::getBlockByType(string typeName, unsigned int pos) {
 	unsigned int maxNum = getNumberOfTypes(typeName);
 	if(maxNum <= pos){
 		ofLogWarning(OFX_BLENDER) << typeName << " " << pos << " not found";
-		pos = maxNum - 1;
+		return NULL;
 	}
-	return *getBlockByType(typeName)[pos];
+	return getBlockByType(typeName)[pos];
+}
+
+File::Block* File::getBlockByAddress(unsigned long address) {
+	for(File::Block& block:blocks){
+		if(block.oldAddress == address){
+			return &block;
+		}
+	}
+	return NULL;
 }
 
 ////////
@@ -266,7 +275,7 @@ unsigned int File::getNumberOfScenes() {
 }
 
 Scene* File::getScene(unsigned int index) {
-	return static_cast<Scene*>(Parser::parseFileBlock(&getBlockByType(BL_SCENE, index)));
+	return static_cast<Scene*>(Parser::parseFileBlock(getBlockByType(BL_SCENE, index)));
 }
 
 unsigned int File::getNumberOfObjects() {
@@ -274,7 +283,7 @@ unsigned int File::getNumberOfObjects() {
 }
 
 Object* File::getObject(unsigned int index) {
-	return static_cast<Object*>(Parser::parseFileBlock(&getBlockByType(BL_OBJECT, index)));
+	return static_cast<Object*>(Parser::parseFileBlock(getBlockByType(BL_OBJECT, index)));
 }
 
 ///////////////////////////////////////////////////////////////////////////// PARSERS
@@ -362,7 +371,7 @@ void File::exportStructure(string path) {
 
 	//write all data blocks
 	html << "<h2>Blocks</h2>" << endl;
-	html << "<table cellspacing='0'><tr><th>NAME</th><th>TYPE</th><th>COUNT</th><th>SIZE</th><th>OFFSET</th></tr>" << endl;
+	html << "<table cellspacing='0'><tr><th>NAME</th><th>TYPE</th><th>COUNT</th><th>SIZE</th><th>OFFSET</th><th>OLD ADDRESS</th></tr>" << endl;
 	for(vector<Block>::iterator it = blocks.begin(); it<blocks.end(); it++) {
 		html << "<tr>";
 		html << "<td>" << (*it).code << "</td>";
@@ -371,6 +380,7 @@ void File::exportStructure(string path) {
 		html << "<td>" << (*it).count << "</td>";
 		html << "<td>" << (*it).size << "</td>";
 		html << "<td>" << (*it).offset << "</td>";
+		html << "<td>" << (*it).oldAddress << "</td>";
 		html << "</tr>" << endl;
 	}
 	html << "</table>" << endl;

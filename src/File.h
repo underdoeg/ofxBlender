@@ -211,7 +211,8 @@ private:
 
 	unsigned int getNumberOfTypes(string typeName);
 	std::vector<Block*> getBlockByType(string typeName);
-	Block& getBlockByType(string typeName, unsigned int pos);
+	Block* getBlockByType(string typeName, unsigned int pos);
+	Block* getBlockByAddress(unsigned long address);
 
 	//function that retreives the pointer type
 	std::function<unsigned long()> readPointer;
