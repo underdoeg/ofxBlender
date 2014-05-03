@@ -139,16 +139,21 @@ public:
 		return "undefined";
 	}
 
-	//get a vec3f
+	//get a vec3
+	template<typename Type>
 	ofVec3f readVec3(string fieldName) {
 		ofVec3f ret;
-		std::vector<float> floats = readArray<float>(fieldName);
-		if(floats.size() >= 3) {
-			ret.set(floats[0], floats[1], floats[2]);
+		std::vector<Type> vals = readArray<Type>(fieldName);
+		if(vals.size() >= 3) {
+			ret.set(vals[0], vals[1], vals[2]);
 		}
 		//ret *= block->file->scale;
 		return ret;
 	}
+	ofVec3f readVec3f(string fieldName) {
+		return readVec3<float>(fieldName);
+	}
+
 
 	//get a pointer address
 	unsigned long readPointer(string fieldName) {
@@ -309,8 +314,8 @@ public:
 		obj->name = reader.readString("name");
 
 		reader.reset();
-		obj->setPosition(reader.readVec3("loc"));
-		obj->setScale(reader.readVec3("size"));
+		obj->setPosition(reader.readVec3f("loc"));
+		obj->setScale(reader.readVec3f("size"));
 		//cout << "DATA " << reader.readPointer("data") << endl;
 		//cout << "TYPE " << reader.read<short>("type") << endl;
 	}
@@ -333,10 +338,8 @@ public:
 		mesh->mesh.clear();
 		int totalVertices = reader.read<int>("totvert");
 		for(int i=0; i<totalVertices; i++) {
-			mesh->mesh.addVertex(vertReader.readVec3("co"));
-			//normals are stored as shorts
-			std::vector<short> norms = vertReader.readArray<short>("no");
-			mesh->mesh.addNormal(ofVec3f(norms[0], norms[1], norms[2]));
+			mesh->mesh.addVertex(vertReader.readVec3f("co"));
+			mesh->mesh.addNormal(vertReader.readVec3<short>("no"));
 			vertReader.nextBlock();
 		}
 
