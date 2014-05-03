@@ -96,7 +96,7 @@ public:
 	bool isPointer;
 	bool isArray;
 	unsigned int arrayDimensions;
-	std::vector<int> arraySizes;
+	std::vector<unsigned int> arraySizes;
 };
 
 class DNAStructure {
@@ -193,6 +193,16 @@ private:
 		file.read((char*)&ret, sizeof(Type));
 		return ret;
 	}
+
+	template<typename Type>
+	Type readMany(unsigned int howMany) {
+		Type* ret = new Type[howMany];
+		for(unsigned int i=0; i<howMany; i++){
+			ret[i] = read<Type>();
+		}
+		return ret;
+	}
+
 	char* readChar(streamsize length);
 	std::string readString(streamsize length=0);
 	void readHeader(File::Block& block);

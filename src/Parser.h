@@ -31,79 +31,97 @@ public:
 	}
 
 	//set another structure according to the provided field name
-	void setStructure(string fieldName) {
-		if(!structure->hasField(fieldName)) {
-			ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
-			return;
+	bool setStructure(string structureName) {
+		if(!structure->hasField(structureName)) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << structureName << "\" not found in " << structure->type->name;
+			return false;
 		}
-		DNAField& field = structure->getField(fieldName);
+		DNAField& field = structure->getField(structureName);
 		DNAStructure* s = file->catalog.getStructure(field.type->name);
 		if(!s)
-			return;
+			return false;
 		setStructure(s, currentOffset + std::streampos(field.offset));
+		return true;
+	}
+
+	DNAField* setField(string fieldName) {
+		if(!structure->hasField(fieldName)) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" not found in " << structure->type->name;
+			return NULL;
+		}
+		DNAField& field = structure->getField(fieldName);
+		file->seek(currentOffset + std::streampos(field.offset));
+		return &field;
 	}
 
 	template<typename Type>
-	Type readArray(string fieldName) {
-		bool isPointer = std::is_pointer<Type>::value;
-		if(!structure->hasField(fieldName)) {
-			ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
-			if(isPointer)
-				return NULL;
-			else
-				return Type();
+	std::vector<Type> readArray(string fieldName) {
+		std::vector<Type> ret;
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return ret;
 		}
-		DNAField& field = structure->getField(fieldName);
+		if(!field->isArray) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" is not an array type";
+			return ret;
+		}
 
-		//read the file contents
-		file->seek(currentOffset + std::streampos(field.offset));
-		return file->read<Type>();
+		//if(field->arrayDimensions == 1){
+		if(field->arraySizes[0] != 0) {
+			for(unsigned int i=0; i < field->arraySizes[0]; i++) {
+				ret.push_back(file->read<Type>());
+			}
+			//Type* ts = file->readMany<Type>(field->arraySizes[0]);
+
+		}
+		//}
+		return ret;
 	}
 
 	template<typename Type>
 	Type read(string fieldName) {
+
+		//check for specials functions
+		if(std::is_same<Type, std::string>::value) {
+			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::read string types should be read with readString";
+			return Type();
+		}
+
 		bool isPointer = std::is_pointer<Type>::value;
-		if(!structure->hasField(fieldName)) {
-			ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " not found in " << structure->type->name;
+
+		DNAField* field = setField(fieldName);
+		if(!field) {
 			if(isPointer)
 				return NULL;
 			else
 				return Type();
 		}
-		DNAField& field = structure->getField(fieldName);
 
-		//seek to the fields position
-		file->seek(currentOffset + std::streampos(field.offset));
-
-		if(isPointer) {
-			ofLogWarning(OFX_BLENDER) << "Property " << fieldName << " is a pointer - not implemented yet - returning NULL";
-			return NULL;
-		}
-
-		//check if the type is a string, strings are actually char arrays
-		if(std::is_same<Type, std::string>::value) {
-			if(field.isArray) {
-				//if(field.arraySizes[0] != -1){
-				string ret = file->readString();
-
-				//strings are usually object names or paths, objects names have the object type prepending, check and remove
-				if(ret.size() >= block->code.size() && block->code == ret.substr(0, block->code.size())) {
-					ret = ret.substr(block->code.size());
-				}
-				return ret;
-				//}
-			}
-			ofLogWarning(OFX_BLENDER) << "Could not read string " << fieldName;
-			return "undefined";
-		}
-
-		if(field.isArray) {
-			cout << "IT IS AN ARRAY!" << endl;
+		if(field->isArray) {
+			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::read field is an array and should be read with readArray";
 			return Type();
 		}
 
 		//read the file contents
 		return file->read<Type>();
+	}
+
+	string readString(string fieldName) {
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return "undefined";
+		}
+
+		if(field->isArray) {
+			string ret = file->readString();
+			//strings are usually object names or paths, objects names have the object type prepending, check and remove
+			if(ret.size() >= block->code.size() && block->code == ret.substr(0, block->code.size())) {
+				ret = ret.substr(block->code.size());
+			}
+			return ret;
+		}
+		ofLogWarning(OFX_BLENDER) << "Could not read string, not a char* " << fieldName;
+		return "undefined";
 	}
 
 	File* file;
@@ -121,7 +139,7 @@ public:
 
 	//handler wrapers to automate the process of updating / creating new types
 	class Handler_ {
-		public:
+	public:
 		virtual void* call(DNAStructureReader&) = 0;
 		virtual void* call(DNAStructureReader&, void*) = 0;
 	};
@@ -159,12 +177,13 @@ public:
 
 	static void parseScene(DNAStructureReader& reader, Scene* scene) {
 		reader.setStructure("id");
-		scene->name = reader.read<string>("name");
+		scene->name = reader.readString("name");
 	}
 
 	static void parseObject(DNAStructureReader& reader, Object* obj) {
 		reader.setStructure("id");
-		cout << "READING " << reader.read<string>("name") << endl;
+		cout << "READING " << reader.readString("name") << endl;
+		//cout << "READING " << reader.read<float*>("loc") << endl;
 	}
 
 	static void* parseFileBlock(File::Block* block) {
