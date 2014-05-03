@@ -7,6 +7,10 @@
 #include "Object.h"
 #include "File.h"
 
+enum BLENDER_TYPES{
+	MESH = 1
+};
+
 namespace ofx {
 
 namespace blender {
@@ -91,9 +95,11 @@ public:
 
 		DNAField* field = setField(fieldName);
 		if(!field) {
+			/*
 			if(isPointer)
 				return NULL;
 			else
+			*/
 				return Type();
 		}
 
@@ -122,6 +128,24 @@ public:
 		}
 		ofLogWarning(OFX_BLENDER) << "Could not read string, not a char* " << fieldName;
 		return "undefined";
+	}
+
+	ofVec3f readVec3(string fieldName){
+		ofVec3f ret;
+		std::vector<float> floats = readArray<float>(fieldName);
+		if(floats.size() >= 3){
+			ret.set(floats[0], floats[1], floats[2]);
+		}
+		//ret *= block->file->scale;
+		return ret;
+	}
+
+	unsigned long readPointer(string fieldName){
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return 0;
+		}
+		return file->readPointer();
 	}
 
 	File* file;
@@ -182,8 +206,13 @@ public:
 
 	static void parseObject(DNAStructureReader& reader, Object* obj) {
 		reader.setStructure("id");
-		cout << "READING " << reader.readString("name") << endl;
-		//cout << "READING " << reader.read<float*>("loc") << endl;
+		obj->name = reader.readString("name");
+
+		reader.reset();
+		obj->setPosition(reader.readVec3("loc"));
+		obj->setScale(reader.readVec3("size"));
+		cout << "DATA " << reader.readPointer("data") << endl;
+		cout << "TYPE " << reader.read<short>("type") << endl;
 	}
 
 	static void* parseFileBlock(File::Block* block) {
