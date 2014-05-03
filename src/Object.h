@@ -5,7 +5,6 @@
 #include "ofMain.h"
 namespace ofx
 {
-
 namespace blender
 {
 
@@ -18,7 +17,6 @@ public:
 };
 
 }
-
 }
 
 #endif // OBJECT_H

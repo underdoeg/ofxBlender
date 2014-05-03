@@ -286,9 +286,6 @@ Object* File::getObject(unsigned int index) {
 	return static_cast<Object*>(Parser::parseFileBlock(getBlockByType(BL_OBJECT, index)));
 }
 
-///////////////////////////////////////////////////////////////////////////// PARSERS
-
-
 //////////////////////////////////////////////////////////////////////////// EXPORT HTML
 void File::exportStructure(string path) {
 	//open file buffer

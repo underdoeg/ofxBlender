@@ -6,9 +6,10 @@
 #include "Scene.h"
 #include "Object.h"
 #include "File.h"
+#include "Mesh.h"
 
-enum BLENDER_TYPES{
-	MESH = 1
+enum BLENDER_TYPES {
+    BL_MESH_ID = 1
 };
 
 namespace ofx {
@@ -26,7 +27,20 @@ public:
 	};
 
 	void reset() {
-		setStructure(block->structure, block->offset);
+		curBlock = 0;
+		nextBlock();
+	}
+
+	//multiple structures can be integrated into one block, move ahead in the file
+	void nextBlock() {
+		setStructure(block->structure, block->offset + streampos(structure->type->size * curBlock));
+		curBlock++;
+	}
+
+	//jump to a specific block
+	void blockAt(unsigned int pos) {
+		curBlock = pos;
+		nextBlock();
 	}
 
 	void setStructure(DNAStructure* s, streamoff offset) {
@@ -95,12 +109,7 @@ public:
 
 		DNAField* field = setField(fieldName);
 		if(!field) {
-			/*
-			if(isPointer)
-				return NULL;
-			else
-			*/
-				return Type();
+			return Type();
 		}
 
 		if(field->isArray) {
@@ -130,23 +139,47 @@ public:
 		return "undefined";
 	}
 
-	ofVec3f readVec3(string fieldName){
+	//get a vec3f
+	ofVec3f readVec3(string fieldName) {
 		ofVec3f ret;
 		std::vector<float> floats = readArray<float>(fieldName);
-		if(floats.size() >= 3){
+		if(floats.size() >= 3) {
 			ret.set(floats[0], floats[1], floats[2]);
 		}
 		//ret *= block->file->scale;
 		return ret;
 	}
 
-	unsigned long readPointer(string fieldName){
+	//get a pointer address
+	unsigned long readPointer(string fieldName) {
 		DNAField* field = setField(fieldName);
 		if(!field) {
 			return 0;
 		}
 		return file->readPointer();
 	}
+	/*
+	std::vector<unsigned long> readPointerArray(string fieldName, unsigned int length) {
+		std::vector<unsigned long> ret;
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return ret;
+		}
+
+		if(!field->isArray && !field->isPointer) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" is not an array type";
+			return ret;
+		}
+
+		for(unsigned int i=0; i < length; i++) {
+			ret.push_back(file->readPointer());
+		}
+
+		return ret;
+	}
+	*/
+
+	//get an object at pointer address
 
 	File* file;
 
@@ -154,6 +187,7 @@ private:
 	DNAStructure* structure;
 	File::Block* block;
 	streamoff currentOffset;
+	unsigned int curBlock;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////// PARSER
@@ -166,6 +200,9 @@ public:
 	public:
 		virtual void* call(DNAStructureReader&) = 0;
 		virtual void* call(DNAStructureReader&, void*) = 0;
+		virtual void* create() {
+			return NULL;
+		}
 	};
 
 	template<typename Type>
@@ -184,7 +221,66 @@ public:
 			return obj;
 		}
 
+		void* create() {
+			return new Type();
+		}
+
 		funcType function;
+	};
+
+	//ObjectHandlers are special because they have to check what kind of object it is first and then call the right parser
+	class ObjectHandler: public Handler_ {
+	public:
+		typedef std::function<void(DNAStructureReader&, Object*)> ObjFunction;
+		ObjectHandler(ObjFunction func) {
+			objFunction = func;
+		}
+
+		void* call(DNAStructureReader& reader) {
+			Handler_* handler = getHandlerFor(getTypeId(reader));
+			if(!handler)
+				return NULL;
+			return call(reader, handler->create());
+		}
+
+		void* call(DNAStructureReader&  reader, void* obj) {
+			//check if we have a handler for the type
+			Handler_* handler = getHandlerFor(getTypeId(reader));
+			if(!handler)
+				return NULL;
+			Object* t = static_cast<Object*>(obj);
+			//parse all object parameters first
+			objFunction(reader, t);
+			//and then load the right data block and call the object
+			File::Block* dataBlock = reader.file->getBlockByAddress(reader.readPointer("data"));
+			if(dataBlock) {
+				DNAStructureReader dataReader(dataBlock);
+				handler->call(dataReader, t);
+			} else {
+				ofLogWarning(OFX_BLENDER) << "ObjectHandler could not read datablock at pointer " << reader.readPointer("data");
+			}
+			return obj;
+		}
+
+		template<typename Type>
+		void addHandler(int typeId, std::function<void(DNAStructureReader&, Type*)> func) {
+			handlers[typeId] = new Handler<Type>(func);
+		}
+
+	private:
+
+		int getTypeId(DNAStructureReader& reader) {
+			return reader.read<short>("type");
+		}
+
+		Handler_* getHandlerFor(int type) {
+			if(handlers.find(type) != handlers.end()) {
+				return handlers[type];
+			}
+			return NULL;
+		}
+		std::map<int, Handler_*> handlers;
+		ObjFunction objFunction;
 	};
 
 
@@ -194,7 +290,11 @@ public:
 			return;
 
 		Parser::handlers[BL_SCENE] = new Handler<Scene>(Parser::parseScene);
-		Parser::handlers[BL_OBJECT] = new Handler<Object>(Parser::parseObject);
+
+		//Types based on objects like Mesh, Camera, Light are special and need to be registered with the ObjectHandler
+		ObjectHandler* objHandler = new ObjectHandler(Parser::parseObject);
+		objHandler->addHandler<Mesh>(BL_MESH_ID, Parser::parseMesh);
+		Parser::handlers[BL_OBJECT] = objHandler;
 
 		isInit = true;
 	}
@@ -211,8 +311,73 @@ public:
 		reader.reset();
 		obj->setPosition(reader.readVec3("loc"));
 		obj->setScale(reader.readVec3("size"));
-		cout << "DATA " << reader.readPointer("data") << endl;
-		cout << "TYPE " << reader.read<short>("type") << endl;
+		//cout << "DATA " << reader.readPointer("data") << endl;
+		//cout << "TYPE " << reader.read<short>("type") << endl;
+	}
+
+	static void parseMesh(DNAStructureReader& reader, Mesh* mesh) {
+		reader.setStructure("id");
+		mesh->meshName = reader.readString("name");
+
+		reader.reset();
+
+		//get address of the polygon blocks
+		DNAStructureReader polyReader(reader.file->getBlockByAddress(reader.readPointer("mpoly")));
+		//get address of the loops blocks
+		DNAStructureReader loopReader(reader.file->getBlockByAddress(reader.readPointer("mloop")));
+		//get address of the vertices blocks
+		DNAStructureReader vertReader(reader.file->getBlockByAddress(reader.readPointer("mvert")));
+
+
+		//read all vertices and add to the mesh
+		mesh->mesh.clear();
+		int totalVertices = reader.read<int>("totvert");
+		for(int i=0; i<totalVertices; i++) {
+			mesh->mesh.addVertex(vertReader.readVec3("co"));
+			//normals are stored as shorts
+			std::vector<short> norms = vertReader.readArray<short>("no");
+			mesh->mesh.addNormal(ofVec3f(norms[0], norms[1], norms[2]));
+			vertReader.nextBlock();
+		}
+
+		//get the total number of polygons
+		int totalPolys = reader.read<int>("totpoly");
+		for(int i=0; i<totalPolys; i++) {
+			unsigned int vertCount = polyReader.read<int>("totloop");
+			if (vertCount<3) {
+				ofLogWarning(OFX_BLENDER) << "can't convert polygon with only 2 or less vertices";
+				continue;
+			}
+			if (vertCount>4) {
+				ofLogWarning(OFX_BLENDER) << "can't convert polygon with more than 4 vertices";
+				continue;
+			}
+			int loopStart = polyReader.read<int>("loopstart");
+			if(vertCount == 4){
+				loopReader.blockAt(loopStart);
+				unsigned int index1 = loopReader.read<int>("v");
+				loopReader.nextBlock();
+				unsigned int index2 = loopReader.read<int>("v");
+				loopReader.nextBlock();
+				unsigned int index3 = loopReader.read<int>("v");
+				loopReader.nextBlock();
+				unsigned int index4 = loopReader.read<int>("v");
+				loopReader.nextBlock();
+				mesh->mesh.addTriangle(index3, index2, index1);
+				mesh->mesh.addTriangle(index3, index4, index1);
+			}else{
+				loopReader.blockAt(loopStart);
+				unsigned int index1 = loopReader.read<int>("v");
+				loopReader.nextBlock();
+				unsigned int index2 = loopReader.read<int>("v");
+				loopReader.nextBlock();
+				unsigned int index3 = loopReader.read<int>("v");
+				mesh->mesh.addTriangle(index1, index2, index3);
+			}
+
+			//done, let's advance to the next polygon
+			polyReader.nextBlock();
+		}
 	}
 
 	static void* parseFileBlock(File::Block* block) {

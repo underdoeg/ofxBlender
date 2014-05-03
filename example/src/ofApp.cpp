@@ -9,7 +9,7 @@ void ofApp::setup() {
 	file.load("test.blend");
 	file.exportStructure();
 	//ofx::blender::Scene* scene = file.getScene(0);
-	cout << "AMOUNT " << file.getNumberOfObjects() << endl;
+	//cout << "AMOUNT " << file.getNumberOfObjects() << endl;
 	suzanne = file.getObject(0);
 }
 
