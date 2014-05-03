@@ -159,13 +159,12 @@ public:
 
 	static void parseScene(DNAStructureReader& reader, Scene* scene) {
 		reader.setStructure("id");
-		cout << "READING " << reader.read<string>("name") << endl;
-		scene->name = reader.read<char>("name");
+		scene->name = reader.read<string>("name");
 	}
 
 	static void parseObject(DNAStructureReader& reader, Object* obj) {
-		//reader.setStructure("id");
-		//cout << "READING " << reader.read<string>("name") << endl;
+		reader.setStructure("id");
+		cout << "READING " << reader.read<string>("name") << endl;
 	}
 
 	static void* parseFileBlock(File::Block* block) {
