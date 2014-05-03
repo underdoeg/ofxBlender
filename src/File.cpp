@@ -273,7 +273,7 @@ unsigned int File::getNumberOfObjects() {
 }
 
 Object* File::getObject(unsigned int index) {
-	return static_cast<Object*>(Parser::parseFileBlock(&getBlockByType(BL_SCENE, index)));
+	return static_cast<Object*>(Parser::parseFileBlock(&getBlockByType(BL_OBJECT, index)));
 }
 
 ///////////////////////////////////////////////////////////////////////////// PARSERS

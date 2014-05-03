@@ -129,7 +129,7 @@ public:
 	template<typename Type>
 	class Handler: public Handler_ {
 	public:
-		typedef std::function<void*(DNAStructureReader&, Type*)> funcType;
+		typedef std::function<void(DNAStructureReader&, Type*)> funcType;
 		Handler(funcType f) {
 			function = f;
 		}
@@ -138,7 +138,8 @@ public:
 		}
 		void* call(DNAStructureReader&  reader, void* obj) {
 			Type* t = static_cast<Type*>(obj);
-			return function(reader, t);
+			function(reader, t);
+			return obj;
 		}
 
 		funcType function;
@@ -151,20 +152,20 @@ public:
 			return;
 
 		Parser::handlers[BL_SCENE] = new Handler<Scene>(Parser::parseScene);
-		//Parser::handlers[BL_OBJECT] = new Handler<Object>(Parser::parseObject);
+		Parser::handlers[BL_OBJECT] = new Handler<Object>(Parser::parseObject);
 
 		isInit = true;
 	}
 
-	static void* parseScene(DNAStructureReader& reader, Scene* scene) {
+	static void parseScene(DNAStructureReader& reader, Scene* scene) {
 		reader.setStructure("id");
 		cout << "READING " << reader.read<string>("name") << endl;
-		//scene->name = reader.read<char>("name");
-		return scene;
+		scene->name = reader.read<char>("name");
 	}
 
-	static void* parseObject(DNAStructureReader& reader, Object* obj) {
-		return NULL;
+	static void parseObject(DNAStructureReader& reader, Object* obj) {
+		//reader.setStructure("id");
+		//cout << "READING " << reader.read<string>("name") << endl;
 	}
 
 	static void* parseFileBlock(File::Block* block) {
