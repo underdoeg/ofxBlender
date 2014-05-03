@@ -1,5 +1,5 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef BLENDER_OBJECT_H
+#define BLENDER_OBJECT_H
 
 #include "Utils.h"
 #include "ofMain.h"
