@@ -44,6 +44,8 @@
         <File Name="../../../../addons/ofxBlender/src/Parser.cpp"/>
         <File Name="../../src/Mesh.h"/>
         <File Name="../../src/Mesh.cpp"/>
+        <File Name="../../src/Animation.h"/>
+        <File Name="../../src/Animation.cpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

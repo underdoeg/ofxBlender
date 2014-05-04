@@ -147,7 +147,6 @@ public:
 		if(vals.size() >= 3) {
 			ret.set(vals[0], vals[1], vals[2]);
 		}
-		//ret *= block->file->scale;
 		return ret;
 	}
 	ofVec3f readVec3f(string fieldName) {
@@ -156,35 +155,46 @@ public:
 
 
 	//get a pointer address
-	unsigned long readPointer(string fieldName) {
+	unsigned long readAddress(string fieldName) {
 		DNAField* field = setField(fieldName);
 		if(!field) {
 			return 0;
 		}
 		return file->readPointer();
 	}
-	/*
-	std::vector<unsigned long> readPointerArray(string fieldName, unsigned int length) {
-		std::vector<unsigned long> ret;
-		DNAField* field = setField(fieldName);
-		if(!field) {
-			return ret;
-		}
 
-		if(!field->isArray && !field->isPointer) {
-			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" is not an array type";
+	//a linked list is basically an array of different structures
+	std::vector<DNAStructureReader> readLinkedList(string fieldName){
+		std::vector<DNAStructureReader> ret;
+		unsigned long address = readAddress(fieldName);
+		if(address == 0)
 			return ret;
-		}
 
-		for(unsigned int i=0; i < length; i++) {
-			ret.push_back(file->readPointer());
+		/*DNAStructureReader linkReader(block->file->getBlockByAddress(address));
+		unsigned long first = linkReader.readAddress("first");
+		if(first == 0){
+			return ret;
+		}*/
+
+		//Get the first structure
+		ret.push_back(DNAStructureReader(block->file->getBlockByAddress(address)));
+		while(ret.back().readAddress("next")){
+			//and the next one
+			ret.push_back(DNAStructureReader(block->file->getBlockByAddress(ret.back().readAddress("next"))));
 		}
 
 		return ret;
 	}
-	*/
 
-	//get an object at pointer address
+	//get a reader for sturcture at address
+	DNAStructureReader readStructure(string fieldName){
+		unsigned long address = readAddress(fieldName);
+		if(address == 0){
+			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::readStructure could not read structure at \"" << fieldName << "\" returning self";
+			return *this;
+		}
+		return DNAStructureReader(file->getBlockByAddress(address));
+	}
 
 	File* file;
 
@@ -257,12 +267,12 @@ public:
 			//parse all object parameters first
 			objFunction(reader, t);
 			//and then load the right data block and call the object
-			File::Block* dataBlock = reader.file->getBlockByAddress(reader.readPointer("data"));
+			File::Block* dataBlock = reader.file->getBlockByAddress(reader.readAddress("data"));
 			if(dataBlock) {
 				DNAStructureReader dataReader(dataBlock);
 				handler->call(dataReader, t);
 			} else {
-				ofLogWarning(OFX_BLENDER) << "ObjectHandler could not read datablock at pointer " << reader.readPointer("data");
+				ofLogWarning(OFX_BLENDER) << "ObjectHandler could not read datablock at pointer " << reader.readAddress("data");
 			}
 			return obj;
 		}
@@ -313,11 +323,26 @@ public:
 		reader.setStructure("id");
 		obj->name = reader.readString("name");
 
+		//get transformation
 		reader.reset();
 		obj->setPosition(reader.readVec3f("loc"));
 		obj->setScale(reader.readVec3f("size"));
-		//cout << "DATA " << reader.readPointer("data") << endl;
-		//cout << "TYPE " << reader.read<short>("type") << endl;
+
+		//parse the anim data
+		unsigned long animDataAddress = reader.readAddress("adt");
+		if(animDataAddress != 0){
+			DNAStructureReader animReader(reader.file->getBlockByAddress(animDataAddress));
+			DNAStructureReader actionReader(animReader.file->getBlockByAddress(animReader.readAddress("action")));
+			actionReader.setStructure("id");
+			cout << "ACTION " << actionReader.readString("name") << endl;
+			actionReader.reset();
+
+			//load all curves
+			vector<DNAStructureReader> curves = actionReader.readLinkedList("curves");
+			cout << curves.size() << endl;
+
+			cout << curves[0].readStructure("driver").readString("expression") << endl;
+		}
 	}
 
 	static void parseMesh(DNAStructureReader& reader, Mesh* mesh) {
@@ -327,11 +352,11 @@ public:
 		reader.reset();
 
 		//get address of the polygon blocks
-		DNAStructureReader polyReader(reader.file->getBlockByAddress(reader.readPointer("mpoly")));
+		DNAStructureReader polyReader(reader.file->getBlockByAddress(reader.readAddress("mpoly")));
 		//get address of the loops blocks
-		DNAStructureReader loopReader(reader.file->getBlockByAddress(reader.readPointer("mloop")));
+		DNAStructureReader loopReader(reader.file->getBlockByAddress(reader.readAddress("mloop")));
 		//get address of the vertices blocks
-		DNAStructureReader vertReader(reader.file->getBlockByAddress(reader.readPointer("mvert")));
+		DNAStructureReader vertReader(reader.file->getBlockByAddress(reader.readAddress("mvert")));
 
 
 		//read all vertices and add to the mesh
