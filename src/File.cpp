@@ -4,8 +4,8 @@
 
 
 class file;
-namespace ofx {
 
+namespace ofx {
 namespace blender {
 
 //helpers to navigate within the file

@@ -26,6 +26,10 @@ public:
 		reset();
 	};
 
+    string getType(){
+        return structure->type->name;
+    }
+
 	void reset() {
 		curBlock = 0;
 		nextBlock();
@@ -127,7 +131,14 @@ public:
 			return "undefined";
 		}
 
-		if(field->isArray) {
+        //sometimes strings are stored as pointers to a string structure, make a shortcut for convenience
+        if(field->isPointer && field->type->name == "char"){
+            //pointers to char are actually pointers to Link objects
+            DNAStructureReader link = readStructure(fieldName);
+            return link.readString("next");
+        }
+
+		if(field->isArray || field->isPointer) {
 			string ret = file->readString();
 			//strings are usually object names or paths, objects names have the object type prepending, check and remove
 			if(ret.size() >= block->code.size() && block->code == ret.substr(0, block->code.size())) {
@@ -340,8 +351,14 @@ public:
 			//load all curves
 			vector<DNAStructureReader> curves = actionReader.readLinkedList("curves");
 			cout << curves.size() << endl;
+            for(DNAStructureReader& reader: curves){
+                //cout << reader.readString("rna_path") << endl;
+                cout << reader.read<int>("array_index") << endl;
+            }
 
-			cout << curves[0].readStructure("driver").readString("expression") << endl;
+
+            //
+			//cout << curves[0].readStructure("driver").readString("expression") << endl;
 		}
 	}
 
