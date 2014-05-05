@@ -353,7 +353,7 @@ public:
 			cout << curves.size() << endl;
             for(DNAStructureReader& reader: curves){
                 //cout << reader.readString("rna_path") << endl;
-                cout << reader.read<int>("array_index") << endl;
+                //cout << reader.read<int>("array_index") << endl;
             }
 
 
