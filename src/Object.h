@@ -3,17 +3,21 @@
 
 #include "Utils.h"
 #include "ofMain.h"
-namespace ofx
-{
-namespace blender
-{
+namespace ofx {
+namespace blender {
 
-class Object: public ofNode
-{
+enum ObjectType{
+    UNDEFINED,
+    MESH,
+    LIGHT
+};
+
+class Object: public ofNode {
 public:
-	Object();
-	~Object();
-	string name;
+    Object();
+    ~Object();
+    string name;
+    ObjectType type;
 };
 
 }

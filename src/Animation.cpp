@@ -22,7 +22,10 @@ void Timeline::addAnimation(Animation_* animation)
 
 void Timeline::step()
 {
-
+    long time = ofGetElapsedTimeMillis();
+    for(Animation_* animation: animations){
+        animation->step(time);
+    }
 }
 
 

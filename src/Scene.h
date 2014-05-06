@@ -2,18 +2,25 @@
 #define BLENDER_SCENE_H
 
 #include "Object.h"
+#include "Animation.h"
+#include "Mesh.h"
 
-namespace ofx
-{
+namespace ofx {
 
-namespace blender
-{
+namespace blender {
 
-class Scene: public ofx::blender::Object
-{
+class Scene: public ofx::blender::Object {
 public:
-	Scene();
-	~Scene();
+    Scene();
+    ~Scene();
+
+    void update();
+    void addObject(Object* obj);
+
+    Timeline timeline;
+private:
+    std::vector<Object*> objects;
+    std::vector<Mesh*> meshes;
 };
 
 }

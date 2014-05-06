@@ -8,18 +8,24 @@ void ofApp::setup() {
 	ofx::blender::File file;
 	file.load("test.blend");
 	file.exportStructure();
-	//ofx::blender::Scene* scene = file.getScene(0);
+
+	scene = file.getScene(0);
+    cout << "LOADED SCENE " << scene->name << endl;
+
+    suzanne = file.getObject(0);
 	//cout << "AMOUNT " << file.getNumberOfObjects() << endl;
 	suzanne = file.getObject(0);
 }
 
 void ofApp::update() {
+    scene->update();
 }
 
 void ofApp::draw() {
 	easyCam.begin();
 	ofDrawGrid(100);
-	suzanne->draw();
+	scene->draw();
+	//suzanne->draw();
 }
 
 void ofApp::gotMessage(ofMessage msg) {

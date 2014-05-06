@@ -1,17 +1,14 @@
 #include "Object.h"
 
-namespace ofx
-{
+namespace ofx {
 
-namespace blender
-{
+namespace blender {
 
-Object::Object()
-{
+Object::Object() {
+    type = UNDEFINED;
 }
 
-Object::~Object()
-{
+Object::~Object() {
 }
 
 

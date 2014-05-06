@@ -4,13 +4,14 @@ namespace ofx {
 namespace blender {
 
 Mesh::Mesh() {
+    type = MESH;
 }
 
 Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
-	mesh.drawWireframe();
+    mesh.drawWireframe();
 }
 
 }
