@@ -46,6 +46,7 @@
         <File Name="../../src/Mesh.cpp"/>
         <File Name="../../src/Animation.h"/>
         <File Name="../../src/Animation.cpp"/>
+        <File Name="../../src/Interpolation.h"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

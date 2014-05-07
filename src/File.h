@@ -151,7 +151,7 @@ public:
 			if((*it).type->name == name)
 				return &(*it);
 		}
-		ofLogWarning(OFX_BLENDER) << "Structure " << name << " not found in DNA Catalogue";
+		ofLogWarning(OFX_BLENDER) << "Structure " << name << " not found in DNA Catalog";
 		return NULL;
 	}
 };

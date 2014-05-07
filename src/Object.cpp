@@ -14,19 +14,29 @@ Object::~Object() {
 }
 
 void Object::onAnimationData(float value, string channel, string address) {
-	cout << channel << ":" << address << endl;
+	//cout << channel << ":" << address << endl;
 	//cout << "MY VALUES : " << value << endl;
 	if(channel == "location"){
-		ofVec3f pos = getPosition();
+		ofVec3f scale = getPosition();
 		if(address == "x"){
-			pos.x = value;
+			scale.x = value;
 		}else if(address == "y"){
-			pos.y = value;
+			scale.y = value;
 		}else if(address == "z"){
-			pos.z = value;
+			scale.z = value;
 		}
-		cout << pos << endl;
-		setPosition(pos);
+		setPosition(scale);
+	}
+	if(channel == "scale"){
+		ofVec3f scale = getScale();
+		if(address == "x"){
+			scale.x = value;
+		}else if(address == "y"){
+			scale.y = value;
+		}else if(address == "z"){
+			scale.z = value;
+		}
+		setScale(scale);
 	}
 }
 
