@@ -14,13 +14,21 @@ enum ObjectType{
     LIGHT
 };
 
+class Scene;
+
 class Object: public ofNode {
 public:
     Object();
     ~Object();
-    string name;
+
+	string name;
     ObjectType type;
-	Animation animation;
+	Timeline timeline;
+	Scene* scene;
+
+private:
+	void onAnimationData(float value, string channel, string address);
+
 };
 
 }

@@ -79,7 +79,7 @@
       <CustomBuild Enabled="yes">
         <RebuildCommand/>
         <CleanCommand>make clean Debug</CleanCommand>
-        <BuildCommand>make Debug</BuildCommand>
+        <BuildCommand>make -j8 Debug</BuildCommand>
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>

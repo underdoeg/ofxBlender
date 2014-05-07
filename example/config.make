@@ -10,7 +10,7 @@ OF_ROOT = ../../..
 # for example search paths like:
 # USER_CFLAGS = -I src/objects
 
-USER_CFLAGS = -std=c++11 -Wall -W -pedantic -O2 -Wno-unused-variable
+USER_CFLAGS = -std=c++11 -pedantic -O2 -Wno-unused-variable
 
 
 # USER_LDFLAGS allows to pass custom flags to the linker

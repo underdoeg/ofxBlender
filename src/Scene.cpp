@@ -24,6 +24,7 @@ void Scene::draw() {
 
 void Scene::addObject(Object* obj) {
 	objects.push_back(obj);
+	timeline.add(&obj->timeline);
 	switch(obj->type) {
 	case MESH:
 		meshes.push_back(static_cast<Mesh*>(obj));

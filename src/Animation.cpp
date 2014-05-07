@@ -1,35 +1,49 @@
 #include "Animation.h"
 
-namespace ofx
-{
+namespace ofx {
 
-namespace blender
-{
+namespace blender {
 
-Timeline::Timeline()
-{
+Timeline::Timeline() {
+	timeOffset = ofGetElapsedTimeMillis();
+	loop = true;
+	duration = 10000;
 }
 
-Timeline::~Timeline()
-{
-}
-
-
-void Timeline::addAnimation(Animation_* animation)
-{
-    animations.push_back(animation);
-}
-
-void Timeline::step()
-{
-    long time = ofGetElapsedTimeMillis();
-    for(Animation_* animation: animations){
-        animation->step(time);
-    }
+Timeline::~Timeline() {
 }
 
 
+void Timeline::add(Animation_* animation) {
+	animation->defaultHandler = &defaultHandler;
+	animations.push_back(animation);
 }
+
+void Timeline::step() {
+	setTime(ofGetElapsedTimeMillis());
+}
+
+void Timeline::setTime(unsigned long long t) {
+	if(loop)
+		time = t % duration;
+	else
+		time = t;
+
+	for(Animation_* animation: animations) {
+		animation->step(time);
+	}
+	for(Timeline* child: children) {
+		child->setTime(t);
+	}
+}
+
+void Timeline::add(Timeline* timeline) {
+	children.push_back(timeline);
+}
+
+void Timeline::start() {
 
 }
 
+}
+}
