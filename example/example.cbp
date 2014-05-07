@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
@@ -6,7 +6,7 @@
 		<Option makefile_is_custom="1" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="addons/;src/;build config/;" />
+		<Option virtualFolders="addons/;src/;build config/;addons/ofxBlender/src/;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/$(PROJECT_NAME)_debug" prefix_auto="1" extension_auto="1" />
@@ -27,6 +27,48 @@
 				<Option projectLinkerOptionsRelation="2" />
 			</Target>
 		</Build>
+		<Unit filename="../src/Animation.cpp">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/Animation.h">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/File.cpp">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
+		<Unit filename="../src/File.h">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/Mesh.cpp">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/Mesh.h">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/Object.cpp">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
+		<Unit filename="../src/Object.h">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
+		<Unit filename="../src/Parser.cpp">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
+		<Unit filename="../src/Parser.h">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
+		<Unit filename="../src/Scene.cpp">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/Scene.h">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
+		<Unit filename="../src/Utils.cpp">
+			<Option virtualFolder="addons/ofxBlender/src/" />
+		</Unit>
+		<Unit filename="../src/Utils.h">
+			<Option virtualFolder="addons/ofxBlender/src" />
+		</Unit>
 		<Unit filename="config.make">
 			<Option virtualFolder="build config" />
 		</Unit>
@@ -44,35 +86,5 @@
 			<envvars />
 			<debugger />
 		</Extensions>
-		<Unit filename="../../../addons/ofxBlender/src/Parser.h">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Utils.h">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/File.cpp">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/File.h">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Scene.cpp">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Object.h">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Object.cpp">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Utils.cpp">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Scene.h">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
-		<Unit filename="../../../addons/ofxBlender/src/Parser.cpp">
-			<Option virtualFolder="addons/ofxBlender/src" />
-		</Unit>
 	</Project>
 </CodeBlocks_project_file>

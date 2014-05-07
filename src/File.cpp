@@ -27,6 +27,7 @@ File::File() {
 }
 
 File::~File() {
+
 }
 
 void File::seek(streamoff to) {
@@ -68,13 +69,13 @@ void File::readHeader(File::Block& block) {
 
 	if(block.code != "ENDB") {
 		block.size = read<unsigned int>();
-		block.oldAddress = readPointer();
+		block.address = readPointer();
 		block.SDNAIndex = read<unsigned int>();
 		block.count = read<unsigned int>();
 		block.offset = file.tellg();
 	} else {
 		block.size = read<unsigned int>();
-		block.oldAddress = 0;
+		block.address = 0;
 		block.SDNAIndex = 0;
 		block.count = 0;
 		block.offset = file.tellg();
@@ -102,7 +103,7 @@ bool File::load(string path) {
 		pointerSize = 8;
 	else if(tempString == "_")
 		pointerSize = 4;
-	ofLogVerbose(OFX_BLENDER) << "Pointer Size is " << pointerSize;
+	//ofLogVerbose(OFX_BLENDER) << "Pointer Size is " << pointerSize;
 
 	if(pointerSize == 4) {
 		readPointer = std::bind(&File::read<unsigned int>, this);
@@ -120,12 +121,11 @@ bool File::load(string path) {
 		littleEndianness = false;
 		structPre = '>';
 	}
-	ofLogVerbose(OFX_BLENDER) << "Struct pre is " << structPre;
-	ofLogVerbose(OFX_BLENDER) << "Little Endianness is " << littleEndianness;
+	//ofLogVerbose(OFX_BLENDER) << "Struct pre is " << structPre;
+	//ofLogVerbose(OFX_BLENDER) << "Little Endianness is " << littleEndianness;
 
 	//version
 	version = readString(3);
-	ofLogVerbose(OFX_BLENDER) << "Version is " << version;
 
 	//now go through all them blocks
 	blocks.push_back(Block(this));
@@ -143,13 +143,12 @@ bool File::load(string path) {
 		readHeader(blocks.back());
 	}
 
-	//BUILD THE CATALOG
+	//advance
 	readString(4);
 	readString(4);
 
 	//NAMES
 	unsigned int numNames = read<unsigned int>();
-	//cout << "FOUND NAMES " << numNames << endl;
 	for(unsigned int i=0; i<numNames; i++) {
 		catalog.names.push_back(DNAName(readString(0)));
 	}
@@ -229,10 +228,22 @@ bool File::load(string path) {
 		it++;
 	}
 
+	ofLogVerbose(OFX_BLENDER) << "Loaded " << path << " - File version is " <<  version;
+
 	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+
+void* File::parseFileBlock(Block* block)
+{
+	//check loopkup table
+	if(parsedBlocks.find(block->address) == parsedBlocks.end()){
+		parsedBlocks[block->address] = Parser::parseFileBlock(block);
+	}
+	return parsedBlocks[block->address];
+}
+
 unsigned int File::getNumberOfTypes(string typeName) {
 	unsigned int count = 0;
 	for(Block& block: blocks) {
@@ -242,7 +253,7 @@ unsigned int File::getNumberOfTypes(string typeName) {
 	return count;
 }
 
-std::vector<File::Block*> File::getBlockByType(string typeName) {
+std::vector<File::Block*> File::getBlocksByType(string typeName) {
 	std::vector<Block*> ret;
 	for(Block& block: blocks) {
 		if(block.structure->type->name == typeName)
@@ -251,18 +262,18 @@ std::vector<File::Block*> File::getBlockByType(string typeName) {
 	return ret;
 }
 
-File::Block* File::getBlockByType(string typeName, unsigned int pos) {
+File::Block* File::getBlocksByType(string typeName, unsigned int pos) {
 	unsigned int maxNum = getNumberOfTypes(typeName);
 	if(maxNum <= pos){
 		ofLogWarning(OFX_BLENDER) << typeName << " " << pos << " not found";
 		return NULL;
 	}
-	return getBlockByType(typeName)[pos];
+	return getBlocksByType(typeName)[pos];
 }
 
 File::Block* File::getBlockByAddress(unsigned long address) {
 	for(File::Block& block:blocks){
-		if(block.oldAddress == address){
+		if(block.address == address){
 			return &block;
 		}
 	}
@@ -275,7 +286,7 @@ unsigned int File::getNumberOfScenes() {
 }
 
 Scene* File::getScene(unsigned int index) {
-	return static_cast<Scene*>(Parser::parseFileBlock(getBlockByType(BL_SCENE, index)));
+	return static_cast<Scene*>(parseFileBlock(getBlocksByType(BL_SCENE, index)));
 }
 
 unsigned int File::getNumberOfObjects() {
@@ -283,10 +294,16 @@ unsigned int File::getNumberOfObjects() {
 }
 
 Object* File::getObject(unsigned int index) {
-	return static_cast<Object*>(Parser::parseFileBlock(getBlockByType(BL_OBJECT, index)));
+	return static_cast<Object*>(parseFileBlock(getBlocksByType(BL_OBJECT, index)));
 }
 
-//////////////////////////////////////////////////////////////////////////// EXPORT HTML
+Object* File::getObjectByAddress(unsigned long address)
+{
+	return static_cast<Object*>(parseFileBlock(getBlockByAddress(address)));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////// EXPORT HTML //////////
 void File::exportStructure(string path) {
 	//open file buffer
 	std::filebuf fb;
@@ -377,7 +394,7 @@ void File::exportStructure(string path) {
 		html << "<td>" << (*it).count << "</td>";
 		html << "<td>" << (*it).size << "</td>";
 		html << "<td>" << (*it).offset << "</td>";
-		html << "<td>" << (*it).oldAddress << "</td>";
+		html << "<td>" << (*it).address << "</td>";
 		html << "</tr>" << endl;
 	}
 	html << "</table>" << endl;

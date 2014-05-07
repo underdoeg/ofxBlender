@@ -10,22 +10,17 @@ void ofApp::setup() {
 	file.exportStructure();
 
 	scene = file.getScene(0);
-    cout << "LOADED SCENE " << scene->name << endl;
-
-    suzanne = file.getObject(0);
-	//cout << "AMOUNT " << file.getNumberOfObjects() << endl;
-	suzanne = file.getObject(0);
 }
 
 void ofApp::update() {
-    scene->update();
+	scene->update();
 }
 
 void ofApp::draw() {
+	ofBackground(40);
 	easyCam.begin();
-	ofDrawGrid(100);
+	ofDrawAxis(10);
 	scene->draw();
-	//suzanne->draw();
 }
 
 void ofApp::gotMessage(ofMessage msg) {

@@ -3,6 +3,8 @@
 
 #include "Utils.h"
 #include "ofMain.h"
+#include "Animation.h"
+
 namespace ofx {
 namespace blender {
 
@@ -18,6 +20,7 @@ public:
     ~Object();
     string name;
     ObjectType type;
+	Animation animation;
 };
 
 }

@@ -7,8 +7,10 @@
 #include <functional>
 #include "Object.h"
 
-namespace ofx {
-namespace blender {
+namespace ofx
+{
+namespace blender
+{
 
 //all the names of the blender object types
 #define BL_SCENE "Scene"
@@ -17,7 +19,8 @@ namespace blender {
 #define BL_CAMERA "Camera"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////// DNA
-class DNAName {
+class DNAName
+{
 public:
 	DNAName(string n) {
 		name=n;
@@ -32,7 +35,8 @@ public:
 	std::string nameClean;
 };
 
-class DNAType {
+class DNAType
+{
 public:
 	DNAType(string n, unsigned int i) {
 		id = i;
@@ -43,7 +47,8 @@ public:
 	unsigned int id;
 };
 
-class DNAField {
+class DNAField
+{
 public:
 	DNAField(DNAType* t, DNAName* n, unsigned int off) {
 		name=n;
@@ -99,7 +104,8 @@ public:
 	std::vector<unsigned int> arraySizes;
 };
 
-class DNAStructure {
+class DNAStructure
+{
 public:
 	DNAStructure(DNAType* t) {
 		type = t;
@@ -125,7 +131,8 @@ public:
 	std::vector<DNAField> fields;
 };
 
-class DNACatalog {
+class DNACatalog
+{
 public:
 	vector<DNAName> names;
 	vector<DNAType> types;
@@ -152,7 +159,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////// FILE
 class DNAStructureReader;
 
-class File {
+class File
+{
 public:
 
 	File();
@@ -166,7 +174,8 @@ public:
 	Object* getObject(unsigned int index);
 
 private:
-	class Block {
+	class Block
+	{
 	public:
 		Block(File* f) {
 			file = f;
@@ -174,16 +183,11 @@ private:
 		File* file;
 		string code;
 		unsigned int size;
-		unsigned long oldAddress;
+		unsigned long address;
 		unsigned int SDNAIndex;
 		unsigned int count;
 		streampos offset;
 		DNAStructure* structure;
-	};
-
-	class ParsedBlock {
-		Block* block;
-		void* result;
 	};
 
 	//templated read function
@@ -197,7 +201,7 @@ private:
 	template<typename Type>
 	Type readMany(unsigned int howMany) {
 		Type* ret = new Type[howMany];
-		for(unsigned int i=0; i<howMany; i++){
+		for(unsigned int i=0; i<howMany; i++) {
 			ret[i] = read<Type>();
 		}
 		return ret;
@@ -207,18 +211,20 @@ private:
 	std::string readString(streamsize length=0);
 	void readHeader(File::Block& block);
 	void seek(streamoff to);
-	void* parseBlock(Block& block);
+	void* parseFileBlock(Block* block);
 
 	unsigned int getNumberOfTypes(string typeName);
-	std::vector<Block*> getBlockByType(string typeName);
-	Block* getBlockByType(string typeName, unsigned int pos);
+	std::vector<Block*> getBlocksByType(string typeName);
+	Block* getBlocksByType(string typeName, unsigned int pos);
 	Block* getBlockByAddress(unsigned long address);
+	Object* getObjectByAddress(unsigned long address);
 
 	//function that retreives the pointer type
 	std::function<unsigned long()> readPointer;
 	unsigned int pointerSize;
 	string version;
 	std::vector<Block> blocks;
+	std::map<unsigned long, void*> parsedBlocks;
 	DNACatalog catalog;
 	std::ifstream file;
 	float scale;

@@ -218,7 +218,6 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////// PARSER
-
 class Parser {
 public:
 
@@ -336,7 +335,7 @@ public:
         DNAStructureReader next = reader.readStructure("base");
         do {
             //Parser::parseFileBlock(getBlockByType(BL_OBJECT, index))
-            Object* object = static_cast<Object*>(parseFileBlock(reader.file->getBlockByAddress(next.readAddress("object"))));
+            Object* object = reader.file->getObjectByAddress(next.readAddress("object"));
             scene->addObject(object);
             //cout << next.readStructure("object").setStructure("id").readString("name") << endl;
             if(next.readAddress("next") == 0) {
