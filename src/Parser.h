@@ -431,6 +431,8 @@ public:
 					for(int i=0; i<numPoints; i++) {
 						std::vector<ofVec3f> points = bezier.readVec3fArray("vec");
 
+						short ipo = bezier.read<short>("ipo");
+
 						//beziers come in this array [handle1X, handle1Y, 0], [Frame, Value, 0], [handle2X, handle2Y, 0]
 
 						//TODO: read proper frame rate
@@ -439,10 +441,16 @@ public:
 						unsigned long long time = 1./fps * points[1][0];
 						time *= 1000;
 
-						animation->addKeyframe(time, points[1][1], points[1], points[0], points[2]);
-
+						if(ipo == 1)
+							animation->addKeyframe(time, points[1][1]);
+						else if(ipo == 2)
+							animation->addKeyframe(time, points[1][1], points[1], points[0], points[2]);
+						else if(ipo == 0)
+							ofLogWarning(OFX_BLENDER) << "Constant Keyframes are not yet supported";
 						bezier.nextBlock();
 					}
+
+					//DNAStructureReader fpt = curve.readStructure("fpt");
 
 					//set the listener
 					object->timeline.add(animation);
