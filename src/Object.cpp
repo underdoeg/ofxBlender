@@ -17,17 +17,16 @@ void Object::onAnimationData(float value, string channel, string address) {
 	//cout << channel << ":" << address << endl;
 	//cout << "MY VALUES : " << value << endl;
 	if(channel == "location"){
-		ofVec3f scale = getPosition();
+		ofVec3f loc = getPosition();
 		if(address == "x"){
-			scale.x = value;
+			loc.x = value;
 		}else if(address == "y"){
-			scale.y = value;
+			loc.y = value;
 		}else if(address == "z"){
-			scale.z = value;
+			loc.z = value;
 		}
-		setPosition(scale);
-	}
-	if(channel == "scale"){
+		setPosition(loc);
+	}else if(channel == "scale"){
 		ofVec3f scale = getScale();
 		if(address == "x"){
 			scale.x = value;
@@ -37,6 +36,19 @@ void Object::onAnimationData(float value, string channel, string address) {
 			scale.z = value;
 		}
 		setScale(scale);
+	}else if(channel == "rotation_euler"){
+		ofVec3f rot = getOrientationEuler();
+		//ofQuaternion rot = getOrientationQuat();
+
+		value = ofRadToDeg(value);
+		if(address == "x"){
+			rot.x = value;
+		}else if(address == "y"){
+			rot.y = value;
+		}else if(address == "z"){
+			rot.z = value;
+		}
+		setOrientation(rot);
 	}
 }
 

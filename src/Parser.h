@@ -89,15 +89,43 @@ public:
 			return ret;
 		}
 
-		//if(field->arrayDimensions == 1){
+		if(field->arrayDimensions > 1) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" has more than one array dimension, use readMultArray";
+		}
+
 		if(field->arraySizes[0] != 0) {
 			for(unsigned int i=0; i < field->arraySizes[0]; i++) {
 				ret.push_back(file->read<Type>());
 			}
-			//Type* ts = file->readMany<Type>(field->arraySizes[0]);
-
 		}
-		//}
+
+		return ret;
+	}
+
+	template<typename Type>
+	std::vector<std::vector<Type> > readMultArray(string fieldName) {
+		std::vector<std::vector<Type> > ret;
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return ret;
+		}
+		if(!field->isArray) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" is not an array type";
+			return ret;
+		}
+
+		if(field->arrayDimensions <= 1)
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" has only one array dimension, use readArray";
+
+		for(unsigned int i=0; i < field->arraySizes[0]; i++) {
+			std::vector<Type> temp;
+			for(unsigned int j=0; j<field->arraySizes[1]; j++) {
+				temp.push_back(file->read<Type>());
+			}
+			ret.push_back(temp);
+		}
+
+
 		return ret;
 	}
 
@@ -151,7 +179,7 @@ public:
 		return "undefined";
 	}
 
-	//get a vec2
+//get a vec2
 	template<typename Type>
 	ofVec3f readVec2(string fieldName) {
 		ofVec3f ret;
@@ -165,7 +193,7 @@ public:
 		return readVec2<float>(fieldName);
 	}
 
-	//get a vec3
+//get a vec3
 	template<typename Type>
 	ofVec3f readVec3(string fieldName) {
 		ofVec3f ret;
@@ -205,7 +233,7 @@ public:
 		return readVec3Array<float>(fieldName, len);
 	}
 
-	//get a pointer address
+//get a pointer address
 	unsigned long readAddress(string fieldName) {
 		DNAField* field = setField(fieldName);
 		if(!field) {
@@ -214,7 +242,7 @@ public:
 		return file->readPointer();
 	}
 
-	//a linked list is basically an array of different structures
+//a linked list is basically an array of different structures
 	std::vector<DNAStructureReader> readLinkedList(string fieldName) {
 		std::vector<DNAStructureReader> ret;
 		unsigned long address = readAddress(fieldName);
@@ -237,7 +265,7 @@ public:
 		return ret;
 	}
 
-	//get a reader for sturcture at address
+//get a reader for sturcture at address
 	DNAStructureReader readStructure(string fieldName) {
 		unsigned long address = readAddress(fieldName);
 		if(address == 0) {
@@ -389,11 +417,16 @@ public:
 	static void parseObject(DNAStructureReader& reader, Object* object) {
 		reader.setStructure("id");
 		object->name = reader.readString("name");
+		reader.reset();
 
 		//get transformation
-		reader.reset();
-		object->setPosition(reader.readVec3f("loc"));
-		object->setScale(reader.readVec3f("size"));
+		vector<vector<float> > matArray = reader.readMultArray<float>("obmat");
+		ofMatrix4x4 mat(matArray[0][0], matArray[0][1], matArray[0][2], matArray[0][3],
+		                matArray[1][0], matArray[1][1], matArray[1][2], matArray[1][3],
+		                matArray[2][0], matArray[2][1], matArray[2][2], matArray[2][3],
+		                matArray[3][0], matArray[3][1], matArray[3][2], matArray[3][3]);
+
+		object->setTransformMatrix(mat);
 
 		//parse the anim data
 		unsigned long animDataAddress = reader.readAddress("adt");
@@ -408,11 +441,12 @@ public:
 			vector<DNAStructureReader> curves = actionReader.readLinkedList("curves");
 			for(DNAStructureReader& curve: curves) {
 				string rnaPath = curve.readString("rna_path");
+				cout << rnaPath << endl;
 				int arrayIndex = curve.read<int>("array_index");
 				string channel = rnaPath;
 				string address = "";
 				//if the channel is rotation, scale or translate, add an X
-				if(channel == "location" || channel == "rotation" || channel == "scale") {
+				if(channel == "location" || channel == "rotation" || channel == "scale" || channel=="rotation_euler") {
 					if(arrayIndex == 0) {
 						address = "x";
 					} else if(arrayIndex == 1) {
@@ -425,7 +459,6 @@ public:
 					BezierAnimation<float>* animation = new BezierAnimation<float>(channel, address);
 
 					//add keyframes
-					//TODO: group xyz into ofVec3f types
 					int numPoints = curve.read<int>("totvert");
 					DNAStructureReader bezier = curve.readStructure("bezt");
 					for(int i=0; i<numPoints; i++) {
