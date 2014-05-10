@@ -5,6 +5,7 @@
 #include "Animation.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Light.h"
 
 namespace ofx {
 namespace blender {
@@ -23,6 +24,8 @@ public:
 	Mesh* getMesh(string name);
 	Camera* getCamera(string name);
 	Camera* getCamera(unsigned int index);
+	Light* getLight(string name);
+	Light* getLight(unsigned int index);
 
 	Camera* getActiveCamera();
 	void setActiveCamera(Camera* cam);
@@ -35,6 +38,7 @@ private:
     std::vector<Object*> objects;
     std::vector<Mesh*> meshes;
 	std::vector<Camera*> cameras;
+	std::vector<Light*> lights;
 };
 
 }

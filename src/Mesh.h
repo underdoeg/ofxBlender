@@ -6,6 +6,11 @@
 namespace ofx {
 namespace blender {
 
+enum Shading{
+	FLAT,
+	SMOOTH
+};
+
 class Mesh: public ofx::blender::Object {
 public:
 	Mesh();
@@ -15,6 +20,7 @@ public:
 
 	string meshName;
 	ofMesh mesh;
+	Shading shading;
 };
 
 }

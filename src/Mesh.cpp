@@ -11,7 +11,11 @@ Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
-    mesh.draw();
+	if(shading == FLAT)
+		glShadeModel(GL_FLAT);
+    else
+		glShadeModel(GL_SMOOTH);
+	mesh.draw();
 }
 
 }

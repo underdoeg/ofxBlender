@@ -1,21 +1,21 @@
 #include "Light.h"
 
-namespace ofx
-{
+namespace ofx {
 
-namespace blender
-{
+namespace blender {
 
-Light::Light()
-{
+Light::Light() {
+	type = LIGHT;
+	light.setParent(*this);
 }
 
-Light::~Light()
-{
+Light::~Light() {
 }
 
-
+void Light::customDraw() {
+	//light.enable();
 }
 
 }
 
+}

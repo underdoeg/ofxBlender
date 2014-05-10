@@ -12,7 +12,8 @@ enum ObjectType{
     UNDEFINED,
     MESH,
     LIGHT,
-	CAMERA
+	CAMERA,
+	TEXT
 };
 
 class Scene;

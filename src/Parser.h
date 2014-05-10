@@ -394,6 +394,7 @@ public:
 		ObjectHandler* objHandler = new ObjectHandler(Parser::parseObject);
 		objHandler->addHandler<Mesh>(BL_MESH_ID, Parser::parseMesh);
 		objHandler->addHandler<Camera>(BL_CAM_ID, Parser::parseCamera);
+		objHandler->addHandler<Light>(BL_LIGHT_ID, Parser::parseLight);
 		Parser::handlers[BL_OBJECT] = objHandler;
 
 		isInit = true;
@@ -585,7 +586,13 @@ public:
 		cout << "IT IS A CAMERA" << endl;
 		ofCamera* camera = &cam->camera;
 		float fov = ofRadToDeg(2 * atan(16 / reader.read<float>("lens")));
-		camera->setFov(fov);
+		//camera->setFov(fov);
+
+		//camera->setupPerspective(true, fov, 0, 1000000);
+	}
+
+	static void parseLight(DNAStructureReader& reader, Light* light) {
+		//cout << "A LIGHT" << endl;
 
 		//camera->setupPerspective(true, fov, 0, 1000000);
 	}

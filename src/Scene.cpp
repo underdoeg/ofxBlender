@@ -21,9 +21,17 @@ void Scene::draw() {
 	if(activeCamera)
 		activeCamera->camera.begin();
 
+	for(Light* light: lights) {
+		light->light.enable();
+	}
+
 	for(Object* obj: objects) {
-		if(obj->type != CAMERA)
+		if(obj->type != CAMERA && obj->type != LIGHT)
 			obj->draw();
+	}
+
+	for(Light* light: lights) {
+		light->light.disable();
 	}
 
 	if(activeCamera)
@@ -39,6 +47,9 @@ void Scene::addObject(Object* obj) {
 		break;
 	case CAMERA:
 		cameras.push_back(static_cast<Camera*>(obj));
+		break;
+	case LIGHT:
+		lights.push_back(static_cast<Light*>(obj));
 		break;
 	}
 }
@@ -91,6 +102,14 @@ void Scene::setActiveCamera(Camera* cam) {
 
 Camera* Scene::getActiveCamera() {
 	return activeCamera;
+}
+
+Light* Scene::getLight(string name) {
+	return getFromVecByName<Light>(lights, name);
+}
+
+Light* Scene::getLight(unsigned int index) {
+	return getFromVecByIndex<Light>(lights, index);
 }
 
 }
