@@ -5,6 +5,7 @@ namespace blender {
 
 Mesh::Mesh() {
     type = MESH;
+	shading = FLAT;
 }
 
 Mesh::~Mesh() {

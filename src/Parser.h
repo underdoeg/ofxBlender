@@ -521,8 +521,19 @@ public:
 	static void parseMesh(DNAStructureReader& reader, Mesh* mesh) {
 		reader.setStructure("id");
 		mesh->meshName = reader.readString("name");
-
 		reader.reset();
+
+		enum DrawFlag{
+			DRAW_FLAT = 67,
+			DRAW_SMOOTH = 75
+		};
+
+		//smoothing
+		int drawFlag = reader.read<short>("smoothresh");
+		if(drawFlag == DRAW_SMOOTH)
+			mesh->shading = SMOOTH;
+		else
+			mesh->shading = FLAT;
 
 		//get address of the polygon blocks
 		DNAStructureReader polyReader(reader.file->getBlockByAddress(reader.readAddress("mpoly")));
