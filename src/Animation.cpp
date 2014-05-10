@@ -6,8 +6,8 @@ namespace blender {
 
 Timeline::Timeline() {
 	timeOffset = ofGetElapsedTimeMillis();
-	loop = true;
-	duration = 10000;
+	loop = false;
+	duration = 1000000;
 }
 
 Timeline::~Timeline() {
@@ -24,6 +24,7 @@ void Timeline::step() {
 }
 
 void Timeline::setTime(unsigned long long t) {
+	t = t - timeOffset;
 	if(loop)
 		time = t % duration;
 	else
@@ -33,7 +34,7 @@ void Timeline::setTime(unsigned long long t) {
 		animation->step(time);
 	}
 	for(Timeline* child: children) {
-		child->setTime(t);
+		child->setTime(time);
 	}
 }
 
@@ -45,5 +46,17 @@ void Timeline::start() {
 
 }
 
+void Timeline::setDuration(unsigned long long d)
+{
+	cout << "NEW DURATION " << d << endl;
+	duration = d;
+}
+
+void Timeline::setLoop(bool loopState)
+{
+	loop = loopState;
+}
+
 }
 }
+

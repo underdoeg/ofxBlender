@@ -104,13 +104,13 @@ protected:
 	}
 
 	Keyframe* getKeyframeBefore(unsigned long long time) {
-		Keyframe* lastFrame = NULL;
+		Keyframe* lastKey = NULL;
 		for(Keyframe* key: keyframes) {
-			if(key->time < time)
-				return key;
-			lastFrame = key;
+			if(key->time > time)
+				return lastKey;
+			lastKey = key;
 		}
-		return lastFrame;
+		return NULL;
 	}
 
 	Keyframe* getKeyframeAfter(unsigned long long time) {
@@ -304,6 +304,9 @@ public:
 
 	void start();
 	void step();
+
+	void setDuration(unsigned long long duration);
+	void setLoop(bool loopState);
 
 private:
 	Animation_::DefaultHandlerContainer defaultHandler;

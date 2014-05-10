@@ -11,7 +11,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
-    mesh.drawWireframe();
+    mesh.draw();
 }
 
 }

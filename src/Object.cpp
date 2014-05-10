@@ -38,19 +38,25 @@ void Object::onAnimationData(float value, string address, int channel) {
 		setScale(scale);
 	}else if(address == "rotation_euler"){
 		ofVec3f rot = getOrientationEuler();
-		ofQuaternion quat = getOrientationQuat();
+		//ofQuaternion quat = getOrientationQuat();
+		//ofVec3f axis;
 
 		value = ofRadToDeg(value);
 		if(channel == 0){
-			tilt(value);
-			//rot.x = value;
+			//tilt(value);
+			rot.x = value;
+			//axis = getXAxis();
 		}else if(channel == 1){
-			//rot.y = value;
-			pan(value);
+			rot.y = value;
+			//pan(value);
+			//axis = getYAxis();
 		}else if(channel == 2){
-			//rot.z = value;
-			roll(value);
+			rot.z = value;
+			//roll(value);
+			//axis = getZAxis();
 		}
+		//quat.set(axis.x, axis.y, axis.z, value);
+		///setOrientation(quat);
 		setOrientation(rot);
 	}
 }

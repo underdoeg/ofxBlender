@@ -61,7 +61,7 @@ void File::readHeader(File::Block& block) {
 
 	//clean the code of potential 0s at end
 	string cleanCode = "";
-	for(char c: block.code){
+	for(char c: block.code) {
 		if(c != 0)
 			cleanCode += c;
 	}
@@ -195,13 +195,13 @@ bool File::load(string path) {
 
 			//if the field is a pointer, then only add the pointer size to offset
 			bool offsetSet = false;
-			if(structure.fields.back().isPointer){
+			if(structure.fields.back().isPointer) {
 				curOffset += pointerSize;
 				offsetSet = true;
-			}else if(structure.fields.back().isArray){//arrays add n times the size to offset
+			} else if(structure.fields.back().isArray) { //arrays add n times the size to offset
 				float multi = 0;
-				for(int s: structure.fields.back().arraySizes){
-					if(s!=-1){
+				for(int s: structure.fields.back().arraySizes) {
+					if(s!=-1) {
 						if(multi == 0)
 							multi += s;
 						else
@@ -214,7 +214,7 @@ bool File::load(string path) {
 
 				curOffset += type->size * multi;
 			}
-			if(!offsetSet){
+			if(!offsetSet) {
 				curOffset += type->size;
 			}
 		}
@@ -235,10 +235,9 @@ bool File::load(string path) {
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-void* File::parseFileBlock(Block* block)
-{
+void* File::parseFileBlock(Block* block) {
 	//check loopkup table
-	if(parsedBlocks.find(block->address) == parsedBlocks.end()){
+	if(parsedBlocks.find(block->address) == parsedBlocks.end()) {
 		parsedBlocks[block->address] = Parser::parseFileBlock(block);
 	}
 	return parsedBlocks[block->address];
@@ -264,7 +263,7 @@ std::vector<File::Block*> File::getBlocksByType(string typeName) {
 
 File::Block* File::getBlocksByType(string typeName, unsigned int pos) {
 	unsigned int maxNum = getNumberOfTypes(typeName);
-	if(maxNum <= pos){
+	if(maxNum <= pos) {
 		ofLogWarning(OFX_BLENDER) << typeName << " " << pos << " not found";
 		return NULL;
 	}
@@ -272,8 +271,8 @@ File::Block* File::getBlocksByType(string typeName, unsigned int pos) {
 }
 
 File::Block* File::getBlockByAddress(unsigned long address) {
-	for(File::Block& block:blocks){
-		if(block.address == address){
+	for(File::Block& block:blocks) {
+		if(block.address == address) {
 			return &block;
 		}
 	}
@@ -297,8 +296,7 @@ Object* File::getObject(unsigned int index) {
 	return static_cast<Object*>(parseFileBlock(getBlocksByType(BL_OBJECT, index)));
 }
 
-Object* File::getObjectByAddress(unsigned long address)
-{
+Object* File::getObjectByAddress(unsigned long address) {
 	return static_cast<Object*>(parseFileBlock(getBlockByAddress(address)));
 }
 
@@ -359,7 +357,7 @@ void File::exportStructure(string path) {
 
 			//IS ARRAY
 			string arrayTxt = "";
-			if((*jt).isArray){
+			if((*jt).isArray) {
 				//arrayTxt = "" + ofToString((*jt).arrayDimensions) + "";
 				arrayTxt = "[";
 				for(int i: (*jt).arraySizes)
@@ -387,15 +385,17 @@ void File::exportStructure(string path) {
 	html << "<h2>Blocks</h2>" << endl;
 	html << "<table cellspacing='0'><tr><th>NAME</th><th>TYPE</th><th>COUNT</th><th>SIZE</th><th>OFFSET</th><th>OLD ADDRESS</th></tr>" << endl;
 	for(vector<Block>::iterator it = blocks.begin(); it<blocks.end(); it++) {
-		html << "<tr>";
-		html << "<td>" << (*it).code << "</td>";
 		DNAStructure& structure = catalog.structures[(*it).SDNAIndex];
-		html << "<td><a href=\"#" << structure.type->name << "\">" << structure.type->name << "</a></td>";
-		html << "<td>" << (*it).count << "</td>";
-		html << "<td>" << (*it).size << "</td>";
-		html << "<td>" << (*it).offset << "</td>";
-		html << "<td>" << (*it).address << "</td>";
-		html << "</tr>" << endl;
+		if(structure.type->name != "ScrVert" && structure.type->name != "Panel" && structure.type->name != "ScrEdge" && structure.type->name != "ARegion") {
+			html << "<tr>";
+			html << "<td>" << (*it).code << "</td>";
+			html << "<td><a href=\"#" << structure.type->name << "\">" << structure.type->name << "</a></td>";
+			html << "<td>" << (*it).count << "</td>";
+			html << "<td>" << (*it).size << "</td>";
+			html << "<td>" << (*it).offset << "</td>";
+			html << "<td>" << (*it).address << "</td>";
+			html << "</tr>" << endl;
+		}
 	}
 	html << "</table>" << endl;
 

@@ -18,7 +18,7 @@ void ofApp::update() {
 
 void ofApp::draw() {
 	ofBackground(40);
-	easyCam.begin();
+	//easyCam.begin();
 	ofDrawAxis(10);
 	scene->draw();
 }

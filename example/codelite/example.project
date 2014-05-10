@@ -47,6 +47,10 @@
         <File Name="../../src/Animation.h"/>
         <File Name="../../src/Animation.cpp"/>
         <File Name="../../src/Interpolation.h"/>
+        <File Name="../../src/Camera.h"/>
+        <File Name="../../src/Camera.cpp"/>
+        <File Name="../../src/Light.h"/>
+        <File Name="../../src/Light.cpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

@@ -4,6 +4,7 @@
 #include "Object.h"
 #include "Animation.h"
 #include "Mesh.h"
+#include "Camera.h"
 
 namespace ofx {
 namespace blender {
@@ -20,12 +21,20 @@ public:
 	Object* getObject(string name);
 	Mesh* getMesh(unsigned int index);
 	Mesh* getMesh(string name);
+	Camera* getCamera(string name);
+	Camera* getCamera(unsigned int index);
+
+	Camera* getActiveCamera();
+	void setActiveCamera(Camera* cam);
+
 
     Timeline timeline;
 	string name;
 private:
+	Camera* activeCamera;
     std::vector<Object*> objects;
     std::vector<Mesh*> meshes;
+	std::vector<Camera*> cameras;
 };
 
 }

@@ -11,7 +11,8 @@ namespace blender {
 enum ObjectType{
     UNDEFINED,
     MESH,
-    LIGHT
+    LIGHT,
+	CAMERA
 };
 
 class Scene;
