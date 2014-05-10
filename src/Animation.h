@@ -23,14 +23,14 @@ public:
 	template<typename Type>
 	class DefaultHandler: public DefaultHandler_ {
 	public:
-		typedef std::function<void(Type&, string, string)> Listener;
+		typedef std::function<void(Type&, string, int)> Listener;
 		DefaultHandler(Listener _listener) {
 
 			listener = _listener;
 		}
 
-		void call(Type t, string channel, string address) {
-			listener(t, channel, address);
+		void call(Type t, string address, int channel) {
+			listener(t, address, channel);
 		}
 
 		std::type_index getType() {
@@ -43,16 +43,16 @@ public:
 	class DefaultHandlerContainer {
 	public:
 		template<typename Type>
-		void call(Type value, string channel, string address) {
+		void call(Type value, string address, int channel) {
 			std::type_index type(typeid(Type));
 			if(handlers.find(type) != handlers.end()) {
 				DefaultHandler<Type>* handler = static_cast<DefaultHandler<Type>*>(handlers[type]);
-				handler->call(value, channel, address);
+				handler->call(value, address, channel);
 			}
 		}
 
 		template<typename Type>
-		void add(std::function<void(Type&, string, string)> listener) {
+		void add(std::function<void(Type&, string, int)> listener) {
 			DefaultHandler<Type>* handler = new DefaultHandler<Type>(listener);
 			handlers[handler->getType()] = handler;
 		}
@@ -61,7 +61,7 @@ public:
 	};
 	/////////////////////////////////////////////////////////////////////
 
-	Animation_(string channel_, string address_) {
+	Animation_(string address_, int channel_) {
 		loop = false;
 		internalTime = 0;
 		timeOffset = 0;
@@ -77,7 +77,7 @@ public:
 		timeLast = timeNow;
 	};
 
-	string channel;
+	int channel;
 	string address;
 	bool loop;
 	unsigned long long timeOffset;
@@ -139,11 +139,11 @@ public:
 		Type value;
 	};
 
-	Animation(string channel, string address):Animation_(channel, address) {
+	Animation(string address, int channel):Animation_(address, channel) {
 		oldValueSet = false;
 	};
 
-	typedef std::function<void(Type&, string, string)> Listener;
+	typedef std::function<void(Type&, string, int)> Listener;
 	void addListener(Listener listener) {
 		listeners.push_back(listener);
 	}
@@ -155,10 +155,10 @@ public:
 
 		//call teh default handler
 		if(defaultHandler)
-			defaultHandler->call<Type>(value, channel, address);
+			defaultHandler->call<Type>(value, address, channel);
 
 		for(Listener listener: listeners) {
-			listener(value, channel, address);
+			listener(value, address, channel);
 		}
 		oldValue = value;
 		oldValueSet = true;
@@ -187,7 +187,7 @@ public:
 		TweenType tweenType;
 	};
 
-	TweenAnimation(string channel, string address_=""):Animation<Type>(channel, address_) {
+	TweenAnimation(string address, int channel_=0):Animation<Type>(address, channel_) {
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
@@ -247,7 +247,7 @@ public:
 		bool isLinear;
 	};
 
-	BezierAnimation(string channel, string address_=""):Animation<Type>(channel, address_) {
+	BezierAnimation(string address, int channel_=0):Animation<Type>(address, channel_) {
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
@@ -295,7 +295,7 @@ public:
 	~Timeline();
 
 	template<typename Type>
-	void setDefaultHandler(std::function<void(Type&, string, string)> listener) {
+	void setDefaultHandler(std::function<void(Type&, string, int)> listener) {
 		defaultHandler.add<Type>(listener);
 	}
 

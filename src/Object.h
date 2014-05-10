@@ -27,7 +27,7 @@ public:
 	Scene* scene;
 
 private:
-	void onAnimationData(float value, string channel, string address);
+	void onAnimationData(float value, string address, int channel);
 
 };
 

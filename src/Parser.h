@@ -443,20 +443,13 @@ public:
 				string rnaPath = curve.readString("rna_path");
 				cout << rnaPath << endl;
 				int arrayIndex = curve.read<int>("array_index");
-				string channel = rnaPath;
-				string address = "";
+				string address = rnaPath;
+				int channel = arrayIndex;
 				//if the channel is rotation, scale or translate, add an X
-				if(channel == "location" || channel == "rotation" || channel == "scale" || channel=="rotation_euler") {
-					if(arrayIndex == 0) {
-						address = "x";
-					} else if(arrayIndex == 1) {
-						address = "y";
-					} else if(arrayIndex == 2) {
-						address = "z";
-					}
+				if(address == "location" || address == "rotation" || address == "scale" || address=="rotation_euler") {
 
 					//create the animation
-					BezierAnimation<float>* animation = new BezierAnimation<float>(channel, address);
+					BezierAnimation<float>* animation = new BezierAnimation<float>(address, channel);
 
 					//add keyframes
 					int numPoints = curve.read<int>("totvert");

@@ -13,40 +13,43 @@ Object::Object() {
 Object::~Object() {
 }
 
-void Object::onAnimationData(float value, string channel, string address) {
+void Object::onAnimationData(float value, string address, int channel) {
 	//cout << channel << ":" << address << endl;
 	//cout << "MY VALUES : " << value << endl;
-	if(channel == "location"){
+	if(address == "location"){
 		ofVec3f loc = getPosition();
-		if(address == "x"){
+		if(channel == 0){
 			loc.x = value;
-		}else if(address == "y"){
+		}else if(channel == 1){
 			loc.y = value;
-		}else if(address == "z"){
+		}else if(channel == 2){
 			loc.z = value;
 		}
 		setPosition(loc);
-	}else if(channel == "scale"){
+	}else if(address == "scale"){
 		ofVec3f scale = getScale();
-		if(address == "x"){
+		if(channel == 0){
 			scale.x = value;
-		}else if(address == "y"){
+		}else if(channel == 1){
 			scale.y = value;
-		}else if(address == "z"){
+		}else if(channel == 2){
 			scale.z = value;
 		}
 		setScale(scale);
-	}else if(channel == "rotation_euler"){
+	}else if(address == "rotation_euler"){
 		ofVec3f rot = getOrientationEuler();
-		//ofQuaternion rot = getOrientationQuat();
+		ofQuaternion quat = getOrientationQuat();
 
 		value = ofRadToDeg(value);
-		if(address == "x"){
-			rot.x = value;
-		}else if(address == "y"){
-			rot.y = value;
-		}else if(address == "z"){
-			rot.z = value;
+		if(channel == 0){
+			tilt(value);
+			//rot.x = value;
+		}else if(channel == 1){
+			//rot.y = value;
+			pan(value);
+		}else if(channel == 2){
+			//rot.z = value;
+			roll(value);
 		}
 		setOrientation(rot);
 	}
