@@ -237,10 +237,17 @@ bool File::load(string path) {
 
 void* File::parseFileBlock(Block* block) {
 	//check loopkup table
+	if(block == NULL)
+		return NULL;
 	if(parsedBlocks.find(block->address) == parsedBlocks.end()) {
 		parsedBlocks[block->address] = Parser::parseFileBlock(block);
 	}
 	return parsedBlocks[block->address];
+}
+
+void* File::parseFileBlock(unsigned long adress)
+{
+	return parseFileBlock(getBlockByAddress(adress));
 }
 
 unsigned int File::getNumberOfTypes(string typeName) {
@@ -432,3 +439,4 @@ void File::exportStructure(string path) {
 
 }
 }
+

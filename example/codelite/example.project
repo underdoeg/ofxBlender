@@ -51,6 +51,8 @@
         <File Name="../../src/Camera.cpp"/>
         <File Name="../../src/Light.h"/>
         <File Name="../../src/Light.cpp"/>
+        <File Name="../../src/Material.h"/>
+        <File Name="../../src/Material.cpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

@@ -17,6 +17,7 @@ namespace blender
 #define BL_OBJECT "Object"
 #define BL_MESH "Mesh"
 #define BL_CAMERA "Camera"
+#define BL_MATERIAL "Material"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////// DNA
 class DNAName
@@ -89,7 +90,7 @@ public:
 		//check if arraySizes is filled up properly
 		if(isArray && arrayDimensions != arraySizes.size()) {
 			for(unsigned int i=arraySizes.size(); i<arrayDimensions; i++) {
-				arraySizes.push_back(-1);
+				arraySizes.push_back(0);
 			}
 		}
 	};
@@ -212,6 +213,7 @@ private:
 	void readHeader(File::Block& block);
 	void seek(streamoff to);
 	void* parseFileBlock(Block* block);
+	void* parseFileBlock(unsigned long adress);
 
 	unsigned int getNumberOfTypes(string typeName);
 	std::vector<Block*> getBlocksByType(string typeName);

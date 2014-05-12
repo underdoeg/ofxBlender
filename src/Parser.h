@@ -7,6 +7,7 @@
 #include "Object.h"
 #include "File.h"
 #include "Mesh.h"
+#include "Material.h"
 
 enum BLENDER_TYPES {
     BL_EMPTY_ID = 0,
@@ -103,6 +104,36 @@ public:
 			}
 		}
 
+		return ret;
+	}
+
+	std::vector<unsigned long> readAddressArray(string fieldName){
+		std::vector<unsigned long> ret;
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return ret;
+		}
+
+		//cout << field->arraySizes[0] << endl;
+
+		if(!field->isArray) {
+			ofLogWarning(OFX_BLENDER) << "Property \"" << fieldName << "\" is not an array type";
+			return ret;
+		}
+
+		if(field->arraySizes[0] > 0) {
+			for(unsigned int i=0; i < field->arraySizes[0]; i++) {
+				ret.push_back(file->readPointer());
+			}
+		}else{
+			while(true){
+				unsigned long addr = file->readPointer();
+				if(addr == 0)
+					break;
+				else
+					ret.push_back(addr);
+			}
+		}
 		return ret;
 	}
 
@@ -389,6 +420,7 @@ public:
 			return;
 
 		Parser::handlers[BL_SCENE] = new Handler<Scene>(Parser::parseScene);
+		Parser::handlers[BL_MATERIAL] = new Handler<Material>(Parser::parseMaterial);
 
 		//Types based on objects like Mesh, Camera, Light are special and need to be registered with the ObjectHandler
 		ObjectHandler* objHandler = new ObjectHandler(Parser::parseObject);
@@ -415,7 +447,6 @@ public:
 
 		//Timeline infos
 		//cout << "LENGTH " << reader.readStructure("fps_info").getType() << endl;
-
 
 		//loop through all objects and add them to the scene
 		DNAStructureReader next = reader.readStructure("base");
@@ -552,6 +583,37 @@ public:
 			vertReader.nextBlock();
 		}
 
+		//read all Materials
+		std::vector<Material*> materials;
+		std::vector<unsigned long> materialAddresses;
+		//this is strange but a way to retreive the materials
+		/*
+		DNAStructureReader matReader = reader.readStructure("mat").readStructure("prev");
+		while(true){
+			unsigned long addr = matReader.setStructure("id").readAddress("next");
+			cout << addr << endl;
+			if(addr == 0)
+				break;
+			materialAddresses.push_back(addr);
+			matReader = matReader.readStructure("next");
+		}
+		cout << materialAddresses.size() << endl;
+		*/
+
+		cout << reader.readStructure("mat").readStructure("next").setStructure("id") << endl;
+		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readString("name")  << endl;
+		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readString("name")  << endl;
+		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readString("name")  << endl;
+		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readString("name")  << endl;
+
+
+		//cout << reader.readStructure("mat").readStructure("next").setStructure("id").readString("name") << endl;
+		//cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readString("name") << endl;
+
+		//std::vector<DNAStructureReader> matReaders = reader.readLinkedList("mat");
+		//cout << "SIZE " << matReaders.size() << endl;
+
+
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");
 		for(int i=0; i<totalPolys; i++) {
@@ -564,6 +626,18 @@ public:
 				ofLogWarning(OFX_BLENDER) << "can't convert polygon with more than 4 vertices";
 				continue;
 			}
+
+			//check the shading
+			Shading shading = FLAT;
+			if((int)polyReader.read<char>("flag") == 3){
+				shading = SMOOTH;
+			}
+
+			//cout << "MAT " << polyReader.read<short>("mat_nr") << endl;
+
+			mesh->pushShading(shading);
+			//mesh->pushMaterial(static_cast<Camera*>(reader.file->getObjectByAddress(reader.readAddress("camera"))));
+
 			int loopStart = polyReader.read<int>("loopstart");
 			if(vertCount == 4) {
 				loopReader.blockAt(loopStart);
@@ -575,8 +649,8 @@ public:
 				loopReader.nextBlock();
 				unsigned int index4 = loopReader.read<int>("v");
 				loopReader.nextBlock();
-				mesh->mesh.addTriangle(index3, index2, index1);
-				mesh->mesh.addTriangle(index3, index4, index1);
+				mesh->addTriangle(index3, index2, index1);
+				mesh->addTriangle(index3, index4, index1);
 			} else {
 				loopReader.blockAt(loopStart);
 				unsigned int index1 = loopReader.read<int>("v");
@@ -584,7 +658,7 @@ public:
 				unsigned int index2 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index3 = loopReader.read<int>("v");
-				mesh->mesh.addTriangle(index1, index2, index3);
+				mesh->addTriangle(index1, index2, index3);
 			}
 
 			//done, let's advance to the next polygon
@@ -592,12 +666,15 @@ public:
 		}
 	}
 
+	static void parseMaterial(DNAStructureReader& reader, Material* cam){
+		cout << "IT IS A MATERIAL" << endl;
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void parseCamera(DNAStructureReader& reader, Camera* cam) {
-		cout << "IT IS A CAMERA" << endl;
 		ofCamera* camera = &cam->camera;
 		float fov = ofRadToDeg(2 * atan(16 / reader.read<float>("lens")));
-		//camera->setFov(fov);
+		camera->setFov(fov);
 
 		//camera->setupPerspective(true, fov, 0, 1000000);
 	}
@@ -620,6 +697,7 @@ public:
 			else
 				return handlers[block->structure->type->name]->call(reader, obj);
 		}
+		ofLogWarning(OFX_BLENDER) << "No Parser for Object Type \"" << block->structure->type->name << "\" found";
 		return NULL;
 	}
 
