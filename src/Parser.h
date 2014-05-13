@@ -644,11 +644,13 @@ public:
 		};
 
 		//smoothing
+		/*
 		int drawFlag = reader.read<short>("smoothresh");
 		if(drawFlag == DRAW_SMOOTH)
-			mesh->shading = SMOOTH;
+			mesh->pushShading(SMOOTH);
 		else
-			mesh->shading = FLAT;
+			mesh->pushShading(FLAT);
+		*/
 
 		//get address of the polygon blocks
 		DNAStructureReader polyReader(reader.file->getBlockByAddress(reader.readAddress("mpoly")));
@@ -659,11 +661,10 @@ public:
 
 
 		//read all vertices and add to the mesh
-		mesh->mesh.clear();
+		mesh->clear();
 		int totalVertices = reader.read<int>("totvert");
 		for(int i=0; i<totalVertices; i++) {
-			mesh->mesh.addVertex(vertReader.readVec3f("co"));
-			mesh->mesh.addNormal(vertReader.readVec3<short>("no"));
+			mesh->addVertex(vertReader.readVec3f("co"), vertReader.readVec3<short>("no"));
 			vertReader.nextBlock();
 		}
 
@@ -692,12 +693,14 @@ public:
 			if((int)polyReader.read<char>("flag") == 3){
 				shading = SMOOTH;
 			}
-
-			//cout << "MAT " << polyReader.read<short>("mat_nr") << endl;
-
 			mesh->pushShading(shading);
-			//mesh->pushMaterial(static_cast<Camera*>(reader.file->getObjectByAddress(reader.readAddress("camera"))));
 
+			//pick the material
+			unsigned int materialNumber = polyReader.read<short>("mat_nr");
+			if(materialNumber < materials.size())
+				mesh->pushMaterial(materials[materialNumber]);
+
+			//write triangles
 			int loopStart = polyReader.read<int>("loopstart");
 			if(vertCount == 4) {
 				loopReader.blockAt(loopStart);

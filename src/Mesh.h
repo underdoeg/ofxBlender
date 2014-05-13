@@ -30,8 +30,8 @@ public:
 	};
 
 	class Vertex {
-		public:
-		Vertex(ofVec3f p, ofVec3f n=ofVec3f()){
+	public:
+		Vertex(ofVec3f p, ofVec3f n=ofVec3f()) {
 			pos = p;
 			norm = n;
 		}
@@ -46,27 +46,38 @@ public:
 	void addVertex(ofVec3f pos, ofVec3f norm=ofVec3f());
 	void addTriangle(unsigned int a, unsigned int b, unsigned int c);
 
+	void clear();
+
 	void build();
 
 	void customDraw();
 
 	string meshName;
-	ofMesh mesh;
-	Shading shading;
 
 private:
 	class Part {
+	public:
+		Part(Material* mat, Shading shade) {
+			material = mat;
+			shading = shade;
+		}
+
+		void draw();
+
 		ofMesh mesh;
 		Material* material;
 		Shading shading;
 		std::vector<Triangle> polys;
 	};
 
-	Part& getPart(Material* mat, Shading shading);
+	Part* getPart(Material* mat, Shading shading);
+	void updatePart();
 
 	Material* curMaterial;
 	Shading curShading;
+	Part* curPart;
 	std::vector<ofVec3f> vertices;
+	std::vector<ofVec3f> normals;
 	std::vector<Part> parts;
 };
 
