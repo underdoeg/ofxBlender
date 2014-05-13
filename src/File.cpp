@@ -245,8 +245,7 @@ void* File::parseFileBlock(Block* block) {
 	return parsedBlocks[block->address];
 }
 
-void* File::parseFileBlock(unsigned long adress)
-{
+void* File::parseFileBlock(unsigned long adress) {
 	return parseFileBlock(getBlockByAddress(adress));
 }
 
@@ -277,12 +276,22 @@ File::Block* File::getBlocksByType(string typeName, unsigned int pos) {
 	return getBlocksByType(typeName)[pos];
 }
 
+bool File::doesAddressExist(unsigned long address) {
+	for(File::Block& block:blocks) {
+		if(block.address == address) {
+			return true;
+		}
+	}
+	return false;
+}
+
 File::Block* File::getBlockByAddress(unsigned long address) {
 	for(File::Block& block:blocks) {
 		if(block.address == address) {
 			return &block;
 		}
 	}
+	ofLogWarning(OFX_BLENDER) << "Could not find block at address " << address;
 	return NULL;
 }
 
@@ -439,4 +448,3 @@ void File::exportStructure(string path) {
 
 }
 }
-

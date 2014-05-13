@@ -300,14 +300,98 @@ public:
 		return ret;
 	}
 
-//get a reader for sturcture at address
+	std::vector<DNAStructureReader> readLinkAsList(string fieldName){
+		//TODO: I don't really get how these Links work, doublecheck
+
+		std::vector<DNAStructureReader> ret;
+		unsigned long address = readAddress(fieldName);
+		if(address == 0)
+			return ret;
+
+
+		//go back to the first structure
+		DNAStructureReader link = readStructure(fieldName);
+
+		if(file->doesAddressExist(link.readAddress("next"))){
+			ret.push_back(link.readStructure("next"));
+		}
+
+		if(file->doesAddressExist(link.readAddress("prev"))){
+			DNAStructureReader first = link.readStructure("prev");
+			while(first.hasPrev()){
+				first = first.getPrev();
+			}
+
+			ret.push_back(first);
+
+			while(first.hasNext()){
+				first = first.getNext();
+				ret.push_back(first);
+			}
+		}
+
+		return ret;
+	}
+
+	//get a reader for sturcture at address
 	DNAStructureReader readStructure(string fieldName) {
 		unsigned long address = readAddress(fieldName);
 		if(address == 0) {
 			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::readStructure could not read structure \"" << fieldName << "\" in \"" << getType() << "\" returning self";
 			return *this;
 		}
-		return DNAStructureReader(file->getBlockByAddress(address));
+		File::Block* block = file->getBlockByAddress(address);
+		if(block == NULL){
+			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::readStructure could not read structure \"" << fieldName << "\" in \"" << getType() << "\" returning self";
+			return *this;
+		}
+		return DNAStructureReader(block);
+	}
+
+	bool hasNext(){
+		if(!structure->hasField("id"))
+			return false;
+		setStructure("id");
+		unsigned long addr = readAddress("next");
+		if(addr!=0 && !file->doesAddressExist(addr)){
+			addr = 0;
+		}
+		reset();
+		return  addr != 0;
+	}
+
+	DNAStructureReader getNext(){
+		setStructure("id");
+		DNAStructureReader ret = readStructure("next");
+		//if(ret.getType() == "ID")
+		//	ret.reset();
+		reset();
+		return ret;
+	}
+
+	bool hasPrev(){
+		if(!structure->hasField("id"))
+			return false;
+		setStructure("id");
+		unsigned long addr = readAddress("prev");
+		if(addr!=0 && !file->doesAddressExist(addr)){
+			addr = 0;
+		}
+		reset();
+		return  addr != 0;
+	}
+
+	DNAStructureReader getPrev(){
+		setStructure("id");
+		DNAStructureReader ret = readStructure("prev");
+		//if(ret.getType() == "ID")
+		//	ret.reset();
+		reset();
+		return ret;
+	}
+
+	void* parse(){
+		return file->parseFileBlock(block);
 	}
 
 	File* file;
@@ -585,34 +669,10 @@ public:
 
 		//read all Materials
 		std::vector<Material*> materials;
-		std::vector<unsigned long> materialAddresses;
-		//this is strange but a way to retreive the materials
-		/*
-		DNAStructureReader matReader = reader.readStructure("mat").readStructure("prev");
-		while(true){
-			unsigned long addr = matReader.setStructure("id").readAddress("next");
-			cout << addr << endl;
-			if(addr == 0)
-				break;
-			materialAddresses.push_back(addr);
-			matReader = matReader.readStructure("next");
+		std::vector<DNAStructureReader> materialStructs = reader.readLinkAsList("mat");
+		for(DNAStructureReader& matReader: materialStructs){
+			materials.push_back(static_cast<Material*>(matReader.parse()));
 		}
-		cout << materialAddresses.size() << endl;
-		*/
-
-		cout << reader.readStructure("mat").readStructure("next").setStructure("id") << endl;
-		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readString("name")  << endl;
-		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readString("name")  << endl;
-		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readString("name")  << endl;
-		cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readString("name")  << endl;
-
-
-		//cout << reader.readStructure("mat").readStructure("next").setStructure("id").readString("name") << endl;
-		//cout << reader.readStructure("mat").readStructure("prev").setStructure("id").readStructure("next").setStructure("id").readStructure("next").setStructure("id").readString("name") << endl;
-
-		//std::vector<DNAStructureReader> matReaders = reader.readLinkedList("mat");
-		//cout << "SIZE " << matReaders.size() << endl;
-
 
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");

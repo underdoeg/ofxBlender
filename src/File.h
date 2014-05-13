@@ -220,6 +220,7 @@ private:
 	Block* getBlocksByType(string typeName, unsigned int pos);
 	Block* getBlockByAddress(unsigned long address);
 	Object* getObjectByAddress(unsigned long address);
+	bool doesAddressExist(unsigned long address);
 
 	//function that retreives the pointer type
 	std::function<unsigned long()> readPointer;
