@@ -46,12 +46,14 @@ Mesh::Part* Mesh::getPart(Material* mat, Shading shading) {
 void Mesh::pushMaterial(Material* material) {
 	if(material == curMaterial)
 		return;
+	curMaterial = material;
 	updatePart();
 }
 
 void Mesh::pushShading(Shading shading) {
 	if(curShading == shading)
 		return;
+	curShading = shading;
 	updatePart();
 }
 
