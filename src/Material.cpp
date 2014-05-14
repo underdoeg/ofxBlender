@@ -1,21 +1,21 @@
 #include "Material.h"
 
-namespace ofx
-{
+namespace ofx {
 
-namespace blender
-{
+namespace blender {
 
-Material::Material()
-{
+Material::Material() {
+	color.set(1, 1, 1);
 }
 
-Material::~Material()
-{
+Material::~Material() {
 }
 
 
+void Material::begin() {
+	ofSetColor(color);
 }
 
-}
 
+}
+}

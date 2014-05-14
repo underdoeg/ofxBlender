@@ -74,6 +74,8 @@ void Mesh::Part::draw() {
 		glShadeModel(GL_FLAT);
 	else
 		glShadeModel(GL_SMOOTH);
+	if(material != NULL)
+		material->begin();
 	mesh.draw();
 }
 

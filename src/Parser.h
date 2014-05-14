@@ -729,8 +729,8 @@ public:
 		}
 	}
 
-	static void parseMaterial(DNAStructureReader& reader, Material* cam){
-		cout << "IT IS A MATERIAL" << endl;
+	static void parseMaterial(DNAStructureReader& reader, Material* material){
+		material->color.set(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b"));
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

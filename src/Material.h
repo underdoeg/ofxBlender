@@ -15,6 +15,10 @@ public:
 	Material();
 	~Material();
 
+	void begin();
+
+	ofFloatColor color;
+	ofFloatColor specColor;
 	std::vector<Texture> textures;
 };
 
