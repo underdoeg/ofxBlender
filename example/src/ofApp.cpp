@@ -5,11 +5,12 @@ void ofApp::setup() {
 	ofEnableDepthTest();
 
 	ofSetLogLevel("ofxBlender", OF_LOG_VERBOSE);
+
 	ofx::blender::File file;
 	file.load("test.blend");
 	file.exportStructure();
-
 	scene = file.getScene(0);
+	//scene->setDebug(true);
 }
 
 void ofApp::update() {
@@ -18,9 +19,7 @@ void ofApp::update() {
 
 void ofApp::draw() {
 	ofBackground(40);
-	//easyCam.begin();
-	ofDrawAxis(10);
-	scene->draw();
+	scene->customDraw();
 }
 
 void ofApp::gotMessage(ofMessage msg) {
@@ -30,6 +29,7 @@ void ofApp::keyPressed(int key) {
 }
 
 void ofApp::keyReleased(int key) {
+	scene->toggleDebug();
 }
 
 void ofApp::mouseDragged(int x, int y, int button) {

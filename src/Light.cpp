@@ -12,10 +12,22 @@ Light::Light() {
 Light::~Light() {
 }
 
-void Light::customDraw() {
-	//light.enable();
+void Light::begin() {
+	if(scene){
+
+	}
+	light.enable();
+}
+
+void Light::end() {
+	light.disable();
+}
+
+void Light::customDraw()
+{
+	ofDrawAxis(.5);
 }
 
 }
-
 }
+

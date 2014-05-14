@@ -26,6 +26,5 @@ class ofApp : public ofBaseApp{
 
 		ofx::blender::Scene* scene;
 		ofx::blender::Object* suzanne;
-		ofEasyCam easyCam;
 
 };

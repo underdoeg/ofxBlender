@@ -22,7 +22,7 @@ void align(ifstream& stream) {
 ////////////////////
 
 File::File() {
-	scale = 100;
+	scale = 10;
 	Parser::init();
 }
 

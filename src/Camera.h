@@ -6,7 +6,7 @@
 namespace ofx {
 namespace blender {
 
-class Camera: public Object {
+class Camera: public ofx::blender::Object {
 public:
 	Camera();
 	~Camera();
@@ -14,6 +14,8 @@ public:
 	void customDraw();
 
 	ofCamera camera;
+private:
+	ofMesh debugMesh;
 };
 
 }

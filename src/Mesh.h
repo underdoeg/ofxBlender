@@ -60,6 +60,7 @@ private:
 		Part(Material* mat, Shading shade) {
 			material = mat;
 			shading = shade;
+			hasTriangles = false;
 		}
 
 		void draw();
@@ -68,6 +69,7 @@ private:
 		Material* material;
 		Shading shading;
 		std::vector<Triangle> polys;
+		bool hasTriangles;
 	};
 
 	Part* getPart(Material* mat, Shading shading);

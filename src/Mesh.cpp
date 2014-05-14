@@ -6,6 +6,7 @@ namespace blender {
 Mesh::Mesh() {
 	type = MESH;
 	curPart = NULL;
+	curMaterial = NULL;
 }
 
 Mesh::~Mesh() {
@@ -13,7 +14,8 @@ Mesh::~Mesh() {
 
 void Mesh::customDraw() {
 	for(Part& part: parts) {
-		part.draw();
+		if(part.hasTriangles)
+			part.draw();
 	}
 }
 
@@ -21,6 +23,7 @@ void Mesh::addTriangle(unsigned int a, unsigned int b, unsigned int c) {
 	if(!curPart)
 		updatePart();
 
+	curPart->hasTriangles = true;
 	curPart->mesh.addTriangle(a, b, c);
 }
 
@@ -77,6 +80,9 @@ void Mesh::Part::draw() {
 	if(material != NULL)
 		material->begin();
 	mesh.draw();
+	//ofDrawBox(0, 0, 0, 2);
+	if(material != NULL)
+		material->end();
 }
 
 }

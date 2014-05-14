@@ -10,12 +10,15 @@
 namespace ofx {
 namespace blender {
 
-class Scene{
+class Scene: public ofNode{
 public:
     Scene();
     ~Scene();
 
-    void draw();
+	void setDebug(bool state);
+	void toggleDebug();
+
+    void customDraw();
     void update();
     void addObject(Object* obj);
 	Object* getObject(unsigned int index);
@@ -29,16 +32,19 @@ public:
 
 	Camera* getActiveCamera();
 	void setActiveCamera(Camera* cam);
-
+	void disableCamera();
 
     Timeline timeline;
 	string name;
 private:
 	Camera* activeCamera;
+	ofEasyCam debugCam;
     std::vector<Object*> objects;
     std::vector<Mesh*> meshes;
 	std::vector<Camera*> cameras;
 	std::vector<Light*> lights;
+	bool doDebug;
+	bool isFirstDebugEnable;
 };
 
 }

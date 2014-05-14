@@ -14,8 +14,13 @@ class Light: public Object
 public:
 	Light();
 	~Light();
+	void begin();
+	void end();
 	void customDraw();
 	ofLight light;
+	//float constantAtt;
+	//float linearAtt;
+	//float quadraticAtt;
 };
 
 }

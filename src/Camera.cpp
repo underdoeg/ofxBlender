@@ -6,13 +6,20 @@ namespace blender {
 Camera::Camera() {
 	type = CAMERA;
 	camera.setParent(*this);
+	debugMesh = ofMesh::cone(.5, 2, 6, 2, 1);
 }
 
 Camera::~Camera() {
 }
 
 void Camera::customDraw() {
-	camera.begin();
+	ofDrawAxis(.5);
+	ofSetColor(255);
+	//ofLine(0, 0, 0, 0, 0, -10);
+	ofPushMatrix();
+	ofRotateX(-90);
+	debugMesh.drawWireframe();
+	ofPopMatrix();
 }
 
 }

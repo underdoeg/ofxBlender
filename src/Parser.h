@@ -107,7 +107,7 @@ public:
 		return ret;
 	}
 
-	std::vector<unsigned long> readAddressArray(string fieldName){
+	std::vector<unsigned long> readAddressArray(string fieldName) {
 		std::vector<unsigned long> ret;
 		DNAField* field = setField(fieldName);
 		if(!field) {
@@ -125,8 +125,8 @@ public:
 			for(unsigned int i=0; i < field->arraySizes[0]; i++) {
 				ret.push_back(file->readPointer());
 			}
-		}else{
-			while(true){
+		} else {
+			while(true) {
 				unsigned long addr = file->readPointer();
 				if(addr == 0)
 					break;
@@ -300,7 +300,7 @@ public:
 		return ret;
 	}
 
-	std::vector<DNAStructureReader> readLinkAsList(string fieldName){
+	std::vector<DNAStructureReader> readLinkAsList(string fieldName) {
 		//TODO: I don't really get how these Links work, doublecheck
 
 		std::vector<DNAStructureReader> ret;
@@ -312,19 +312,19 @@ public:
 		//go back to the first structure
 		DNAStructureReader link = readStructure(fieldName);
 
-		if(file->doesAddressExist(link.readAddress("next"))){
+		if(file->doesAddressExist(link.readAddress("next"))) {
 			ret.push_back(link.readStructure("next"));
 		}
 
-		if(file->doesAddressExist(link.readAddress("prev"))){
+		if(file->doesAddressExist(link.readAddress("prev"))) {
 			DNAStructureReader first = link.readStructure("prev");
-			while(first.hasPrev()){
+			while(first.hasPrev()) {
 				first = first.getPrev();
 			}
 
 			ret.push_back(first);
 
-			while(first.hasNext()){
+			while(first.hasNext()) {
 				first = first.getNext();
 				ret.push_back(first);
 			}
@@ -341,26 +341,26 @@ public:
 			return *this;
 		}
 		File::Block* block = file->getBlockByAddress(address);
-		if(block == NULL){
+		if(block == NULL) {
 			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::readStructure could not read structure \"" << fieldName << "\" in \"" << getType() << "\" returning self";
 			return *this;
 		}
 		return DNAStructureReader(block);
 	}
 
-	bool hasNext(){
+	bool hasNext() {
 		if(!structure->hasField("id"))
 			return false;
 		setStructure("id");
 		unsigned long addr = readAddress("next");
-		if(addr!=0 && !file->doesAddressExist(addr)){
+		if(addr!=0 && !file->doesAddressExist(addr)) {
 			addr = 0;
 		}
 		reset();
 		return  addr != 0;
 	}
 
-	DNAStructureReader getNext(){
+	DNAStructureReader getNext() {
 		setStructure("id");
 		DNAStructureReader ret = readStructure("next");
 		//if(ret.getType() == "ID")
@@ -369,19 +369,19 @@ public:
 		return ret;
 	}
 
-	bool hasPrev(){
+	bool hasPrev() {
 		if(!structure->hasField("id"))
 			return false;
 		setStructure("id");
 		unsigned long addr = readAddress("prev");
-		if(addr!=0 && !file->doesAddressExist(addr)){
+		if(addr!=0 && !file->doesAddressExist(addr)) {
 			addr = 0;
 		}
 		reset();
 		return  addr != 0;
 	}
 
-	DNAStructureReader getPrev(){
+	DNAStructureReader getPrev() {
 		setStructure("id");
 		DNAStructureReader ret = readStructure("prev");
 		//if(ret.getType() == "ID")
@@ -390,7 +390,7 @@ public:
 		return ret;
 	}
 
-	void* parse(){
+	void* parse() {
 		return file->parseFileBlock(block);
 	}
 
@@ -568,6 +568,7 @@ public:
 		                matArray[3][0], matArray[3][1], matArray[3][2], matArray[3][3]);
 
 		object->setTransformMatrix(mat);
+		//object->setPosition(object->getPosition()*reader.file->scale);
 
 		//parse the anim data
 		unsigned long animDataAddress = reader.readAddress("adt");
@@ -638,9 +639,9 @@ public:
 		mesh->meshName = reader.readString("name");
 		reader.reset();
 
-		enum DrawFlag{
-			DRAW_FLAT = 67,
-			DRAW_SMOOTH = 75
+		enum DrawFlag {
+		    DRAW_FLAT = 67,
+		    DRAW_SMOOTH = 75
 		};
 
 		//smoothing
@@ -671,7 +672,7 @@ public:
 		//read all Materials
 		std::vector<Material*> materials;
 		std::vector<DNAStructureReader> materialStructs = reader.readLinkAsList("mat");
-		for(DNAStructureReader& matReader: materialStructs){
+		for(DNAStructureReader& matReader: materialStructs) {
 			materials.push_back(static_cast<Material*>(matReader.parse()));
 		}
 
@@ -690,7 +691,7 @@ public:
 
 			//check the shading
 			Shading shading = FLAT;
-			if((int)polyReader.read<char>("flag") == 3){
+			if((int)polyReader.read<char>("flag") == 3) {
 				shading = SMOOTH;
 			}
 			mesh->pushShading(shading);
@@ -729,8 +730,13 @@ public:
 		}
 	}
 
-	static void parseMaterial(DNAStructureReader& reader, Material* material){
-		material->color.set(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b"));
+	static void parseMaterial(DNAStructureReader& reader, Material* material) {
+		material->material.setShininess(reader.read<float>("spec"));
+
+		//TODO: why are those colors flipped?
+		material->material.setSpecularColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
+		//material->material.setAmbientColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
+		material->material.setDiffuseColor(ofFloatColor(reader.read<float>("specr"), reader.read<float>("specg"), reader.read<float>("specb")));
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -743,9 +749,37 @@ public:
 	}
 
 	static void parseLight(DNAStructureReader& reader, Light* light) {
-		//cout << "A LIGHT" << endl;
+		//http://en.wikibooks.org/wiki/GLSL_Programming/Blender/Diffuse_Reflection
+		enum LightType {
+		    BL_POINT = 0,
+		    BL_SUN = 1,
+		    BL_SPOT = 2,
+		    BL_HEMI = 3,
+		    BL_AREA = 4
+		};
 
-		//camera->setupPerspective(true, fov, 0, 1000000);
+		//TODO: the lights get kind of parsed, but there is lots to do, best would be to use blenders shaders
+
+		unsigned int type = reader.read<short>("type");
+		if(type == BL_POINT) {
+			light->light.setPointLight();
+			float energy = reader.read<float>("energy");
+			if(energy == 0)
+				energy = .00001;
+			float distance = 1.f / reader.read<float>("dist");
+			light->light.setAttenuation(1.f / energy, reader.read<float>("att1") * distance, reader.read<float>("att2") * distance);
+		} else if(type == BL_SUN) {
+			light->light.setDirectional();
+		} else if(type == BL_SPOT) {
+			light->light.setSpotlight(ofRadToDeg(reader.read<float>("spotsize"))*.5, (1-reader.read<float>("spotblend"))*128);
+		} else if(type == BL_HEMI) {
+		} else {
+			ofLogWarning(OFX_BLENDER) << "Light \"" << light->name << "\" has an unsupported type";
+		}
+
+		light->light.setDiffuseColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
+
+
 	}
 
 	static void* parseFileBlock(File::Block* block) {

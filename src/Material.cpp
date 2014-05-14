@@ -5,17 +5,19 @@ namespace ofx {
 namespace blender {
 
 Material::Material() {
-	color.set(1, 1, 1);
+	scene = NULL;
 }
 
 Material::~Material() {
 }
 
-
 void Material::begin() {
-	ofSetColor(color);
+	material.begin();
 }
 
+void Material::end() {
+	material.end();
+}
 
 }
 }
