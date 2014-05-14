@@ -34,6 +34,8 @@ public:
 	void setActiveCamera(Camera* cam);
 	void disableCamera();
 
+	ofFloatColor bgColor;
+
     Timeline timeline;
 	string name;
 private:

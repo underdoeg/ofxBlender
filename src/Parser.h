@@ -551,6 +551,10 @@ public:
 			scene->setActiveCamera(static_cast<Camera*>(reader.file->getObjectByAddress(reader.readAddress("camera"))));
 		}
 
+		//WORLD INFOS
+		DNAStructureReader worldReader = reader.readStructure("world");
+		scene->bgColor = ofFloatColor(worldReader.read<float>("horr"), worldReader.read<float>("horg"), worldReader.read<float>("horb"));
+		cout << "COLOR MODEL " << worldReader.read<short>("colormodel") << endl;
 		//cout << reader.readStructure("base").readStructure("object").setStructure("id").readString("name") << endl;
 	}
 
@@ -733,9 +737,10 @@ public:
 	static void parseMaterial(DNAStructureReader& reader, Material* material) {
 		material->material.setShininess(reader.read<float>("spec"));
 
+
 		//TODO: why are those colors flipped?
 		material->material.setSpecularColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
-		//material->material.setAmbientColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
+		material->material.setAmbientColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
 		material->material.setDiffuseColor(ofFloatColor(reader.read<float>("specr"), reader.read<float>("specg"), reader.read<float>("specb")));
 	}
 
@@ -770,6 +775,7 @@ public:
 			light->light.setAttenuation(1.f / energy, reader.read<float>("att1") * distance, reader.read<float>("att2") * distance);
 		} else if(type == BL_SUN) {
 			light->light.setDirectional();
+			light->light.tilt(180);
 		} else if(type == BL_SPOT) {
 			light->light.setSpotlight(ofRadToDeg(reader.read<float>("spotsize"))*.5, (1-reader.read<float>("spotblend"))*128);
 		} else if(type == BL_HEMI) {
@@ -778,8 +784,6 @@ public:
 		}
 
 		light->light.setDiffuseColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
-
-
 	}
 
 	static void* parseFileBlock(File::Block* block) {

@@ -18,7 +18,7 @@ void ofApp::update() {
 }
 
 void ofApp::draw() {
-	ofBackground(40);
+	ofBackground(scene->bgColor);
 	scene->customDraw();
 }
 

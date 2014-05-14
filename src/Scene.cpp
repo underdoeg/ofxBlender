@@ -22,7 +22,6 @@ void Scene::setDebug(bool state) {
 		debugCam.setGlobalPosition(activeCamera->getGlobalPosition());
 		debugCam.setGlobalOrientation(activeCamera->getGlobalOrientation());
 		debugCam.setDistance(debugCam.getTarget().getGlobalPosition().distance(activeCamera->getGlobalPosition()));
-		//debugCam.setTransformMatrix(activeCamera->getLocalTransformMatrix());
 	}
 	doDebug = state;
 	isFirstDebugEnable = false;
@@ -40,8 +39,11 @@ void Scene::customDraw() {
 	ofPushStyle();
 
 	ofEnableDepthTest();
-	ofSetSmoothLighting(true);
-	ofEnableLighting();
+
+	if(lights.size()>0){
+		ofSetSmoothLighting(true);
+		ofEnableLighting();
+	}
 
 	//camera
 	if(activeCamera && !doDebug)

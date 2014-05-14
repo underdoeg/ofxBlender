@@ -9,7 +9,7 @@ namespace ofx
 namespace blender
 {
 
-class Light: public Object
+class Light: public ofx::blender::Object
 {
 public:
 	Light();
