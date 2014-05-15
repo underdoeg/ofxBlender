@@ -749,7 +749,7 @@ public:
 				loopReader.nextBlock();
 				unsigned int index4 = loopReader.read<int>("v");
 				loopReader.nextBlock();
-				mesh->addTriangle(index3, index2, index1);
+				mesh->addTriangle(index1, index2, index3);
 				mesh->addTriangle(index3, index4, index1);
 
 				//mesh->addTriangle(index1, index2, index3);
@@ -765,7 +765,6 @@ public:
 					uvReader.nextBlock();
 					mesh->setUV(index4, uvReader.readVec2f("uv"));
 				}
-
 			} else {
 				loopReader.blockAt(loopStart);
 				unsigned int index1 = loopReader.read<int>("v");
@@ -846,6 +845,9 @@ public:
 		ofCamera* camera = &cam->camera;
 		float fov = ofRadToDeg(2 * atan(16 / reader.read<float>("lens")));
 		camera->setFov(fov);
+
+		camera->setNearClip(reader.read<float>("clipsta"));
+		camera->setFarClip(reader.read<float>("clipend"));
 
 		//camera->setupPerspective(true, fov, 0, 1000000);
 	}
