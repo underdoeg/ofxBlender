@@ -228,7 +228,7 @@ bool File::load(string path) {
 		it++;
 	}
 
-	ofLogVerbose(OFX_BLENDER) << "Loaded " << path << " - File version is " <<  version;
+	ofLogVerbose(OFX_BLENDER) << "Loaded \"" << path << "\" - Blender version is " <<  version;
 
 	return true;
 }

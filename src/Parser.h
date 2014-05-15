@@ -123,7 +123,9 @@ public:
 
 		if(field->arraySizes[0] > 0) {
 			for(unsigned int i=0; i < field->arraySizes[0]; i++) {
-				ret.push_back(file->readPointer());
+				unsigned long ptr = file->readPointer();
+				if(ptr != 0)
+					ret.push_back(ptr);
 			}
 		} else {
 			while(true) {
@@ -136,6 +138,18 @@ public:
 		}
 		return ret;
 	}
+
+	std::vector<DNAStructureReader> readStructureArray(string fieldName) {
+		std::vector<unsigned long> addresses = readAddressArray(fieldName);
+		std::vector<DNAStructureReader> ret;
+		for(unsigned long& address: addresses) {
+			File::Block* block = file->getBlockByAddress(address);
+			if(block != NULL) {
+				ret.push_back(DNAStructureReader(block));
+			}
+		}
+		return ret;
+	};
 
 	template<typename Type>
 	std::vector<std::vector<Type> > readMultArray(string fieldName) {
@@ -170,7 +184,7 @@ public:
 		//check for specials functions
 		if(std::is_same<Type, std::string>::value) {
 			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::read string types should be read with readString";
-			return Type();
+			//return Type();
 		}
 
 		bool isPointer = std::is_pointer<Type>::value;
@@ -182,7 +196,7 @@ public:
 
 		if(field->isArray) {
 			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::read field is an array and should be read with readArray";
-			return Type();
+			//return Type();
 		}
 
 		//read the file contents
@@ -216,10 +230,10 @@ public:
 
 //get a vec2
 	template<typename Type>
-	ofVec3f readVec2(string fieldName) {
-		ofVec3f ret;
+	ofVec2f readVec2(string fieldName) {
+		ofVec2f ret;
 		std::vector<Type> vals = readArray<Type>(fieldName);
-		if(vals.size() >= 3) {
+		if(vals.size() >= 2) {
 			ret.set(vals[0], vals[1]);
 		}
 		return ret;
@@ -505,6 +519,7 @@ public:
 
 		Parser::handlers[BL_SCENE] = new Handler<Scene>(Parser::parseScene);
 		Parser::handlers[BL_MATERIAL] = new Handler<Material>(Parser::parseMaterial);
+		Parser::handlers[BL_TEXTURE] = new Handler<Texture>(Parser::parseTexture);
 
 		//Types based on objects like Mesh, Camera, Light are special and need to be registered with the ObjectHandler
 		ObjectHandler* objHandler = new ObjectHandler(Parser::parseObject);
@@ -554,7 +569,7 @@ public:
 		//WORLD INFOS
 		DNAStructureReader worldReader = reader.readStructure("world");
 		scene->bgColor = ofFloatColor(worldReader.read<float>("horr"), worldReader.read<float>("horg"), worldReader.read<float>("horb"));
-		cout << "COLOR MODEL " << worldReader.read<short>("colormodel") << endl;
+		//cout << "COLOR MODEL " << worldReader.read<short>("colormodel") << endl;
 		//cout << reader.readStructure("base").readStructure("object").setStructure("id").readString("name") << endl;
 	}
 
@@ -658,17 +673,17 @@ public:
 		*/
 
 		//get address of the polygon blocks
-		DNAStructureReader polyReader(reader.file->getBlockByAddress(reader.readAddress("mpoly")));
+		DNAStructureReader polyReader = reader.readStructure("mpoly");
 		//get address of the loops blocks
-		DNAStructureReader loopReader(reader.file->getBlockByAddress(reader.readAddress("mloop")));
+		DNAStructureReader loopReader = reader.readStructure("mloop");
 		//get address of the vertices blocks
-		DNAStructureReader vertReader(reader.file->getBlockByAddress(reader.readAddress("mvert")));
-
+		DNAStructureReader vertReader = reader.readStructure("mvert");
 
 		//read all vertices and add to the mesh
 		mesh->clear();
-		int totalVertices = reader.read<int>("totvert");
-		for(int i=0; i<totalVertices; i++) {
+		unsigned int totalVertices = reader.read<int>("totvert");
+		for(unsigned int i=0; i<totalVertices; i++) {
+			//cout << vertReader.readVec3f("co") << endl;
 			mesh->addVertex(vertReader.readVec3f("co"), vertReader.readVec3<short>("no"));
 			vertReader.nextBlock();
 		}
@@ -680,8 +695,25 @@ public:
 			materials.push_back(static_cast<Material*>(matReader.parse()));
 		}
 
+		//try to read uv coordinates
+		bool hasUV = false;
+		DNAStructureReader uvReader = reader;
+		if(reader.readAddress("mloopuv") != 0) {
+			uvReader = reader.readStructure("mloopuv");
+			hasUV = true;
+			/*
+			for(unsigned int i=0; i<totalVertices; i++) {
+				ofVec2f uv = uvReader.readVec2f("uv");
+				//cout << uvReader.readVec2f("uv") << endl;
+				mesh->setUV(i, uv);
+				uvReader.nextBlock();
+			}
+			*/
+		}
+
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");
+		//build triangles
 		for(int i=0; i<totalPolys; i++) {
 			unsigned int vertCount = polyReader.read<int>("totloop");
 			if (vertCount<3) {
@@ -719,6 +751,21 @@ public:
 				loopReader.nextBlock();
 				mesh->addTriangle(index3, index2, index1);
 				mesh->addTriangle(index3, index4, index1);
+
+				//mesh->addTriangle(index1, index2, index3);
+				//mesh->addTriangle(index2, index3, index1);
+
+				if(hasUV) {
+					uvReader.blockAt(loopStart);
+					mesh->setUV(index1, uvReader.readVec2f("uv"));
+					uvReader.nextBlock();
+					mesh->setUV(index2, uvReader.readVec2f("uv"));
+					uvReader.nextBlock();
+					mesh->setUV(index3, uvReader.readVec2f("uv"));
+					uvReader.nextBlock();
+					mesh->setUV(index4, uvReader.readVec2f("uv"));
+				}
+
 			} else {
 				loopReader.blockAt(loopStart);
 				unsigned int index1 = loopReader.read<int>("v");
@@ -727,6 +774,15 @@ public:
 				loopReader.nextBlock();
 				unsigned int index3 = loopReader.read<int>("v");
 				mesh->addTriangle(index1, index2, index3);
+
+				if(hasUV) {
+					uvReader.blockAt(loopStart);
+					mesh->setUV(index1, uvReader.readVec2f("uv"));
+					uvReader.nextBlock();
+					mesh->setUV(index2, uvReader.readVec2f("uv"));
+					uvReader.nextBlock();
+					mesh->setUV(index3, uvReader.readVec2f("uv"));
+				}
 			}
 
 			//done, let's advance to the next polygon
@@ -735,6 +791,10 @@ public:
 	}
 
 	static void parseMaterial(DNAStructureReader& reader, Material* material) {
+		reader.setStructure("id");
+		material->name = reader.readString("name");
+		reader.reset();
+
 		material->material.setShininess(reader.read<float>("spec"));
 
 
@@ -742,6 +802,43 @@ public:
 		material->material.setSpecularColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
 		material->material.setAmbientColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
 		material->material.setDiffuseColor(ofFloatColor(reader.read<float>("specr"), reader.read<float>("specg"), reader.read<float>("specb")));
+
+		std::vector<DNAStructureReader> textures = reader.readStructureArray("mtex");
+		for(DNAStructureReader& texReader: textures) {
+			material->textures.push_back(static_cast<Texture*>(texReader.readStructure("tex").parse()));
+		}
+	}
+
+	static void parseTexture(DNAStructureReader& reader, Texture* texture) {
+		reader.setStructure("id");
+		texture->name = reader.readString("name");
+		reader.reset();
+
+		//there are many more types
+		enum texTypes {
+		    BLEND = 1,
+		    WOOD = 2,
+		    VOXEL = 15,
+		    IMAGE = 8
+		};
+
+		if(reader.read<short>("type") != IMAGE) {
+			ofLogWarning(OFX_BLENDER) << "CAN ONLY READ TEXTURES OF TYPE IMAGE \"" << texture->name << "\"";
+			return;
+		}
+
+		DNAStructureReader imgReader = reader.readStructure("ima");
+		string path = imgReader.readString("name");
+		ofStringReplace(path, "//", "");
+		texture->img.loadImage(path);
+		/*
+		imgReader.setStructure("id");
+		cout << "ADDRESS " << imgReader.readAddress("lib") << endl;
+		//check if it is a packed file
+		cout << "PACKED " << imgReader.readStructure("lib").readAddress("packedfile") << endl;
+		imgReader.reset();
+		*/
+		cout << "PACKED " << imgReader.readAddress("packedfile") << endl;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

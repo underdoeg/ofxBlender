@@ -7,6 +7,9 @@ namespace ofx {
 namespace blender {
 
 class Texture {
+public:
+	string name;
+	ofImage img;
 };
 
 class Scene;
@@ -19,8 +22,9 @@ public:
 	void end();
 
 	ofMaterial material;
-	std::vector<Texture> textures;
+	std::vector<Texture*> textures;
 	Scene* scene;
+	string name;
 };
 
 }

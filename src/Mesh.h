@@ -46,6 +46,8 @@ public:
 	void addVertex(ofVec3f pos, ofVec3f norm=ofVec3f());
 	void addTriangle(unsigned int a, unsigned int b, unsigned int c);
 
+	void setUV(unsigned int index, ofVec2f uv);
+
 	void clear();
 
 	void build();
@@ -65,7 +67,7 @@ private:
 
 		void draw();
 
-		ofMesh mesh;
+		ofVboMesh mesh;
 		Material* material;
 		Shading shading;
 		std::vector<Triangle> polys;
@@ -80,6 +82,7 @@ private:
 	Part* curPart;
 	std::vector<ofVec3f> vertices;
 	std::vector<ofVec3f> normals;
+	std::vector<ofVec2f> uvs;
 	std::vector<Part> parts;
 };
 

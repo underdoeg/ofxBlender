@@ -48,7 +48,6 @@ void Timeline::start() {
 
 void Timeline::setDuration(unsigned long long d)
 {
-	cout << "NEW DURATION " << d << endl;
 	duration = d;
 }
 
