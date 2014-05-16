@@ -102,7 +102,7 @@ bool File::load(string path) {
 		file.close();
 		Poco::TemporaryFile tempFile;
 		tempFile.keepUntilExit();
-		std::ofstream out(tempFile.path());b
+		std::ofstream out(tempFile.path());
 		Poco::StreamCopier::copyStream( inflater, out);
 		out.close();
 
