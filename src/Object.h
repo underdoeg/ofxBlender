@@ -23,12 +23,15 @@ public:
     Object();
     ~Object();
 
+	void addChild(Object* child);
+
 	string name;
     ObjectType type;
 	Timeline timeline;
 	Scene* scene;
 
 private:
+	std::vector<Object*> children;
 	void onAnimationData(float value, string address, int channel);
 
 };

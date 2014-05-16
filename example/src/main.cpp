@@ -7,7 +7,7 @@
 int main( ){
 
     ofAppGlutWindow window;
-	ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+	//ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 
 	ofSetupOpenGL(&window, 1280,720, OF_WINDOW);			// <-------- setup the GL context
 
