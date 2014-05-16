@@ -196,7 +196,13 @@ bool File::load(string path) {
 			//if the field is a pointer, then only add the pointer size to offset
 			bool offsetSet = false;
 			if(structure.fields.back().isPointer) {
-				curOffset += pointerSize;
+				int amount = 0;
+				if(structure.fields.back().isArray){
+					 amount = structure.fields.back().arraySizes[0];
+				}
+				if(amount == 0)
+					amount = 1;
+				curOffset += (pointerSize * amount);
 				offsetSet = true;
 			} else if(structure.fields.back().isArray) { //arrays add n times the size to offset
 				float multi = 0;
