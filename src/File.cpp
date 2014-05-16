@@ -1,6 +1,8 @@
 #include "File.h"
 #include <fstream>
 #include "Parser.h"
+#include "Poco/InflatingStream.h"
+#include "Poco/StreamCopier.h"
 
 
 class file;
@@ -91,7 +93,14 @@ bool File::load(string path) {
 	//info should contain blender now, if not it is compressed
 	string info = readString(7);
 
+	//check if the file is gzipped
 	if(info != "BLENDER") {
+		/*
+		Poco::InflatingInputStream inflater(file, Poco::InflatingStreamBuf::STREAM_GZIP);
+		file.close();
+		Poco::StreamCopier::copyStream( inflater, file);
+		//inflater >> file;
+		 */
 		ofLogWarning(OFX_BLENDER) << "Compressed blend files are not yet supported. Loading canceled.";
 		return false;
 	}
