@@ -8,24 +8,23 @@ Most objects have an inheritance structure like this
 
 ## Features
 
-### partially implemented
+### supports
 
 * scenes
-
-### planned
-
+* meshes (tris and quads)
 * materials (colors & textures)
 * animation data (position, rotation, scale)
-* scene hierarchy 
-* meshes (tris and quads)
 * cameras
 * lights
 
+### planned
+
+* scene hierarchy 
+
 ## limitations
 
-* Compressed blend files are not supported 
-* Only tested with Blender 2.7
+* Only tested with Blender 2.7, will not work with blender 2.4 versions and only partially with blender 2.6
 
 ## platforms
 
-Developed on linux (Arch 64bit), but should also work on Mac & Windows.
+Developed and tested on linux (Arch 64bit), but should also work on Mac & Windows.
