@@ -3,6 +3,7 @@
 #include "Parser.h"
 #include "Poco/InflatingStream.h"
 #include "Poco/StreamCopier.h"
+#include "Poco/TemporaryFile.h"
 
 
 class file;
@@ -95,14 +96,20 @@ bool File::load(string path) {
 
 	//check if the file is gzipped
 	if(info != "BLENDER") {
-		/*
+
+		//unzip the blend file to a temp file and reload
 		Poco::InflatingInputStream inflater(file, Poco::InflatingStreamBuf::STREAM_GZIP);
 		file.close();
-		Poco::StreamCopier::copyStream( inflater, file);
-		//inflater >> file;
-		 */
-		ofLogWarning(OFX_BLENDER) << "Compressed blend files are not yet supported. Loading canceled.";
-		return false;
+		Poco::TemporaryFile tempFile;
+		tempFile.keepUntilExit();
+		std::ofstream out(tempFile.path());b
+		Poco::StreamCopier::copyStream( inflater, out);
+		out.close();
+
+		file.open(tempFile.path(), ios::binary);
+		readString(7);
+
+		ofLogNotice(OFX_BLENDER) << "Blend file is gzipped, temporarily decompressed contents to " << tempFile.path();
 	}
 
 	//now extract the rest of the header data
@@ -206,8 +213,8 @@ bool File::load(string path) {
 			bool offsetSet = false;
 			if(structure.fields.back().isPointer) {
 				int amount = 0;
-				if(structure.fields.back().isArray){
-					 amount = structure.fields.back().arraySizes[0];
+				if(structure.fields.back().isArray) {
+					amount = structure.fields.back().arraySizes[0];
 				}
 				if(amount == 0)
 					amount = 1;
