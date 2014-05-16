@@ -284,7 +284,7 @@ public:
 
 	//get an array
 	template<typename Type>
-	Type* readArray(string fieldName, unsigned int amount){
+	Type* readArray(string fieldName, unsigned int amount) {
 		DNAField* field = setField(fieldName);
 		if(!field) {
 			return new Type[0];
@@ -301,7 +301,7 @@ public:
 		return file->readPointer();
 	}
 
-	char* readChar(string fieldName, unsigned int length){
+	char* readChar(string fieldName, unsigned int length) {
 		setField(fieldName);
 		return file->readChar(length);
 	}
@@ -699,7 +699,7 @@ public:
 		unsigned int totalVertices = reader.read<int>("totvert");
 		for(unsigned int i=0; i<totalVertices; i++) {
 			//cout << vertReader.readVec3f("co") << endl;
-			mesh->addVertex(vertReader.readVec3f("co"), vertReader.readVec3<short>("no"));
+			mesh->addVertex(vertReader.readVec3f("co"), vertReader.readVec3<short>("no").getNormalized());
 			vertReader.nextBlock();
 		}
 
@@ -728,6 +728,7 @@ public:
 
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");
+		ofVec3f e0, e1;
 		//build triangles
 		for(int i=0; i<totalPolys; i++) {
 			unsigned int vertCount = polyReader.read<int>("totloop");
@@ -764,8 +765,20 @@ public:
 				loopReader.nextBlock();
 				unsigned int index4 = loopReader.read<int>("v");
 				loopReader.nextBlock();
-				mesh->addTriangle(index1, index2, index3);
-				mesh->addTriangle(index3, index4, index1);
+
+				//e0 = (gkVector3(mvert[curface.v1].co) - gkVector3(mvert[curface.v2].co));
+				//e1 = (gkVector3(mvert[curface.v3].co) - gkVector3(mvert[curface.v4].co));
+
+				e0 = mesh->getVertex(index1) - mesh->getVertex(index2);
+				e1 = mesh->getVertex(index3) - mesh->getVertex(index4);
+
+				if(e0.lengthSquared() < e1.lengthSquared()) {
+					mesh->addTriangle(index3, index2, index1);
+					//mesh->addTriangle(index4, index3, index1);
+				} else {
+					//mesh->addTriangle(index1, index2, index4);
+					//mesh->addTriangle(index4, index2, index3);
+				}
 
 				//mesh->addTriangle(index1, index2, index3);
 				//mesh->addTriangle(index2, index3, index1);
@@ -787,7 +800,7 @@ public:
 				unsigned int index2 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index3 = loopReader.read<int>("v");
-				mesh->addTriangle(index1, index2, index3);
+				mesh->addTriangle(index3, index2, index1);
 
 				if(hasUV) {
 					uvReader.blockAt(loopStart);
@@ -844,7 +857,7 @@ public:
 		DNAStructureReader imgReader = reader.readStructure("ima");
 
 		//check if file is packed or has to be loaded
-		if(imgReader.readAddress("packedfile")){
+		if(imgReader.readAddress("packedfile")) {
 			DNAStructureReader packedFile = imgReader.readStructure("packedfile");
 			unsigned int size = packedFile.read<int>("size");
 			DNAStructureReader dataBlock = packedFile.readStructure("data");
@@ -852,7 +865,7 @@ public:
 			char* pixels = dataBlock.readChar("next", size);
 			ofBuffer buffer(pixels, size);
 			texture->img.loadImage(buffer);
-		}else{
+		} else {
 			string path = imgReader.readString("name");
 			ofStringReplace(path, "//", "");
 			texture->img.loadImage(path);

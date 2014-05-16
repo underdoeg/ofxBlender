@@ -44,6 +44,7 @@ public:
 	void pushShading(Shading shading);
 
 	void addVertex(ofVec3f pos, ofVec3f norm=ofVec3f());
+	ofVec3f getVertex(unsigned int pos);
 	void addTriangle(unsigned int a, unsigned int b, unsigned int c);
 
 	void setUV(unsigned int index, ofVec2f uv);

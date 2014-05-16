@@ -33,6 +33,10 @@ void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
 	uvs.push_back(ofVec2f());
 }
 
+ofVec3f Mesh::getVertex(unsigned int pos) {
+	return vertices[pos];
+}
+
 void Mesh::setUV(unsigned int index, ofVec2f uv) {
 	if(!curPart)
 		updatePart();
@@ -88,6 +92,10 @@ void Mesh::Part::draw() {
 	if(material != NULL)
 		material->begin();
 	mesh.drawInstanced(OF_MESH_FILL, 1);
+	ofSetColor(100, 255, 100);
+	mesh.drawFaceNormals(.1);
+	ofSetColor(100, 100, 255);
+	mesh.drawVertNormals(.01);
 	//ofDrawBox(0, 0, 0, 2);
 	if(material != NULL)
 		material->end();
