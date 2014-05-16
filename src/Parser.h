@@ -83,7 +83,7 @@ public:
 	}
 
 	template<typename Type>
-	std::vector<Type> readArray(string fieldName) {
+	std::vector<Type> readVector(string fieldName) {
 		std::vector<Type> ret;
 		DNAField* field = setField(fieldName);
 		if(!field) {
@@ -232,7 +232,7 @@ public:
 	template<typename Type>
 	ofVec2f readVec2(string fieldName) {
 		ofVec2f ret;
-		std::vector<Type> vals = readArray<Type>(fieldName);
+		std::vector<Type> vals = readVector<Type>(fieldName);
 		if(vals.size() >= 2) {
 			ret.set(vals[0], vals[1]);
 		}
@@ -246,7 +246,7 @@ public:
 	template<typename Type>
 	ofVec3f readVec3(string fieldName) {
 		ofVec3f ret;
-		std::vector<Type> vals = readArray<Type>(fieldName);
+		std::vector<Type> vals = readVector<Type>(fieldName);
 		if(vals.size() >= 3) {
 			ret.set(vals[0], vals[1], vals[2]);
 		}
@@ -282,6 +282,16 @@ public:
 		return readVec3Array<float>(fieldName, len);
 	}
 
+	//get an array
+	template<typename Type>
+	Type* readArray(string fieldName, unsigned int amount){
+		DNAField* field = setField(fieldName);
+		if(!field) {
+			return new Type[0];
+		}
+		return file->readMany<Type>(amount);
+	}
+
 //get a pointer address
 	unsigned long readAddress(string fieldName) {
 		DNAField* field = setField(fieldName);
@@ -289,6 +299,11 @@ public:
 			return 0;
 		}
 		return file->readPointer();
+	}
+
+	char* readChar(string fieldName, unsigned int length){
+		setField(fieldName);
+		return file->readChar(length);
 	}
 
 //a linked list is basically an array of different structures
@@ -827,17 +842,21 @@ public:
 		}
 
 		DNAStructureReader imgReader = reader.readStructure("ima");
-		string path = imgReader.readString("name");
-		ofStringReplace(path, "//", "");
-		texture->img.loadImage(path);
-		/*
-		imgReader.setStructure("id");
-		cout << "ADDRESS " << imgReader.readAddress("lib") << endl;
-		//check if it is a packed file
-		cout << "PACKED " << imgReader.readStructure("lib").readAddress("packedfile") << endl;
-		imgReader.reset();
-		*/
-		cout << "PACKED " << imgReader.readAddress("packedfile") << endl;
+
+		//check if file is packed or has to be loaded
+		if(imgReader.readAddress("packedfile")){
+			DNAStructureReader packedFile = imgReader.readStructure("packedfile");
+			unsigned int size = packedFile.read<int>("size");
+			DNAStructureReader dataBlock = packedFile.readStructure("data");
+
+			char* pixels = dataBlock.readChar("next", size);
+			ofBuffer buffer(pixels, size);
+			texture->img.loadImage(buffer);
+		}else{
+			string path = imgReader.readString("name");
+			ofStringReplace(path, "//", "");
+			texture->img.loadImage(path);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

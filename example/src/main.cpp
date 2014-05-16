@@ -2,10 +2,13 @@
 #include "ofApp.h"
 #include "ofAppGlutWindow.h"
 
+
 //========================================================================
 int main( ){
 
     ofAppGlutWindow window;
+	ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+
 	ofSetupOpenGL(&window, 1280,720, OF_WINDOW);			// <-------- setup the GL context
 
 	// this kicks off the running of my app

@@ -25,6 +25,7 @@ public:
 	std::vector<Texture*> textures;
 	Scene* scene;
 	string name;
+	bool useShader;
 };
 
 }

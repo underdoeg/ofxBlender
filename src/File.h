@@ -201,7 +201,7 @@ private:
 	}
 
 	template<typename Type>
-	Type readMany(unsigned int howMany) {
+	Type* readMany(unsigned int howMany) {
 		Type* ret = new Type[howMany];
 		for(unsigned int i=0; i<howMany; i++) {
 			ret[i] = read<Type>();
@@ -232,6 +232,9 @@ private:
 	DNACatalog catalog;
 	std::ifstream file;
 	float scale;
+
+	//packed files
+	//std::map<string, ofPixels> packedImages;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////// ALL ABOUT PARSING //////////////////////////////////////////////////////

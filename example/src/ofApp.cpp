@@ -11,6 +11,8 @@ void ofApp::setup() {
 	file.exportStructure();
 	scene = file.getScene(0);
 	//scene->setDebug(true);
+
+	//ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 }
 
 void ofApp::update() {
