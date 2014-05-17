@@ -678,14 +678,14 @@ public:
 		    DRAW_SMOOTH = 75
 		};
 
-		//smoothing
-		/*
-		int drawFlag = reader.read<short>("smoothresh");
-		if(drawFlag == DRAW_SMOOTH)
-			mesh->pushShading(SMOOTH);
-		else
-			mesh->pushShading(FLAT);
-		*/
+		//two sided
+		//TODO: check how flags actually work, this will only be right when flag is exactly 4
+		if(reader.read<short>("flag") == 4){
+			mesh->isTwoSided = true;
+		}else{
+			mesh->isTwoSided = false;
+		}
+
 
 		//get address of the polygon blocks
 		DNAStructureReader polyReader = reader.readStructure("mpoly");
@@ -693,6 +693,8 @@ public:
 		DNAStructureReader loopReader = reader.readStructure("mloop");
 		//get address of the vertices blocks
 		DNAStructureReader vertReader = reader.readStructure("mvert");
+		//get address of the edge blocks
+		DNAStructureReader edgeReader = reader.readStructure("medge");
 
 		//read all vertices and add to the mesh
 		mesh->clear();
@@ -716,14 +718,6 @@ public:
 		if(reader.readAddress("mloopuv") != 0) {
 			uvReader = reader.readStructure("mloopuv");
 			hasUV = true;
-			/*
-			for(unsigned int i=0; i<totalVertices; i++) {
-				ofVec2f uv = uvReader.readVec2f("uv");
-				//cout << uvReader.readVec2f("uv") << endl;
-				mesh->setUV(i, uv);
-				uvReader.nextBlock();
-			}
-			*/
 		}
 
 		//get the total number of polygons
@@ -743,7 +737,7 @@ public:
 
 			//check the shading
 			Shading shading = FLAT;
-			if((int)polyReader.read<char>("flag") == 3) {
+			if(((int)polyReader.read<char>("flag")) == 3) {
 				shading = SMOOTH;
 			}
 			mesh->pushShading(shading);
@@ -755,8 +749,12 @@ public:
 
 			//write triangles
 			int loopStart = polyReader.read<int>("loopstart");
+
 			if(vertCount == 4) {
 				loopReader.blockAt(loopStart);
+
+				//cout << loopReader.read<int>("e") << endl;
+
 				unsigned int index1 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index2 = loopReader.read<int>("v");
@@ -766,22 +764,16 @@ public:
 				unsigned int index4 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 
-				//e0 = (gkVector3(mvert[curface.v1].co) - gkVector3(mvert[curface.v2].co));
-				//e1 = (gkVector3(mvert[curface.v3].co) - gkVector3(mvert[curface.v4].co));
-
 				e0 = mesh->getVertex(index1) - mesh->getVertex(index2);
 				e1 = mesh->getVertex(index3) - mesh->getVertex(index4);
 
-				//if(e0.lengthSquared() < e1.lengthSquared()) {
-					mesh->addTriangle(index3, index2, index1);
-					mesh->addTriangle(index4, index3, index1);
-				//} else {
-					//mesh->addTriangle(index1, index2, index4);
-					//mesh->addTriangle(index4, index2, index3);
-				//}
-
-				//mesh->addTriangle(index1, index2, index3);
-				//mesh->addTriangle(index2, index3, index1);
+				if(e0.lengthSquared() < e1.lengthSquared()) {
+					mesh->addTriangle(index1, index2, index3);
+					mesh->addTriangle(index3, index4, index1);
+				} else {
+					mesh->addTriangle(index1, index2, index4);
+					mesh->addTriangle(index4, index2, index3);
+				}
 
 				if(hasUV) {
 					uvReader.blockAt(loopStart);
@@ -800,7 +792,7 @@ public:
 				unsigned int index2 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index3 = loopReader.read<int>("v");
-				mesh->addTriangle(index3, index2, index1);
+				mesh->addTriangle(index1, index2, index3);
 
 				if(hasUV) {
 					uvReader.blockAt(loopStart);

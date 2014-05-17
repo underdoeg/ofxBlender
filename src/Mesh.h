@@ -57,6 +57,8 @@ public:
 
 	string meshName;
 
+	bool isTwoSided;
+
 private:
 	class Part {
 	public:

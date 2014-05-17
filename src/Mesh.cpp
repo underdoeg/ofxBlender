@@ -7,12 +7,23 @@ Mesh::Mesh() {
 	type = MESH;
 	curPart = NULL;
 	curMaterial = NULL;
+	isTwoSided = true;
 }
 
 Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
+
+	if(isTwoSided) {
+		glDisable(GL_CULL_FACE);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	} else {
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+	}
+
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();
@@ -89,19 +100,33 @@ void Mesh::Part::draw() {
 		glShadeModel(GL_FLAT);
 	else
 		glShadeModel(GL_SMOOTH);
+
 	if(material != NULL)
 		material->begin();
+	else
+		ofSetColor(255);
 
 	primitive.draw(OF_MESH_FILL);
 
-	//ofSetColor(100, 255, 100);
-	//primitive.drawNormals(.05, false);
-
-	//ofSetColor(255, 100, 100);
-	//primitive.drawNormals(.05, false);
-
 	if(material != NULL)
 		material->end();
+
+	/*
+	ofSetColor(0, 255, 0);
+	primitive.drawNormals(.1);
+
+	ofSetColor(0, 255, 255);
+	float length = .15;
+	vector<ofMeshFace> faces = primitive.getMesh().getUniqueFaces();
+	for(unsigned int i=0; i<faces.size(); i++) {
+		ofMeshFace& face = faces[i];
+
+		if(face.hasNormals()) {
+			ofVec3f center = (face.getVertex(0) + face.getVertex(1) + face.getVertex(2)) / 3.f;
+			ofLine(center, center + face.getFaceNormal() * length);
+		}
+	}
+	 */
 }
 
 }

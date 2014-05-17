@@ -10,9 +10,7 @@ void ofApp::setup() {
 	file.load("test.blend");
 	file.exportStructure();
 	scene = file.getScene(0);
-	//scene->setDebug(true);
-
-	//ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+	scene->setDebug(true);
 }
 
 void ofApp::update() {
