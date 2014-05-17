@@ -24,7 +24,7 @@ void Mesh::addTriangle(unsigned int a, unsigned int b, unsigned int c) {
 		updatePart();
 
 	curPart->hasTriangles = true;
-	curPart->mesh.addTriangle(a, b, c);
+	curPart->primitive.getMesh().addTriangle(a, b, c);
 }
 
 void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
@@ -40,7 +40,7 @@ ofVec3f Mesh::getVertex(unsigned int pos) {
 void Mesh::setUV(unsigned int index, ofVec2f uv) {
 	if(!curPart)
 		updatePart();
-	curPart->mesh.setTexCoord(index, uv);
+	curPart->primitive.getMesh().setTexCoord(index, uv);
 }
 
 Mesh::Part* Mesh::getPart(Material* mat, Shading shading) {
@@ -51,9 +51,9 @@ Mesh::Part* Mesh::getPart(Material* mat, Shading shading) {
 	parts.push_back(Part(mat, shading));
 
 	//TODO: could be optimized, not all parts need all vertices
-	parts.back().mesh.addVertices(vertices);
-	parts.back().mesh.addNormals(normals);
-	parts.back().mesh.addTexCoords(uvs);
+	parts.back().primitive.getMesh().addVertices(vertices);
+	parts.back().primitive.getMesh().addNormals(normals);
+	parts.back().primitive.getMesh().addTexCoords(uvs);
 
 	return &parts.back();
 }
@@ -91,12 +91,15 @@ void Mesh::Part::draw() {
 		glShadeModel(GL_SMOOTH);
 	if(material != NULL)
 		material->begin();
-	mesh.drawInstanced(OF_MESH_FILL, 1);
-	ofSetColor(100, 255, 100);
-	mesh.drawFaceNormals(.1);
-	ofSetColor(100, 100, 255);
-	mesh.drawVertNormals(.01);
-	//ofDrawBox(0, 0, 0, 2);
+
+	primitive.draw(OF_MESH_FILL);
+
+	//ofSetColor(100, 255, 100);
+	//primitive.drawNormals(.05, false);
+
+	//ofSetColor(255, 100, 100);
+	//primitive.drawNormals(.05, false);
+
 	if(material != NULL)
 		material->end();
 }

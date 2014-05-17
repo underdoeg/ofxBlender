@@ -4,7 +4,7 @@
 #include "Poco/InflatingStream.h"
 #include "Poco/StreamCopier.h"
 #include "Poco/TemporaryFile.h"
-
+#include "Poco/Exception.h"
 
 class file;
 
@@ -90,31 +90,36 @@ bool File::load(string path) {
 	if(file.is_open())
 		file.close();
 	file.open(ofToDataPath(path, true).c_str(), ios::binary);
-
 	//info should contain blender now, if not it is compressed
 	string info = readString(7);
 
 	//check if the file is gzipped
 	if(info != "BLENDER") {
+		seek(0);
 
 		//unzip the blend file to a temp file and reload
 		Poco::InflatingInputStream inflater(file, Poco::InflatingStreamBuf::STREAM_GZIP);
-		file.close();
+
 		Poco::TemporaryFile tempFile;
 		tempFile.keepUntilExit();
-		std::ofstream out(tempFile.path());
+		std::ofstream out(tempFile.path().c_str(), ios::binary);
 		Poco::StreamCopier::copyStream( inflater, out);
 		out.close();
 
-		file.open(tempFile.path(), ios::binary);
-		readString(7);
+		file.close();
+		file.open(tempFile.path().c_str(), ios::binary);
+		info = readString(7);
 
-		ofLogNotice(OFX_BLENDER) << "Blend file is gzipped, temporarily decompressed contents to " << tempFile.path();
+		if(info != "BLENDER") {
+			ofLogWarning(OFX_BLENDER) << "Could not read blend file " << path;
+		} else {
+			ofLogVerbose(OFX_BLENDER) << "Blend file is gzipped, temporarily decompressed contents to " << tempFile.path();
+		}
 	}
 
 	//now extract the rest of the header data
-
 	string tempString = readString(1);
+
 	if(tempString == "-")
 		pointerSize = 8;
 	else if(tempString == "_")

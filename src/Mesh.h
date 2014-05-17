@@ -68,7 +68,7 @@ private:
 
 		void draw();
 
-		ofVboMesh mesh;
+		of3dPrimitive primitive;
 		Material* material;
 		Shading shading;
 		std::vector<Triangle> polys;

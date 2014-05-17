@@ -772,13 +772,13 @@ public:
 				e0 = mesh->getVertex(index1) - mesh->getVertex(index2);
 				e1 = mesh->getVertex(index3) - mesh->getVertex(index4);
 
-				if(e0.lengthSquared() < e1.lengthSquared()) {
+				//if(e0.lengthSquared() < e1.lengthSquared()) {
 					mesh->addTriangle(index3, index2, index1);
-					//mesh->addTriangle(index4, index3, index1);
-				} else {
+					mesh->addTriangle(index4, index3, index1);
+				//} else {
 					//mesh->addTriangle(index1, index2, index4);
 					//mesh->addTriangle(index4, index2, index3);
-				}
+				//}
 
 				//mesh->addTriangle(index1, index2, index3);
 				//mesh->addTriangle(index2, index3, index1);
