@@ -17,6 +17,7 @@ enum ObjectType{
 };
 
 class Scene;
+class Layer;
 
 class Object: public ofNode {
 public:
@@ -27,13 +28,19 @@ public:
 
 	void addChild(Object* child);
 	bool hasParent();
+	bool isVisible();
+	void show();
+	void hide();
+	void toggleVisibility();
 	
 	string name;
     ObjectType type;
 	Timeline timeline;
 	Scene* scene;
+	Layer* layer;
 
 private:
+	bool visible;
 	Object* parent;
 	std::vector<Object*> children;
 	void onAnimationData(float value, string address, int channel);

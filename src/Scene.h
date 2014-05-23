@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Layer.h"
 
 namespace ofx {
 namespace blender {
@@ -38,6 +39,7 @@ public:
 
     Timeline timeline;
 	string name;
+	std::map<unsigned int, Layer> layers;
 private:
 	Camera* activeCamera;
 	ofEasyCam debugCam;

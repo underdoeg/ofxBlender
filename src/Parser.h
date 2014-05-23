@@ -566,9 +566,14 @@ public:
 		DNAStructureReader next = reader.readStructure("base");
 		do {
 			//Parser::parseFileBlock(getBlockByType(BL_OBJECT, index))
-			Object* object = reader.file->getObjectByAddress(next.readAddress("object"));
+			DNAStructureReader objReader = next.readStructure("object");
+			Object* object = static_cast<Object*>(objReader.parse());
 			if(object != NULL)
 				scene->addObject(object);
+			
+			//set the scene layer to the object
+			object->layer = &scene->layers[objReader.read<int>("lay")-1];
+						
 			//cout << next.readStructure("object").setStructure("id").readString("name") << endl;
 			if(next.readAddress("next") == 0) {
 				break;

@@ -1,4 +1,5 @@
 #include "Object.h"
+#include "Layer.h"
 
 namespace ofx {
 
@@ -8,6 +9,8 @@ Object::Object() {
 	type = UNDEFINED;
 	scene = NULL;
 	parent = NULL;
+	visible = true;
+	layer = NULL;
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
@@ -15,9 +18,15 @@ Object::~Object() {
 }
 
 void Object::draw() {
+	//check if associated layer is null
+	if(layer){
+		if(!layer->isVisible())
+			return;
+	}
+	
 	ofNode::transformGL();
 	customDraw();
-	for(Object* child: children){
+	for(Object* child: children) {
 		child->draw();
 	}
 	ofNode::restoreTransformGL();
@@ -33,6 +42,29 @@ bool Object::hasParent() {
 	return parent != NULL;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+bool Object::isVisible() {
+	return visible;
+}
+
+void Object::hide() {
+	visible = false;
+}
+
+void Object::show() {
+	visible = true;
+}
+
+void Object::toggleVisibility() {
+	if(isVisible())
+		hide();
+	else
+		show();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
 
 void Object::onAnimationData(float value, string address, int channel) {
 	//cout << channel << ":" << address << endl;

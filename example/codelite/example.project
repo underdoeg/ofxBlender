@@ -53,6 +53,8 @@
         <File Name="../../src/Light.cpp"/>
         <File Name="../../src/Material.h"/>
         <File Name="../../src/Material.cpp"/>
+        <File Name="../../src/Layer.h"/>
+        <File Name="../../src/Layer.cpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>
