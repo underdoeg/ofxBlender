@@ -66,6 +66,7 @@ private:
 			material = mat;
 			shading = shade;
 			hasTriangles = false;
+			primitive.setUseVbo(true);
 		}
 
 		void draw();

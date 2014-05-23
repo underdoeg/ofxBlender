@@ -22,18 +22,21 @@ class Object: public ofNode {
 public:
     Object();
     ~Object();
+	
+	void draw();
 
 	void addChild(Object* child);
-
+	bool hasParent();
+	
 	string name;
     ObjectType type;
 	Timeline timeline;
 	Scene* scene;
 
 private:
+	Object* parent;
 	std::vector<Object*> children;
 	void onAnimationData(float value, string address, int channel);
-
 };
 
 }

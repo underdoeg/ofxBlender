@@ -601,9 +601,19 @@ public:
 		                matArray[2][0], matArray[2][1], matArray[2][2], matArray[2][3],
 		                matArray[3][0], matArray[3][1], matArray[3][2], matArray[3][3]);
 
-		object->setTransformMatrix(mat);
 		//object->setPosition(object->getPosition()*reader.file->scale);
+		object->setTransformMatrix(mat);
 
+		//check for parent
+		unsigned long parentAddress = reader.readAddress("parent");
+		if(parentAddress != 0){
+			DNAStructureReader parentReader = reader.readStructure("parent");
+			Object* parent = static_cast<Object*>(parentReader.parse());
+			parent->addChild(object);
+			object->setTransformMatrix(mat * ofMatrix4x4::getInverseOf(parent->getGlobalTransformMatrix()));
+			//object->setTransformMatrix(parent->getGlobalTransformMatrix().getInverse() * mat);
+		}
+		
 		//parse the anim data
 		unsigned long animDataAddress = reader.readAddress("adt");
 		if(animDataAddress != 0) {
@@ -897,7 +907,7 @@ public:
 			float distance = 1.f / reader.read<float>("dist");
 			light->light.setAttenuation(1.f / energy, reader.read<float>("att1") * distance, reader.read<float>("att2") * distance);
 		} else if(type == BL_SUN) {
-			light->light.setDirectional();
+			light->light.setDirectional();	
 			light->light.tilt(180);
 		} else if(type == BL_SPOT) {
 			light->light.setSpotlight(ofRadToDeg(reader.read<float>("spotsize"))*.5, (1-reader.read<float>("spotblend"))*128);

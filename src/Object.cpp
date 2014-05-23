@@ -7,16 +7,32 @@ namespace blender {
 Object::Object() {
 	type = UNDEFINED;
 	scene = NULL;
+	parent = NULL;
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 Object::~Object() {
 }
 
+void Object::draw() {
+	ofNode::transformGL();
+	customDraw();
+	for(Object* child: children){
+		child->draw();
+	}
+	ofNode::restoreTransformGL();
+}
+
 void Object::addChild(Object* child) {
-	child->setParent(*this);
+	child->parent = this;
+	child->setParent(*this, true);
 	children.push_back(child);
 }
+
+bool Object::hasParent() {
+	return parent != NULL;
+}
+
 
 void Object::onAnimationData(float value, string address, int channel) {
 	//cout << channel << ":" << address << endl;
