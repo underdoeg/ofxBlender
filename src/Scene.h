@@ -39,7 +39,7 @@ public:
 
     Timeline timeline;
 	string name;
-	std::map<unsigned int, Layer> layers;
+	std::map<int, Layer> layers;
 private:
 	Camera* activeCamera;
 	ofEasyCam debugCam;

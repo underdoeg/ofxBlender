@@ -551,7 +551,9 @@ public:
 		reader.setStructure("id");
 		scene->name = reader.readString("name");
 		reader.reset();
-
+		
+		ofLogNotice(OFX_BLENDER) << "Loading Scene \"" << scene->name << "\"";
+		
 		//read render settings
 		reader.setStructure("r");
 		short fps = reader.read<short>("frs_sec");
@@ -568,11 +570,15 @@ public:
 			//Parser::parseFileBlock(getBlockByType(BL_OBJECT, index))
 			DNAStructureReader objReader = next.readStructure("object");
 			Object* object = static_cast<Object*>(objReader.parse());
-			if(object != NULL)
+			if(object != NULL){
 				scene->addObject(object);
 			
-			//set the scene layer to the object
-			object->layer = &scene->layers[objReader.read<int>("lay")-1];
+				//set the scene layer to the object
+				int layer = objReader.read<int>("lay");
+				if(layer >= 0){
+					object->layer = &scene->layers[layer];
+				}
+			}
 						
 			//cout << next.readStructure("object").setStructure("id").readString("name") << endl;
 			if(next.readAddress("next") == 0) {
@@ -598,7 +604,9 @@ public:
 		reader.setStructure("id");
 		object->name = reader.readString("name");
 		reader.reset();
-
+		
+		ofLogNotice(OFX_BLENDER) << "Loading Object \"" << object->name << "\"";
+		
 		//get transformation
 		vector<vector<float> > matArray = reader.readMultArray<float>("obmat");
 		ofMatrix4x4 mat(matArray[0][0], matArray[0][1], matArray[0][2], matArray[0][3],
@@ -614,9 +622,10 @@ public:
 		if(parentAddress != 0){
 			DNAStructureReader parentReader = reader.readStructure("parent");
 			Object* parent = static_cast<Object*>(parentReader.parse());
-			parent->addChild(object);
-			object->setTransformMatrix(mat * ofMatrix4x4::getInverseOf(parent->getGlobalTransformMatrix()));
-			//object->setTransformMatrix(parent->getGlobalTransformMatrix().getInverse() * mat);
+			if(parent != NULL){
+				parent->addChild(object);
+				object->setTransformMatrix(mat * ofMatrix4x4::getInverseOf(parent->getGlobalTransformMatrix()));
+			}			
 		}
 		
 		//parse the anim data
@@ -687,6 +696,8 @@ public:
 		reader.setStructure("id");
 		mesh->meshName = reader.readString("name");
 		reader.reset();
+		
+		ofLogNotice(OFX_BLENDER) << "Loading Mesh \"" << mesh->name << "\"";
 
 		enum DrawFlag {
 		    DRAW_FLAT = 67,
@@ -828,6 +839,8 @@ public:
 		reader.setStructure("id");
 		material->name = reader.readString("name");
 		reader.reset();
+		
+		ofLogNotice(OFX_BLENDER) << "Loading Material \"" << material->name << "\"";
 
 		material->material.setShininess(reader.read<float>("spec"));
 
@@ -847,6 +860,8 @@ public:
 		reader.setStructure("id");
 		texture->name = reader.readString("name");
 		reader.reset();
+		
+		ofLogNotice(OFX_BLENDER) << "Loading Texture \"" << texture->name << "\"";
 
 		//there are many more types
 		enum texTypes {
