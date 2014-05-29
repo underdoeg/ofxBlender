@@ -37,12 +37,11 @@ void Scene::update() {
 }
 
 void Scene::customDraw() {
-
 	//camera
 	ofCamera* camera = &debugCam;
 	if(activeCamera && !doDebug)
 		camera = &activeCamera->camera;
-	
+		
 	if(!hasViewport)
 		camera->begin();
 	else
@@ -50,7 +49,7 @@ void Scene::customDraw() {
 	
 	//basics
 	ofPushStyle();
-
+	
 	ofEnableDepthTest();
 
 	if(lights.size()>0){
@@ -64,7 +63,7 @@ void Scene::customDraw() {
 	}
 
 	//action
-	
+
 	for(Object* obj: objects) {
 		if(doDebug)
 			if(!obj->hasParent())
@@ -82,18 +81,20 @@ void Scene::customDraw() {
 
 	//draw object names
 	if(doDebug) {
-		ofDisableDepthTest();
-		ofDisableLighting();
+		
 		ofSetColor(255);
 		for(Object* obj: objects) {
 			ofDrawBitmapString(obj->name, obj->getGlobalPosition());
 		}
 	}
-
+	
+	ofDisableDepthTest();
+	ofDisableLighting();
+	
+	ofPopStyle();
+	
 	//end the camera
 	camera->end();
-
-	ofPopStyle();
 }
 
 void Scene::addObject(Object* obj) {
