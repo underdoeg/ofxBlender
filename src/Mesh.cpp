@@ -8,22 +8,24 @@ Mesh::Mesh() {
 	curPart = NULL;
 	curMaterial = NULL;
 	isTwoSided = true;
+	boundsMin.set(std::numeric_limits<float>::max());
+	boundsMax.set(std::numeric_limits<float>::min());
 }
 
 Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
-
-	if(isTwoSided) {
-		glDisable(GL_CULL_FACE);
-		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	} else {
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-	}
-
+	/*
+		if(isTwoSided) {
+			glDisable(GL_CULL_FACE);
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+		} else {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+		}
+	*/
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();
@@ -39,6 +41,21 @@ void Mesh::addTriangle(unsigned int a, unsigned int b, unsigned int c) {
 }
 
 void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
+
+	if(boundsMin.x > pos.x)
+		boundsMin.x = pos.x;
+	if(boundsMin.y > pos.y)
+		boundsMin.y = pos.y;
+	if(boundsMin.z > pos.z)
+		boundsMin.z = pos.z;
+
+	if(boundsMax.x < pos.x)
+		boundsMax = pos;
+	if(boundsMax.y > pos.y)
+		boundsMax.y = pos.y;
+	if(boundsMax.z > pos.z)
+		boundsMax.z = pos.z;
+
 	vertices.push_back(pos);
 	normals.push_back(norm);
 	uvs.push_back(ofVec2f());

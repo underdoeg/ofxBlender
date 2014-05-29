@@ -58,6 +58,9 @@ public:
 	string meshName;
 
 	bool isTwoSided;
+	
+	ofVec3f boundsMin;
+	ofVec3f boundsMax;
 
 private:
 	class Part {

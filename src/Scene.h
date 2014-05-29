@@ -34,6 +34,8 @@ public:
 	Camera* getActiveCamera();
 	void setActiveCamera(Camera* cam);
 	void disableCamera();
+	
+	void setViewport(float x, float y, float w, float h);
 
 	ofFloatColor bgColor;
 
@@ -47,6 +49,8 @@ private:
     std::vector<Mesh*> meshes;
 	std::vector<Camera*> cameras;
 	std::vector<Light*> lights;
+	bool hasViewport;
+	ofRectangle viewport;
 	bool doDebug;
 	bool isFirstDebugEnable;
 };

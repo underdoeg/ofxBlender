@@ -10,6 +10,7 @@ Scene::Scene() {
 	//setScale(10);
 	doDebug = false;
 	isFirstDebugEnable = true;
+	hasViewport = false;
 }
 
 Scene::~Scene() {
@@ -36,6 +37,18 @@ void Scene::update() {
 }
 
 void Scene::customDraw() {
+
+	//camera
+	ofCamera* camera = &debugCam;
+	if(activeCamera && !doDebug)
+		camera = &activeCamera->camera;
+	
+	if(!hasViewport)
+		camera->begin();
+	else
+		camera->begin(viewport);
+	
+	//basics
 	ofPushStyle();
 
 	ofEnableDepthTest();
@@ -44,19 +57,14 @@ void Scene::customDraw() {
 		ofSetSmoothLighting(true);
 		ofEnableLighting();
 	}
-
-	//camera
-	if(activeCamera && !doDebug)
-		activeCamera->camera.begin();
-	if(doDebug)
-		debugCam.begin();
-
+	
 	//lights
 	for(Light* light: lights) {
 		light->begin();
 	}
 
 	//action
+	
 	for(Object* obj: objects) {
 		if(doDebug)
 			if(!obj->hasParent())
@@ -83,10 +91,7 @@ void Scene::customDraw() {
 	}
 
 	//end the camera
-	if(!doDebug && activeCamera)
-		activeCamera->camera.end();
-	if(doDebug)
-		debugCam.end();
+	camera->end();
 
 	ofPopStyle();
 }
@@ -170,6 +175,12 @@ Light* Scene::getLight(string name) {
 
 Light* Scene::getLight(unsigned int index) {
 	return getFromVecByIndex<Light>(lights, index);
+}
+
+void Scene::setViewport(float x, float y, float w, float h)
+{
+	hasViewport = true;
+	viewport.set(x, y, w, h);
 }
 
 }
