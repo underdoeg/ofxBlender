@@ -65,10 +65,10 @@ void Scene::customDraw() {
 	//action
 
 	for(Object* obj: objects) {
-		if(doDebug)
+		if(doDebug){
 			if(!obj->hasParent())
 				obj->draw();
-		else if(obj->type != CAMERA && obj->type != LIGHT){
+		}else if(obj->type != CAMERA && obj->type != LIGHT){
 			if(!obj->hasParent())
 				obj->draw();
 		}
