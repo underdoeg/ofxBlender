@@ -19,6 +19,10 @@ Object::~Object() {
 
 void Object::draw() {
 	//check if associated layer is null
+	
+	if(!visible)
+		return;
+	
 	if(layer){
 		if(!layer->isVisible())
 			return;
