@@ -16,16 +16,16 @@ Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
-	/*
-		if(isTwoSided) {
-			glDisable(GL_CULL_FACE);
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-		} else {
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-		}
-	*/
+
+	if(isTwoSided) {
+		glDisable(GL_CULL_FACE);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	} else {
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+	}
+	
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();

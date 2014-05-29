@@ -91,6 +91,9 @@ void Scene::customDraw() {
 	ofDisableDepthTest();
 	ofDisableLighting();
 	
+	glDisable(GL_CULL_FACE);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	
 	ofPopStyle();
 	
 	//end the camera
