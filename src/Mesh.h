@@ -38,7 +38,15 @@ public:
 		ofVec3f pos;
 		ofVec3f norm;
 	};
-
+	
+	class UVLayer {
+	public:
+		UVLayer(string n) {
+			name = n;
+		}
+		string name;
+		std::vector<ofVec2f> uvs;
+	};
 
 	void pushMaterial(Material* material);
 	void pushShading(Shading shading);
@@ -47,21 +55,25 @@ public:
 	ofVec3f getVertex(unsigned int pos);
 	void addTriangle(unsigned int a, unsigned int b, unsigned int c);
 
-	void setUV(unsigned int index, ofVec2f uv);
+	void setUV(unsigned int index, ofVec2f uv, bool flipY=true);
+	
+	UVLayer* getUVLayer(string name);
 
 	void clear();
 
 	void build();
 
 	void customDraw();
+	void drawNormals(float length=1);
 
 	string meshName;
 
 	bool isTwoSided;
-	
+
 	ofVec3f boundsMin;
 	ofVec3f boundsMax;
-
+	
+	std::vector<UVLayer> uvLayers;
 private:
 	class Part {
 	public:

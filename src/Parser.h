@@ -17,6 +17,22 @@ enum BLENDER_TYPES {
     BL_CAM_ID = 11
 };
 
+/* texflag */
+#define MTEX_RGBTOINT       1
+#define MTEX_STENCIL        2
+#define MTEX_NEGATIVE       4
+#define MTEX_ALPHAMIX       8
+#define MTEX_VIEWSPACE      16
+#define MTEX_DUPLI_MAPTO    32
+#define MTEX_OB_DUPLI_ORIG  64
+#define MTEX_COMPAT_BUMP    128
+#define MTEX_3TAP_BUMP      256
+#define MTEX_5TAP_BUMP      512
+#define MTEX_BUMP_OBJECTSPACE   1024
+#define MTEX_BUMP_TEXTURESPACE  2048
+	/* #define MTEX_BUMP_FLIPPED    4096 */ /* UNUSED */
+#define MTEX_BICUBIC_BUMP       8192
+
 namespace ofx {
 
 namespace blender {
@@ -50,6 +66,15 @@ public:
 	void blockAt(unsigned int pos) {
 		curBlock = pos;
 		nextBlock();
+	}
+
+	DNAStructureReader& setStructureType(string structureName) {
+		if(!file->catalog.hasStructure(structureName)) {
+			ofLogWarning(OFX_BLENDER) << "Structure \"" << structureName << "\" not found in file";
+			return *this;
+		}
+		setStructure(file->catalog.getStructure(structureName), block->offset + streampos(structure->type->size * curBlock));
+		return *this;
 	}
 
 	DNAStructureReader& setStructure(DNAStructure* s, streamoff offset) {
@@ -376,6 +401,17 @@ public:
 		}
 		return DNAStructureReader(block);
 	}
+	/*
+	DNAStructureReader readStructure(string fieldName, string fieldType) {
+		unsigned long address = readAddress(fieldName);
+		if(address == 0) {
+			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::readStructure could not read structure \"" << fieldName << "\" in \"" << getType() << "\" returning self";
+			return *this;
+		}
+		file->getBlockByAddress(address);
+
+	}
+	*/
 
 	bool hasNext() {
 		if(!structure->hasField("id"))
@@ -616,7 +652,7 @@ public:
 
 		//object->setPosition(object->getPosition()*reader.file->scale);
 		object->setTransformMatrix(mat);
-		
+
 		//flags
 		//cout << reader.read<short>("flag") << endl;
 
@@ -709,6 +745,7 @@ public:
 
 		//two sided
 		//TODO: check how flags actually work, this will only be right when flag is exactly 4
+		//TODO: there is somewhere a flag defined in blender source code, called ME_SMOOTH, GEMAT_BACKCULL
 		if(reader.read<short>("flag") == 4) {
 			mesh->isTwoSided = true;
 		} else {
@@ -749,6 +786,34 @@ public:
 			hasUV = true;
 		}
 
+		//std::map<string, DNAStructureReader> uvLayers;
+
+		//read the layers
+		if(reader.readAddress("ldata") != 0) {
+			reader.setStructure("ldata");
+			int numLayers = reader.read<int>("totlayer");
+			DNAStructureReader layerReader = reader.readStructure("layers");
+			for(int i=0; i<numLayers; i++) {
+				//only interested in CD_MLOOPUV types (could also be CD_MPOLY)
+				//if(layerReader.read<int>("type") == 16){
+				DNAStructureReader layerData = layerReader.readStructure("data");
+				if(layerData.getType() == "MLoopUV") {
+					Mesh::UVLayer uvLayer(layerReader.readString("name"));
+					for(unsigned int i=0; i<totalVertices; i++) {
+						layerData.blockAt(i);
+						uvLayer.uvs.push_back(layerData.readVec2f("uv"));
+						mesh->uvLayers.push_back(uvLayer);
+						//cout << layerData.read<short>("flag");
+						//cout << layerData.readVec2f("uv").y << endl;
+					}
+					//uvLayers[layerReader.readString("name")] = layerData;
+				}
+				//}
+				layerReader.nextBlock();
+			}
+			reader.reset();
+		}
+
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");
 		ofVec3f e0, e1;
@@ -773,8 +838,19 @@ public:
 
 			//pick the material
 			unsigned int materialNumber = polyReader.read<short>("mat_nr");
-			if(materialNumber < materials.size())
-				mesh->pushMaterial(materials[materialNumber]);
+			Material* material = NULL;
+			if(materialNumber < materials.size()) {
+				material = materials[materialNumber];
+				mesh->pushMaterial(material);
+			}
+
+			//pick the uv layer
+			Mesh::UVLayer* uvLayer = NULL;
+			if(material) {
+				if(material->textures.size() > 0) {
+					uvLayer = mesh->getUVLayer(material->textures[0]->uvLayerName);
+				}
+			}
 
 			//write triangles
 			int loopStart = polyReader.read<int>("loopstart");
@@ -804,6 +880,15 @@ public:
 					mesh->addTriangle(index4, index2, index3);
 				}
 
+				//check wich UVs to use
+				//DNAStructureReader* uvReader = NULL;
+
+				if(uvLayer) {
+					mesh->setUV(index1, uvLayer->uvs[loopStart]);
+					mesh->setUV(index2, uvLayer->uvs[loopStart+1]);
+					mesh->setUV(index3, uvLayer->uvs[loopStart+2]);
+					mesh->setUV(index4, uvLayer->uvs[loopStart+3]);
+				}
 				if(hasUV) {
 					uvReader.blockAt(loopStart);
 					mesh->setUV(index1, uvReader.readVec2f("uv"));
@@ -823,6 +908,11 @@ public:
 				unsigned int index3 = loopReader.read<int>("v");
 				mesh->addTriangle(index1, index2, index3);
 
+				if(uvLayer) {
+					mesh->setUV(index1, uvLayer->uvs[loopStart]);
+					mesh->setUV(index2, uvLayer->uvs[loopStart+1]);
+					mesh->setUV(index3, uvLayer->uvs[loopStart+2]);
+				}
 				if(hasUV) {
 					uvReader.blockAt(loopStart);
 					mesh->setUV(index1, uvReader.readVec2f("uv"));
@@ -837,7 +927,7 @@ public:
 			polyReader.nextBlock();
 		}
 	}
-
+	
 	static void parseMaterial(DNAStructureReader& reader, Material* material) {
 		reader.setStructure("id");
 		material->name = reader.readString("name");
@@ -855,16 +945,27 @@ public:
 
 		std::vector<DNAStructureReader> textures = reader.readStructureArray("mtex");
 		for(DNAStructureReader& texReader: textures) {
-			material->textures.push_back(static_cast<Texture*>(texReader.readStructure("tex").parse()));
+			Texture* texture = static_cast<Texture*>(texReader.parse());
+			if(texture->img.isAllocated())
+				material->textures.push_back(texture);
+		}
+		if(material->textures.size() > 1) {
+			ofLogNotice(OFX_BLENDER) << "Material \"" << material->name << "\" has more than 1 Texture, only the first one will be used";
 		}
 	}
 
 	static void parseTexture(DNAStructureReader& reader, Texture* texture) {
-		reader.setStructure("id");
-		texture->name = reader.readString("name");
-		reader.reset();
+		DNAStructureReader texReader = reader.readStructure("tex");
+		texReader.setStructure("id");
+		texture->name = texReader.readString("name");
+		texReader.reset();
 
 		ofLogNotice(OFX_BLENDER) << "Loading Texture \"" << texture->name << "\"";
+
+		cout << "FLAG " << (reader.read<short>("texflag") & 2) << endl;
+
+		texture->uvLayerName = reader.readString("uvname");
+		//reader.readString("uvname") << endl;
 
 		//there are many more types
 		enum texTypes {
@@ -874,12 +975,12 @@ public:
 		    IMAGE = 8
 		};
 
-		if(reader.read<short>("type") != IMAGE) {
+		if(texReader.read<short>("type") != IMAGE) {
 			ofLogWarning(OFX_BLENDER) << "CAN ONLY READ TEXTURES OF TYPE IMAGE \"" << texture->name << "\"";
 			return;
 		}
 
-		DNAStructureReader imgReader = reader.readStructure("ima");
+		DNAStructureReader imgReader = texReader.readStructure("ima");
 
 		//check if file is packed or has to be loaded
 		if(imgReader.readAddress("packedfile")) {
@@ -890,6 +991,7 @@ public:
 			char* pixels = dataBlock.readChar("next", size);
 			ofBuffer buffer(pixels, size);
 			texture->img.loadImage(buffer);
+			//texture->img.saveImage("test.png");
 		} else {
 			string path = imgReader.readString("name");
 			ofStringReplace(path, "//", "");

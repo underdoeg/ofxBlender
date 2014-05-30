@@ -18,7 +18,7 @@ namespace blender
 #define BL_MESH "Mesh"
 #define BL_CAMERA "Camera"
 #define BL_MATERIAL "Material"
-#define BL_TEXTURE "Tex"
+#define BL_TEXTURE "MTex"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////// DNA
 class DNAName

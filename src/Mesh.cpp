@@ -25,11 +25,35 @@ void Mesh::customDraw() {
 		glCullFace(GL_BACK);
 		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 	}
-	
+
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();
 	}
+}
+
+
+void Mesh::drawNormals(float length) {
+	bool lightOn = ofGetLightingEnabled();
+	if(lightOn)
+		ofDisableLighting();
+	
+	ofPushStyle();
+	transformGL();
+	
+	for(Part& part: parts) {
+		if(part.hasTriangles) {
+			ofSetColor(100, 255, 100);
+			part.primitive.drawNormals(length);
+			ofSetColor(255, 100, 100);
+			part.primitive.drawNormals(length, true);
+		}
+	}
+	restoreTransformGL();
+	ofPopStyle();
+	
+	if(lightOn)
+		ofEnableLighting();
 }
 
 void Mesh::addTriangle(unsigned int a, unsigned int b, unsigned int c) {
@@ -51,9 +75,9 @@ void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
 
 	if(boundsMax.x < pos.x)
 		boundsMax = pos;
-	if(boundsMax.y > pos.y)
+	if(boundsMax.y < pos.y)
 		boundsMax.y = pos.y;
-	if(boundsMax.z > pos.z)
+	if(boundsMax.z < pos.z)
 		boundsMax.z = pos.z;
 
 	vertices.push_back(pos);
@@ -65,9 +89,12 @@ ofVec3f Mesh::getVertex(unsigned int pos) {
 	return vertices[pos];
 }
 
-void Mesh::setUV(unsigned int index, ofVec2f uv) {
+void Mesh::setUV(unsigned int index, ofVec2f uv, bool flipY) {
 	if(!curPart)
 		updatePart();
+	if(flipY)
+		uv.y = 1-uv.y;
+	//uv.x = 1-uv.x;
 	curPart->primitive.getMesh().setTexCoord(index, uv);
 }
 
@@ -84,6 +111,15 @@ Mesh::Part* Mesh::getPart(Material* mat, Shading shading) {
 	parts.back().primitive.getMesh().addTexCoords(uvs);
 
 	return &parts.back();
+}
+
+Mesh::UVLayer* Mesh::getUVLayer(string name) {
+	for(std::vector<UVLayer>::iterator it = uvLayers.begin(); it<uvLayers.end(); it++) {
+		if((*it).name == name) {
+			return &(*it);
+		}
+	}
+	return NULL;
 }
 
 void Mesh::pushMaterial(Material* material) {

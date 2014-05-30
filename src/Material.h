@@ -10,6 +10,7 @@ class Texture {
 public:
 	string name;
 	ofImage img;
+	string uvLayerName;
 };
 
 class Scene;

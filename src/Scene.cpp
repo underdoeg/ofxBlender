@@ -63,9 +63,10 @@ void Scene::customDraw() {
 	}
 
 	//action
-
 	for(Object* obj: objects) {
 		if(doDebug){
+			glDisable(GL_CULL_FACE);
+			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 			if(!obj->hasParent())
 				obj->draw();
 		}else if(obj->type != CAMERA && obj->type != LIGHT){
@@ -73,6 +74,17 @@ void Scene::customDraw() {
 				obj->draw();
 		}
 	}
+	
+	glDisable(GL_CULL_FACE);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	
+	/*
+	if(doDebug){
+		for(Mesh* mesh: meshes){
+			mesh->drawNormals();
+		}
+	}
+	*/
 
 	//kill the lights
 	for(Light* light: lights) {
@@ -81,7 +93,6 @@ void Scene::customDraw() {
 
 	//draw object names
 	if(doDebug) {
-		
 		ofSetColor(255);
 		for(Object* obj: objects) {
 			ofDrawBitmapString(obj->name, obj->getGlobalPosition());
@@ -90,9 +101,6 @@ void Scene::customDraw() {
 	
 	ofDisableDepthTest();
 	ofDisableLighting();
-	
-	glDisable(GL_CULL_FACE);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	
 	ofPopStyle();
 	

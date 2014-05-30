@@ -15,6 +15,7 @@ Material::~Material() {
 void Material::begin() {
 	if(!useShader){
 		ofEnableNormalizedTexCoords();
+		
 		if(textures.size()>0) {
 			if(textures[0]->img.isAllocated()) {
 				textures[0]->img.getTextureReference().bind();
