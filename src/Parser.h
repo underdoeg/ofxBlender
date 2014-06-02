@@ -956,7 +956,7 @@ public:
 		//mesh->exportUVLayer(i);
 		//}
 		mesh->build();
-		mesh->exportUVs();
+		//mesh->exportUVs();
 	}
 
 #define TF_INVISIBLE 1024
@@ -1030,7 +1030,7 @@ public:
 			char* pixels = dataBlock.readChar("next", size);
 			ofBuffer buffer(pixels, size);
 			texture->img.loadImage(buffer);
-			texture->img.saveImage(texture->name+".png");
+			//texture->img.saveImage(texture->name+".png");
 		} else {
 			string path = imgReader.readString("name");
 			ofStringReplace(path, "//", "");
