@@ -8,9 +8,11 @@ namespace blender {
 
 class Texture {
 public:
+	Texture():isEnabled(true) {}
 	string name;
 	ofImage img;
 	string uvLayerName;
+	bool isEnabled;
 };
 
 class Scene;
@@ -27,6 +29,8 @@ public:
 	Scene* scene;
 	string name;
 	bool useShader;
+	bool isLightningEnabled;
+	bool isTwoSided;
 };
 
 }

@@ -30,7 +30,7 @@ enum BLENDER_TYPES {
 #define MTEX_5TAP_BUMP      512
 #define MTEX_BUMP_OBJECTSPACE   1024
 #define MTEX_BUMP_TEXTURESPACE  2048
-	/* #define MTEX_BUMP_FLIPPED    4096 */ /* UNUSED */
+/* #define MTEX_BUMP_FLIPPED    4096 */ /* UNUSED */
 #define MTEX_BICUBIC_BUMP       8192
 
 namespace ofx {
@@ -56,6 +56,10 @@ public:
 		nextBlock();
 	}
 
+	unsigned int count() {
+		return block->count;
+	}
+
 	//multiple structures can be integrated into one block, move ahead in the file
 	void nextBlock() {
 		setStructure(block->structure, block->offset + streampos(structure->type->size * curBlock));
@@ -64,6 +68,9 @@ public:
 
 	//jump to a specific block
 	void blockAt(unsigned int pos) {
+		if(pos>count()) {
+			ofLogWarning(OFX_BLENDER) << "DNAStructureReader::blockAt " << pos << " not that many blocks in " << block->structure->type->name << endl;
+		}
 		curBlock = pos;
 		nextBlock();
 	}
@@ -680,7 +687,6 @@ public:
 				vector<DNAStructureReader> curves = actionReader.readLinkedList("curves");
 				for(DNAStructureReader& curve: curves) {
 					string rnaPath = curve.readString("rna_path");
-					cout << rnaPath << endl;
 					int arrayIndex = curve.read<int>("array_index");
 					string address = rnaPath;
 					int channel = arrayIndex;
@@ -730,6 +736,8 @@ public:
 		}
 	}
 
+#define ME_SMOOTH 1
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void parseMesh(DNAStructureReader& reader, Mesh* mesh) {
 		reader.setStructure("id");
@@ -738,35 +746,44 @@ public:
 
 		ofLogNotice(OFX_BLENDER) << "Loading Mesh \"" << mesh->name << "\"";
 
+		/*
 		enum DrawFlag {
 		    DRAW_FLAT = 67,
 		    DRAW_SMOOTH = 75
 		};
+		*/
 
 		//two sided
 		//TODO: check how flags actually work, this will only be right when flag is exactly 4
 		//TODO: there is somewhere a flag defined in blender source code, called ME_SMOOTH, GEMAT_BACKCULL
+		/*
 		if(reader.read<short>("flag") == 4) {
 			mesh->isTwoSided = true;
 		} else {
 			mesh->isTwoSided = false;
 		}
+		*/
+
 
 
 		//get address of the polygon blocks
 		DNAStructureReader polyReader = reader.readStructure("mpoly");
+		
 		//get address of the loops blocks
 		DNAStructureReader loopReader = reader.readStructure("mloop");
+		
 		//get address of the vertices blocks
 		DNAStructureReader vertReader = reader.readStructure("mvert");
+		
 		//get address of the edge blocks
-		DNAStructureReader edgeReader = reader.readStructure("medge");
+		//DNAStructureReader edgeReader = reader.readStructure("medge");
+		//get address of the material blocks
+		//DNAStructureReader mtPolyReader = reader.readStructure("mtpoly");
 
 		//read all vertices and add to the mesh
 		mesh->clear();
 		unsigned int totalVertices = reader.read<int>("totvert");
 		for(unsigned int i=0; i<totalVertices; i++) {
-			//cout << vertReader.readVec3f("co") << endl;
 			mesh->addVertex(vertReader.readVec3f("co"), vertReader.readVec3<short>("no").getNormalized());
 			vertReader.nextBlock();
 		}
@@ -780,13 +797,18 @@ public:
 
 		//try to read uv coordinates
 		bool hasUV = false;
-		DNAStructureReader uvReader = reader;
+		std::vector<ofVec2f> defaultUvs;
 		if(reader.readAddress("mloopuv") != 0) {
-			uvReader = reader.readStructure("mloopuv");
+			DNAStructureReader uvReader = reader.readStructure("mloopuv");
+			for(unsigned int j=0; j<uvReader.count(); j++) {
+				defaultUvs.push_back(uvReader.readVec2f("uv"));
+				defaultUvs.back().y = 1 - defaultUvs.back().y;
+				uvReader.nextBlock();
+			}
 			hasUV = true;
 		}
 
-		//std::map<string, DNAStructureReader> uvLayers;
+		std::map<string, std::vector<ofVec2f> > uvLayers;
 
 		//read the layers
 		if(reader.readAddress("ldata") != 0) {
@@ -794,21 +816,17 @@ public:
 			int numLayers = reader.read<int>("totlayer");
 			DNAStructureReader layerReader = reader.readStructure("layers");
 			for(int i=0; i<numLayers; i++) {
-				//only interested in CD_MLOOPUV types (could also be CD_MPOLY)
-				//if(layerReader.read<int>("type") == 16){
 				DNAStructureReader layerData = layerReader.readStructure("data");
+				
+				//only interested in CD_MLOOPUV types (could also be CD_MPOLY)
 				if(layerData.getType() == "MLoopUV") {
-					Mesh::UVLayer uvLayer(layerReader.readString("name"));
-					for(unsigned int i=0; i<totalVertices; i++) {
-						layerData.blockAt(i);
-						uvLayer.uvs.push_back(layerData.readVec2f("uv"));
-						mesh->uvLayers.push_back(uvLayer);
-						//cout << layerData.read<short>("flag");
-						//cout << layerData.readVec2f("uv").y << endl;
+					string layerName = layerReader.readString("name");
+					for(unsigned int j=0; j<layerData.count(); j++) {
+						uvLayers[layerName].push_back(layerData.readVec2f("uv"));
+						uvLayers[layerName].back().y = 1 - uvLayers[layerName].back().y;
+						layerData.nextBlock();
 					}
-					//uvLayers[layerReader.readString("name")] = layerData;
 				}
-				//}
 				layerReader.nextBlock();
 			}
 			reader.reset();
@@ -816,6 +834,7 @@ public:
 
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");
+		
 		ofVec3f e0, e1;
 		//build triangles
 		for(int i=0; i<totalPolys; i++) {
@@ -831,7 +850,8 @@ public:
 
 			//check the shading
 			Shading shading = FLAT;
-			if(((int)polyReader.read<char>("flag")) == 3) {
+			//if(((int)polyReader.read<char>("flag")) == 3) {
+			if(polyReader.read<char>("flag") & ME_SMOOTH) {
 				shading = SMOOTH;
 			}
 			mesh->pushShading(shading);
@@ -845,93 +865,112 @@ public:
 			}
 
 			//pick the uv layer
-			Mesh::UVLayer* uvLayer = NULL;
+			std::vector<ofVec2f>* uvLayer = NULL;
 			if(material) {
 				if(material->textures.size() > 0) {
-					uvLayer = mesh->getUVLayer(material->textures[0]->uvLayerName);
+					if(material->textures[0]->uvLayerName != "")
+						uvLayer = &uvLayers[material->textures[0]->uvLayerName];
 				}
 			}
+			
+			if(!uvLayer && hasUV)
+				uvLayer = &defaultUvs;
 
 			//write triangles
 			int loopStart = polyReader.read<int>("loopstart");
 
 			if(vertCount == 4) {
 				loopReader.blockAt(loopStart);
-
-				//cout << loopReader.read<int>("e") << endl;
-
+				unsigned int index0 = loopReader.read<int>("v");
+				loopReader.nextBlock();
 				unsigned int index1 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index2 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index3 = loopReader.read<int>("v");
-				loopReader.nextBlock();
-				unsigned int index4 = loopReader.read<int>("v");
-				loopReader.nextBlock();
+				//loopReader.nextBlock();
 
-				e0 = mesh->getVertex(index1) - mesh->getVertex(index2);
-				e1 = mesh->getVertex(index3) - mesh->getVertex(index4);
+				e0 = mesh->getVertex(index0) - mesh->getVertex(index1);
+				e1 = mesh->getVertex(index2) - mesh->getVertex(index3);
 
 				if(e0.lengthSquared() < e1.lengthSquared()) {
-					mesh->addTriangle(index1, index2, index3);
-					mesh->addTriangle(index3, index4, index1);
+
+					Mesh::Triangle tri1(index0, index1, index2);
+					if(uvLayer) {
+						tri1.addUVs(uvLayer->at(loopStart), uvLayer->at(loopStart+1), uvLayer->at(loopStart+2));
+					}
+					mesh->addTriangle(tri1);
+
+					Mesh::Triangle tri2(index2, index3, index0);
+					if(uvLayer) {
+						tri2.addUVs(uvLayer->at(loopStart+2), uvLayer->at(loopStart+3), uvLayer->at(loopStart));
+					}
+
+					mesh->addTriangle(tri2);
+
 				} else {
-					mesh->addTriangle(index1, index2, index4);
-					mesh->addTriangle(index4, index2, index3);
-				}
+					//mesh->addTriangle(index1, index2, index4);
+					//mesh->addTriangle(index4, index2, index3);
 
-				//check wich UVs to use
-				//DNAStructureReader* uvReader = NULL;
+					Mesh::Triangle tri1(index0, index1, index3);
+					if(uvLayer) {
+						tri1.addUVs(uvLayer->at(loopStart), uvLayer->at(loopStart+1), uvLayer->at(loopStart+3));
+					}
+					mesh->addTriangle(tri1);
 
-				if(uvLayer) {
-					mesh->setUV(index1, uvLayer->uvs[loopStart]);
-					mesh->setUV(index2, uvLayer->uvs[loopStart+1]);
-					mesh->setUV(index3, uvLayer->uvs[loopStart+2]);
-					mesh->setUV(index4, uvLayer->uvs[loopStart+3]);
+					Mesh::Triangle tri2(index3, index1, index2);
+					if(uvLayer) {
+						tri2.addUVs(uvLayer->at(loopStart+3), uvLayer->at(loopStart+1), uvLayer->at(loopStart+2));
+					}
+
+					mesh->addTriangle(tri2);
+
 				}
-				if(hasUV) {
-					uvReader.blockAt(loopStart);
-					mesh->setUV(index1, uvReader.readVec2f("uv"));
-					uvReader.nextBlock();
-					mesh->setUV(index2, uvReader.readVec2f("uv"));
-					uvReader.nextBlock();
-					mesh->setUV(index3, uvReader.readVec2f("uv"));
-					uvReader.nextBlock();
-					mesh->setUV(index4, uvReader.readVec2f("uv"));
-				}
+				
 			} else {
 				loopReader.blockAt(loopStart);
+				unsigned int index0 = loopReader.read<int>("v");
+				loopReader.nextBlock();
 				unsigned int index1 = loopReader.read<int>("v");
 				loopReader.nextBlock();
 				unsigned int index2 = loopReader.read<int>("v");
-				loopReader.nextBlock();
-				unsigned int index3 = loopReader.read<int>("v");
-				mesh->addTriangle(index1, index2, index3);
 
+				//mesh->addTriangle(index1, index2, index3);
+				Mesh::Triangle tri1(index0, index1, index2);
 				if(uvLayer) {
-					mesh->setUV(index1, uvLayer->uvs[loopStart]);
-					mesh->setUV(index2, uvLayer->uvs[loopStart+1]);
-					mesh->setUV(index3, uvLayer->uvs[loopStart+2]);
+					tri1.addUVs(uvLayer->at(loopStart), uvLayer->at(loopStart+1), uvLayer->at(loopStart+2));
 				}
-				if(hasUV) {
-					uvReader.blockAt(loopStart);
-					mesh->setUV(index1, uvReader.readVec2f("uv"));
-					uvReader.nextBlock();
-					mesh->setUV(index2, uvReader.readVec2f("uv"));
-					uvReader.nextBlock();
-					mesh->setUV(index3, uvReader.readVec2f("uv"));
-				}
+				mesh->addTriangle(tri1);
+				
 			}
 
 			//done, let's advance to the next polygon
 			polyReader.nextBlock();
 		}
+
+
+
+		//export uv layers
+		//for(unsigned int i=0; i<mesh->getNumUVLayers(); i++) {
+		//cout << "EXPORT" << endl;
+		//mesh->exportUVLayer(i);
+		//}
+		mesh->build();
+		mesh->exportUVs();
 	}
-	
+
+#define TF_INVISIBLE 1024
+#define TF_TWOSIDE 512
+
 	static void parseMaterial(DNAStructureReader& reader, Material* material) {
 		reader.setStructure("id");
 		material->name = reader.readString("name");
 		reader.reset();
+
+		/*
+		MA_LIGHTINGENABLED  = (1 << 1),
+		MA_WIREFRAME        = (1 << 2),
+		*/
 
 		ofLogNotice(OFX_BLENDER) << "Loading Material \"" << material->name << "\"";
 
@@ -946,7 +985,7 @@ public:
 		std::vector<DNAStructureReader> textures = reader.readStructureArray("mtex");
 		for(DNAStructureReader& texReader: textures) {
 			Texture* texture = static_cast<Texture*>(texReader.parse());
-			if(texture->img.isAllocated())
+			if(texture->isEnabled && texture->img.isAllocated())
 				material->textures.push_back(texture);
 		}
 		if(material->textures.size() > 1) {
@@ -962,7 +1001,7 @@ public:
 
 		ofLogNotice(OFX_BLENDER) << "Loading Texture \"" << texture->name << "\"";
 
-		cout << "FLAG " << (reader.read<short>("texflag") & 2) << endl;
+		//cout << "FLAG " << (reader.read<short>("texflag") & 2) << endl;
 
 		texture->uvLayerName = reader.readString("uvname");
 		//reader.readString("uvname") << endl;

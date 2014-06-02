@@ -17,6 +17,19 @@ public:
 	Mesh();
 	~Mesh();
 
+	class TriangleUVs {
+	public:
+		TriangleUVs(ofVec2f a_, ofVec2f b_, ofVec2f c_) {
+			a = a_;
+			b = b_;
+			c = c_;
+		}
+
+		ofVec2f a;
+		ofVec2f b;
+		ofVec2f c;
+	};
+
 	class Triangle {
 	public:
 		Triangle(unsigned int a_, unsigned int b_, unsigned int c_) {
@@ -24,40 +37,35 @@ public:
 			b = b_;
 			c = c_;
 		}
+		
+		Triangle(unsigned int a_, unsigned int b_, unsigned int c_, ofVec2f uv1, ofVec2f uv2, ofVec2f uv3) {
+			Triangle(a_, b_, c_);
+			addUVs(uv1, uv2, uv3);
+		}
+
+		void addUVs(ofVec2f a, ofVec2f b, ofVec2f c) {
+			uvs.push_back(TriangleUVs(a, b, c));
+		}
+
 		unsigned int a;
 		unsigned int b;
 		unsigned int c;
-	};
-
-	class Vertex {
-	public:
-		Vertex(ofVec3f p, ofVec3f n=ofVec3f()) {
-			pos = p;
-			norm = n;
-		}
-		ofVec3f pos;
-		ofVec3f norm;
+		Material* material;
+		Shading shading;
+		std::vector<TriangleUVs> uvs;
 	};
 	
-	class UVLayer {
-	public:
-		UVLayer(string n) {
-			name = n;
-		}
-		string name;
-		std::vector<ofVec2f> uvs;
-	};
-
 	void pushMaterial(Material* material);
 	void pushShading(Shading shading);
 
 	void addVertex(ofVec3f pos, ofVec3f norm=ofVec3f());
-	ofVec3f getVertex(unsigned int pos);
-	void addTriangle(unsigned int a, unsigned int b, unsigned int c);
+	void addTriangle(Triangle triangle);
 
-	void setUV(unsigned int index, ofVec2f uv, bool flipY=true);
-	
-	UVLayer* getUVLayer(string name);
+	ofVec3f& getVertex(unsigned int index);
+	ofVec3f& getNormal(unsigned int index);
+	Triangle& getTriangle(unsigned int index);
+
+	void exportUVs(int w=1024, int h=1024, unsigned int layer=0, string path="");
 
 	void clear();
 
@@ -72,15 +80,14 @@ public:
 
 	ofVec3f boundsMin;
 	ofVec3f boundsMax;
-	
-	std::vector<UVLayer> uvLayers;
 private:
 	class Part {
 	public:
-		Part(Material* mat, Shading shade) {
+		Part(Material* mat, Shading shade, bool hasUvs_) {
 			material = mat;
 			shading = shade;
 			hasTriangles = false;
+			hasUvs = hasUvs_;
 			primitive.setUseVbo(true);
 		}
 
@@ -91,17 +98,16 @@ private:
 		Shading shading;
 		std::vector<Triangle> polys;
 		bool hasTriangles;
+		bool hasUvs;
 	};
 
-	Part* getPart(Material* mat, Shading shading);
-	void updatePart();
+	Part& getPart(Material* mat, Shading shading, bool hasUvs);
 
 	Material* curMaterial;
 	Shading curShading;
-	Part* curPart;
 	std::vector<ofVec3f> vertices;
 	std::vector<ofVec3f> normals;
-	std::vector<ofVec2f> uvs;
+	std::vector<Triangle> triangles;
 	std::vector<Part> parts;
 };
 

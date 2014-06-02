@@ -7,6 +7,8 @@ namespace blender {
 Material::Material() {
 	scene = NULL;
 	useShader = false;
+	isLightningEnabled = true;
+	isTwoSided = false;
 }
 
 Material::~Material() {

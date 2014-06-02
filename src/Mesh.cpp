@@ -5,7 +5,6 @@ namespace blender {
 
 Mesh::Mesh() {
 	type = MESH;
-	curPart = NULL;
 	curMaterial = NULL;
 	isTwoSided = true;
 	boundsMin.set(std::numeric_limits<float>::max());
@@ -37,10 +36,10 @@ void Mesh::drawNormals(float length) {
 	bool lightOn = ofGetLightingEnabled();
 	if(lightOn)
 		ofDisableLighting();
-	
+
 	ofPushStyle();
 	transformGL();
-	
+
 	for(Part& part: parts) {
 		if(part.hasTriangles) {
 			ofSetColor(100, 255, 100);
@@ -51,17 +50,35 @@ void Mesh::drawNormals(float length) {
 	}
 	restoreTransformGL();
 	ofPopStyle();
-	
+
 	if(lightOn)
 		ofEnableLighting();
 }
 
-void Mesh::addTriangle(unsigned int a, unsigned int b, unsigned int c) {
+void Mesh::addTriangle(Triangle triangle) {
+	/*
 	if(!curPart)
 		updatePart();
 
 	curPart->hasTriangles = true;
-	curPart->primitive.getMesh().addTriangle(a, b, c);
+
+	//TODO: optimize this. Currently because of the UVs every triangle is sent separately
+	ofMesh* mesh = curPart->primitive.getMeshPtr();
+	unsigned int curIndex = mesh->getNumVertices();
+	mesh->addVertex(vertices[a]);
+	mesh->addVertex(vertices[b]);
+	mesh->addVertex(vertices[c]);
+	mesh->addNormal(normals[a]);
+	mesh->addNormal(normals[b]);
+	mesh->addNormal(normals[c]);
+	mesh->addTriangle(curIndex, curIndex+1, curIndex+2);
+	triangles.push_back(Triangle(a, b, c));
+	*/
+
+	triangle.material = curMaterial;
+	triangle.shading = curShading;
+	//cout << triangle.a << endl;
+	triangles.push_back(triangle);
 }
 
 void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
@@ -82,70 +99,126 @@ void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
 
 	vertices.push_back(pos);
 	normals.push_back(norm);
-	uvs.push_back(ofVec2f());
 }
 
-ofVec3f Mesh::getVertex(unsigned int pos) {
+ofVec3f& Mesh::getVertex(unsigned int pos) {
 	return vertices[pos];
 }
 
+ofVec3f& Mesh::getNormal(unsigned int pos) {
+	return normals[pos];
+}
+
+/*
 void Mesh::setUV(unsigned int index, ofVec2f uv, bool flipY) {
 	if(!curPart)
 		updatePart();
 	if(flipY)
 		uv.y = 1-uv.y;
 	//uv.x = 1-uv.x;
-	curPart->primitive.getMesh().setTexCoord(index, uv);
+	//curPart->primitive.getMesh().setTexCoord(index, uv);
 }
+*/
 
-Mesh::Part* Mesh::getPart(Material* mat, Shading shading) {
+Mesh::Part& Mesh::getPart(Material* mat, Shading shading, bool hasUvs) {
 	for(Part& part: parts) {
-		if(part.material == mat && part.shading == shading)
-			return &part;
+		if(part.material == mat && part.shading == shading && part.hasUvs == hasUvs)
+			return part;
 	}
-	parts.push_back(Part(mat, shading));
-
-	//TODO: could be optimized, not all parts need all vertices
-	parts.back().primitive.getMesh().addVertices(vertices);
-	parts.back().primitive.getMesh().addNormals(normals);
-	parts.back().primitive.getMesh().addTexCoords(uvs);
-
-	return &parts.back();
-}
-
-Mesh::UVLayer* Mesh::getUVLayer(string name) {
-	for(std::vector<UVLayer>::iterator it = uvLayers.begin(); it<uvLayers.end(); it++) {
-		if((*it).name == name) {
-			return &(*it);
-		}
-	}
-	return NULL;
+	parts.push_back(Part(mat, shading, hasUvs));
+	return parts.back();
 }
 
 void Mesh::pushMaterial(Material* material) {
 	if(material == curMaterial)
 		return;
 	curMaterial = material;
-	updatePart();
 }
 
 void Mesh::pushShading(Shading shading) {
 	if(curShading == shading)
-		return;
+		return;		
 	curShading = shading;
-	updatePart();
-}
-
-void Mesh::updatePart() {
-	curPart = getPart(curMaterial, curShading);
 }
 
 void Mesh::build() {
+	clear();
+	for(Triangle& tri: triangles) {
+		Part& part = getPart(tri.material, tri.shading, true);
+		part.hasTriangles = true;
+
+		ofMesh& mesh = part.primitive.getMesh();
+		
+		//if(tri.uvs.size() > 0) {
+		
+		//TODO: currently each triangle is uploaded  separately, could be optimized, at least for meshes without UVs
+		unsigned int curIndex = mesh.getNumVertices();
+		mesh.addVertex(vertices[tri.a]);
+		mesh.addVertex(vertices[tri.b]);
+		mesh.addVertex(vertices[tri.c]);
+		mesh.addNormal(normals[tri.a]);
+		mesh.addNormal(normals[tri.b]);
+		mesh.addNormal(normals[tri.c]);
+		if(tri.uvs.size() > 0) {
+			mesh.addTexCoord(tri.uvs[0].a);
+			mesh.addTexCoord(tri.uvs[0].b);
+			mesh.addTexCoord(tri.uvs[0].c);
+		}
+		mesh.addTriangle(curIndex, curIndex+1, curIndex+2);
+	}
+
+	//cout << "NUMBER OF PARTS " << parts.size() << endl;
 }
 
 void Mesh::clear() {
-
+	parts.clear();
 }
+
+void Mesh::exportUVs(int h, int w, unsigned int layer, string path) {
+	//UVLayer* layer = getUVLayer(index);
+
+	if(path == "") {
+		path = name+"_uvs_"+ofToString(layer)+".png";
+	}
+
+	ofPushStyle();
+
+	ofFbo fbo;
+	fbo.allocate(w, h);
+	fbo.begin();
+
+	ofClear(0, 0, 0, 0);
+
+	ofVec2f scale(w, h);
+
+	for(Triangle& tri: triangles) {
+		ofVec2f a,b,c;
+
+		if(tri.uvs.size() > layer) {
+			a = tri.uvs[layer].a * scale;
+			b = tri.uvs[layer].b * scale;
+			c = tri.uvs[layer].c * scale;
+		}
+
+		ofSetColor(0, 100);
+		ofFill();
+		ofTriangle(a, b, c);
+		ofSetColor(10);
+		ofNoFill();
+		ofTriangle(a, b, c);
+
+	}
+
+	fbo.end();
+	ofImage img;
+	img.allocate(fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR_ALPHA);
+	fbo.readToPixels(img.getPixelsRef());
+	img.saveImage(path);
+	img.clear();
+
+	ofPopStyle();
+}
+
 
 //////////////////////////////// DRAWING
 void Mesh::Part::draw() {
