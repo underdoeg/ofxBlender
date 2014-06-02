@@ -855,9 +855,7 @@ public:
 			if(polyReader.read<char>("flag") & ME_SMOOTH) {
 				shading = SMOOTH;
 			}
-			
-			cout << (int)polyReader.read<char>("flag") << endl;
-			
+						
 			mesh->pushShading(shading);
 
 			//pick the material
@@ -1032,7 +1030,7 @@ public:
 			char* pixels = dataBlock.readChar("next", size);
 			ofBuffer buffer(pixels, size);
 			texture->img.loadImage(buffer);
-			//texture->img.saveImage("test.png");
+			texture->img.saveImage(texture->name+".png");
 		} else {
 			string path = imgReader.readString("name");
 			ofStringReplace(path, "//", "");
