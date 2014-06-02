@@ -896,13 +896,13 @@ public:
 				if(e0.lengthSquared() < e1.lengthSquared()) {
 
 					Mesh::Triangle tri1(index0, index1, index2);
-					if(uvLayer) {
+					if(uvLayer && uvLayer->size() > loopStart+2) {
 						tri1.addUVs(uvLayer->at(loopStart), uvLayer->at(loopStart+1), uvLayer->at(loopStart+2));
 					}
 					mesh->addTriangle(tri1);
 
 					Mesh::Triangle tri2(index2, index3, index0);
-					if(uvLayer) {
+					if(uvLayer && uvLayer->size() > loopStart+3) {
 						tri2.addUVs(uvLayer->at(loopStart+2), uvLayer->at(loopStart+3), uvLayer->at(loopStart));
 					}
 
@@ -913,13 +913,13 @@ public:
 					//mesh->addTriangle(index4, index2, index3);
 
 					Mesh::Triangle tri1(index0, index1, index3);
-					if(uvLayer) {
+					if(uvLayer && uvLayer->size() > loopStart+3) {
 						tri1.addUVs(uvLayer->at(loopStart), uvLayer->at(loopStart+1), uvLayer->at(loopStart+3));
 					}
 					mesh->addTriangle(tri1);
 
 					Mesh::Triangle tri2(index3, index1, index2);
-					if(uvLayer) {
+					if(uvLayer && uvLayer->size() > loopStart+3) {
 						tri2.addUVs(uvLayer->at(loopStart+3), uvLayer->at(loopStart+1), uvLayer->at(loopStart+2));
 					}
 
@@ -937,11 +937,10 @@ public:
 
 				//mesh->addTriangle(index1, index2, index3);
 				Mesh::Triangle tri1(index0, index1, index2);
-				if(uvLayer) {
+				if(uvLayer && uvLayer->size() > loopStart+2) {
 					tri1.addUVs(uvLayer->at(loopStart), uvLayer->at(loopStart+1), uvLayer->at(loopStart+2));
 				}
 				mesh->addTriangle(tri1);
-				
 			}
 
 			//done, let's advance to the next polygon
