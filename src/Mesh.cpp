@@ -137,7 +137,7 @@ void Mesh::pushMaterial(Material* material) {
 
 void Mesh::pushShading(Shading shading) {
 	if(curShading == shading)
-		return;		
+		return;
 	curShading = shading;
 }
 
@@ -148,17 +148,34 @@ void Mesh::build() {
 		part.hasTriangles = true;
 
 		ofMesh& mesh = part.primitive.getMesh();
-		
+
 		//if(tri.uvs.size() > 0) {
-		
+
 		//TODO: currently each triangle is uploaded  separately, could be optimized, at least for meshes without UVs
 		unsigned int curIndex = mesh.getNumVertices();
-		mesh.addVertex(vertices[tri.a]);
-		mesh.addVertex(vertices[tri.b]);
-		mesh.addVertex(vertices[tri.c]);
-		mesh.addNormal(normals[tri.a]);
-		mesh.addNormal(normals[tri.b]);
-		mesh.addNormal(normals[tri.c]);
+
+		ofVec3f v0 = vertices[tri.a];
+		ofVec3f v1 = vertices[tri.b];
+		ofVec3f v2 = vertices[tri.c];
+
+		mesh.addVertex(v0);
+		mesh.addVertex(v1);
+		mesh.addVertex(v2);
+
+		if(part.shading == FLAT) {
+			ofVec3f n = (v1 - v2).crossed(v2-v0).normalized();
+			mesh.addNormal(n);
+			mesh.addNormal(n);
+			mesh.addNormal(n);
+		} else {
+			ofVec3f n0 = normals[tri.a];
+			ofVec3f n1 = normals[tri.b];
+			ofVec3f n2 = normals[tri.c];
+			mesh.addNormal(n0);
+			mesh.addNormal(n1);
+			mesh.addNormal(n2);
+		}
+
 		if(tri.uvs.size() > 0) {
 			mesh.addTexCoord(tri.uvs[0].a);
 			mesh.addTexCoord(tri.uvs[0].b);

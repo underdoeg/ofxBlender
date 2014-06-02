@@ -821,6 +821,7 @@ public:
 				//only interested in CD_MLOOPUV types (could also be CD_MPOLY)
 				if(layerData.getType() == "MLoopUV") {
 					string layerName = layerReader.readString("name");
+					cout << "NUMBER OF UVs " << layerData.count() << endl;
 					for(unsigned int j=0; j<layerData.count(); j++) {
 						uvLayers[layerName].push_back(layerData.readVec2f("uv"));
 						uvLayers[layerName].back().y = 1 - uvLayers[layerName].back().y;
@@ -854,6 +855,9 @@ public:
 			if(polyReader.read<char>("flag") & ME_SMOOTH) {
 				shading = SMOOTH;
 			}
+			
+			cout << (int)polyReader.read<char>("flag") << endl;
+			
 			mesh->pushShading(shading);
 
 			//pick the material
@@ -924,7 +928,6 @@ public:
 					}
 
 					mesh->addTriangle(tri2);
-
 				}
 				
 			} else {
