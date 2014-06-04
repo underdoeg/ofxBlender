@@ -25,7 +25,9 @@ public:
     ~Object();
 	
 	void draw();
-
+	
+	virtual void customDraw();
+	
 	void addChild(Object* child);
 	bool hasParent();
 	bool isVisible();

@@ -584,6 +584,7 @@ public:
 		objHandler->addHandler<Mesh>(BL_MESH_ID, Parser::parseMesh);
 		objHandler->addHandler<Camera>(BL_CAM_ID, Parser::parseCamera);
 		objHandler->addHandler<Light>(BL_LIGHT_ID, Parser::parseLight);
+		objHandler->addHandler<Object>(BL_EMPTY_ID, Parser::parseEmpty);
 		Parser::handlers[BL_OBJECT] = objHandler;
 
 		isInit = true;
@@ -735,7 +736,11 @@ public:
 			//cout << curves[0].readStructure("driver").readString("expression") << endl;
 		}
 	}
-
+	
+	static void parseEmpty(DNAStructureReader& reader, Object* empty) {
+		//pass
+	}
+	
 #define ME_SMOOTH 1
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

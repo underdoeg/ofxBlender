@@ -19,21 +19,25 @@ Object::~Object() {
 
 void Object::draw() {
 	//check if associated layer is null
-	
+
 	if(!visible)
 		return;
-	
-	if(layer){
+
+	if(layer) {
 		if(!layer->isVisible())
 			return;
 	}
-	
+
 	ofNode::transformGL();
 	customDraw();
 	for(Object* child: children) {
 		child->draw();
 	}
 	ofNode::restoreTransformGL();
+}
+
+void Object::customDraw() {
+
 }
 
 void Object::addChild(Object* child) {

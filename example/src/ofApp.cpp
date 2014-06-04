@@ -19,7 +19,7 @@ void ofApp::update() {
 
 void ofApp::draw() {
 	ofBackground(scene->bgColor);
-	scene->customDraw();
+	scene->draw();
 }
 
 void ofApp::gotMessage(ofMessage msg) {
