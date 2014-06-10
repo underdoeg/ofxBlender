@@ -29,7 +29,7 @@ void Timeline::setTime(unsigned long long t) {
 		time = t % duration;
 	else
 		time = t;
-
+		
 	for(Animation_* animation: animations) {
 		animation->step(time);
 	}
@@ -39,11 +39,12 @@ void Timeline::setTime(unsigned long long t) {
 }
 
 void Timeline::add(Timeline* timeline) {
+	timeline->timeOffset = 0;
 	children.push_back(timeline);
 }
 
 void Timeline::start() {
-
+	
 }
 
 void Timeline::setDuration(unsigned long long d)

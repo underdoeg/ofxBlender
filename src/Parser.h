@@ -719,6 +719,9 @@ public:
 				timeline->add(anim);
 
 			} else if(address == "hide_render") {
+				
+				
+				
 				Animation<bool>* anim = new Animation<bool>(address, arrayIndex);
 
 				for(TempKeyFrame& key: keyframes) {
@@ -726,13 +729,17 @@ public:
 					bool value = false;
 					if(key.points[1][1] > 0)
 						value = true;
+						
+					cout << address << value << " " << key.time << endl;
 
+					/*
 					if(key.ipo == 1)
 						anim->addKeyframe(key.time, value, LINEAR);
 					else if(key.ipo == 2)
 						anim->addKeyframe(key.time, value, key.points[1], key.points[0], key.points[2]);
 					else if(key.ipo == 0)
-						anim->addKeyframe(key.time, value, CONSTANT);
+					*/
+					anim->addKeyframe(key.time, value, CONSTANT);
 				}
 				timeline->add(anim);
 			} else {
@@ -866,7 +873,6 @@ public:
 				//only interested in CD_MLOOPUV types (could also be CD_MPOLY)
 				if(layerData.getType() == "MLoopUV") {
 					string layerName = layerReader.readString("name");
-					cout << "NUMBER OF UVs " << layerData.count() << endl;
 					for(unsigned int j=0; j<layerData.count(); j++) {
 						uvLayers[layerName].push_back(layerData.readVec2f("uv"));
 						uvLayers[layerName].back().y = 1 - uvLayers[layerName].back().y;

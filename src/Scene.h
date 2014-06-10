@@ -45,6 +45,7 @@ public:
 	string name;
 	std::map<int, Layer> layers;
 private:
+	bool hasObject(Object* obj);
 	Camera* activeCamera;
 	ofEasyCam debugCam;
     std::vector<Object*> objects;

@@ -29,6 +29,7 @@ public:
 	virtual void customDraw();
 
 	void addChild(Object* child);
+	Object* getParent();
 	bool hasParent();
 	bool isVisible();
 	void show();

@@ -71,13 +71,15 @@ void Scene::customDraw() {
 
 	//action
 	for(Object* obj: objects) {
+		bool drawIt = true;
+		if(obj->hasParent() && hasObject(obj->getParent()))
+			drawIt = false;
+		
 		if(doDebug) {
-			glDisable(GL_CULL_FACE);
-			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-			if(!obj->hasParent())
+			if(drawIt)
 				obj->draw();
 		} else if(obj->type != CAMERA && obj->type != LIGHT) {
-			if(!obj->hasParent())
+			if(drawIt)
 				obj->draw();
 		}
 	}
@@ -100,6 +102,9 @@ void Scene::customDraw() {
 		}
 	}
 
+	ofDisableDepthTest();
+	ofDisableLighting();
+
 	//draw object names
 	if(doDebug) {
 		ofSetColor(255);
@@ -107,9 +112,6 @@ void Scene::customDraw() {
 			ofDrawBitmapString(obj->name, obj->getGlobalPosition());
 		}
 	}
-
-	ofDisableDepthTest();
-	ofDisableLighting();
 
 	ofPopStyle();
 
@@ -120,7 +122,7 @@ void Scene::customDraw() {
 void Scene::addObject(Object* obj) {
 	objects.push_back(obj);
 	timeline.add(&obj->timeline);
-	obj->setParent(*this);
+	//obj->setParent(*this);
 	switch(obj->type) {
 	case MESH:
 		meshes.push_back(static_cast<Mesh*>(obj));
@@ -134,6 +136,9 @@ void Scene::addObject(Object* obj) {
 	default:
 		break;
 	}
+
+	ofLogNotice(OFX_BLENDER) << "Added object " << obj->name << " to scene " << name;
+
 }
 
 //templated helper to retrieve objects
@@ -152,6 +157,10 @@ Type* getFromVecByIndex(std::vector<Type*> vec, unsigned int index) {
 		return vec[index];
 	}
 	return NULL;
+}
+
+bool Scene::hasObject(Object* obj) {
+	return std::find(objects.begin(), objects.end(), obj)!=objects.end();
 }
 
 Object* Scene::getObject(string name) {

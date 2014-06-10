@@ -19,8 +19,6 @@ Object::~Object() {
 }
 
 void Object::draw() {
-	//check if associated layer is null
-
 	if(!visible)
 		return;
 
@@ -28,7 +26,8 @@ void Object::draw() {
 		if(!layer->isVisible())
 			return;
 	}
-
+	
+	
 	ofNode::transformGL();
 	customDraw();
 	for(Object* child: children) {
@@ -49,6 +48,11 @@ void Object::addChild(Object* child) {
 
 bool Object::hasParent() {
 	return parent != NULL;
+}
+
+Object* Object::getParent()
+{
+	return parent;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +129,7 @@ void Object::onAnimationDataFloat(float value, string address, int channel) {
 
 void Object::onAnimationDataBool(bool value, string address, int channel) {
 	if(address == "hide_render"){
-		cout << "SHOW HIDE " << name << " - " << value << endl;
+		cout << "SHOW IT " << name << " _ " << value << endl;
 		if(value){
 			hide();
 		}else{
@@ -136,3 +140,4 @@ void Object::onAnimationDataBool(bool value, string address, int channel) {
 
 }
 }
+

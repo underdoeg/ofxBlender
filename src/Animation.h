@@ -151,7 +151,6 @@ public:
 		ofVec2f handle2;
 		Type value;
 		InterpolationType interpolation;
-		//bool isLinear;
 	};
 
 	Animation(string address, int channel):Animation_(address, channel) {
@@ -159,7 +158,9 @@ public:
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-
+		
+		//cout << address << endl;
+		
 		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
 		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
 
@@ -168,7 +169,7 @@ public:
 			return;
 
 		//if there is no key in the future, then the value has to be key1
-		if(!key2) {
+		if(!key2 || key1->interpolation == CONSTANT) {
 			Animation<Type>::triggerListeners(key1->value);
 			return;
 		}
@@ -177,15 +178,15 @@ public:
 		double step = key2->time - key1->time;
 		float stepRel = (timeNow - key1->time) / step;
 
-		switch(key1->interpolation){
-		case BEZIER:
-			Animation<Type>::triggerListeners(Interpolation::linear(stepRel, key1->value, key2->value));
-		break;
-		case LINEAR:
-			Animation<Type>::triggerListeners(Interpolation::bezier(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
-			break;
-		case CONSTANT:
-			Animation<Type>::triggerListeners(key1->value);
+		switch(key1->interpolation) {
+			case BEZIER:
+				Animation<Type>::triggerListeners(Interpolation::linear(stepRel, key1->value, key2->value));
+				break;
+			case LINEAR:
+				Animation<Type>::triggerListeners(Interpolation::bezier(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
+				break;
+			case CONSTANT:
+				Animation<Type>::triggerListeners(key1->value);
 		}
 	}
 
