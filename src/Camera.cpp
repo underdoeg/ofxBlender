@@ -5,7 +5,8 @@ namespace blender {
 
 Camera::Camera() {
 	type = CAMERA;
-	camera.setParent(*this);
+	//camera.setParent(*this);
+
 	debugMesh = ofMesh::cone(.5, 2, 6, 2, 1);
 }
 
@@ -20,6 +21,17 @@ void Camera::customDraw() {
 	ofRotateX(-90);
 	debugMesh.drawWireframe();
 	ofPopMatrix();
+}
+
+void Camera::onOrientationChanged() {
+	camera.setOrientation(getOrientationQuat());
+}
+
+void Camera::onPositionChanged() {
+	camera.setPosition(getPosition());
+}
+
+void Camera::updateCamPos() {
 }
 
 }

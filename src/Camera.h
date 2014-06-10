@@ -12,9 +12,12 @@ public:
 	~Camera();
 
 	void customDraw();
-
+	void onPositionChanged();
+	void onOrientationChanged();
+	//void onScaleChanged();
 	ofCamera camera;
 private:
+	void updateCamPos();
 	ofMesh debugMesh;
 };
 

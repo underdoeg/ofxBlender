@@ -331,6 +331,16 @@ Scene* File::getScene(unsigned int index) {
 	return static_cast<Scene*>(parseFileBlock(getBlocksByType(BL_SCENE, index)));
 }
 
+Scene* File::getScene(string sceneName) {
+	std::vector<File::Block*> sceneBlocks = getBlocksByType(BL_SCENE);
+	for(File::Block* block:sceneBlocks) {
+		Scene* scn = static_cast<Scene*>(parseFileBlock(block));
+		if(scn->name == sceneName)
+			return scn;
+	}
+	return NULL;
+}
+
 unsigned int File::getNumberOfObjects() {
 	return getNumberOfTypes(BL_OBJECT);
 }

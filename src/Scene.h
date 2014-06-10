@@ -18,6 +18,7 @@ public:
 
 	void setDebug(bool state);
 	void toggleDebug();
+	bool isDebugEnabled();
 
     void customDraw();
     void update();
@@ -30,6 +31,7 @@ public:
 	Camera* getCamera(unsigned int index);
 	Light* getLight(string name);
 	Light* getLight(unsigned int index);
+	void setLightningEnabled(bool state);
 
 	Camera* getActiveCamera();
 	void setActiveCamera(Camera* cam);
@@ -52,6 +54,7 @@ private:
 	bool hasViewport;
 	ofRectangle viewport;
 	bool doDebug;
+	bool doLightning;
 	bool isFirstDebugEnable;
 };
 

@@ -11,6 +11,7 @@ Scene::Scene() {
 	doDebug = false;
 	isFirstDebugEnable = true;
 	hasViewport = false;
+	doLightning = false;
 }
 
 Scene::~Scene() {
@@ -32,6 +33,10 @@ void Scene::toggleDebug() {
 	setDebug(!doDebug);
 }
 
+bool Scene::isDebugEnabled() {
+	return doDebug;
+}
+
 void Scene::update() {
 	timeline.step();
 }
@@ -41,43 +46,45 @@ void Scene::customDraw() {
 	ofCamera* camera = &debugCam;
 	if(activeCamera && !doDebug)
 		camera = &activeCamera->camera;
-		
+
 	if(!hasViewport)
 		camera->begin();
 	else
 		camera->begin(viewport);
-	
+
 	//basics
 	ofPushStyle();
-	
+
 	ofEnableDepthTest();
 
-	if(lights.size()>0){
+	if(lights.size()>0) {
 		ofSetSmoothLighting(true);
 		ofEnableLighting();
 	}
-	
+
 	//lights
-	for(Light* light: lights) {
-		light->begin();
+	if(doLightning) {
+		for(Light* light: lights) {
+			light->begin();
+		}
 	}
 
 	//action
 	for(Object* obj: objects) {
-		if(doDebug){
+		if(doDebug) {
 			glDisable(GL_CULL_FACE);
 			glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 			if(!obj->hasParent())
 				obj->draw();
-		}else if(obj->type != CAMERA && obj->type != LIGHT){
+		} else if(obj->type != CAMERA && obj->type != LIGHT) {
 			if(!obj->hasParent())
 				obj->draw();
 		}
 	}
-	
+
 	glDisable(GL_CULL_FACE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	
+
 	/*
 	if(doDebug){
 		for(Mesh* mesh: meshes){
@@ -87,8 +94,10 @@ void Scene::customDraw() {
 	*/
 
 	//kill the lights
-	for(Light* light: lights) {
-		light->end();
+	if(doLightning) {
+		for(Light* light: lights) {
+			light->end();
+		}
 	}
 
 	//draw object names
@@ -98,12 +107,12 @@ void Scene::customDraw() {
 			ofDrawBitmapString(obj->name, obj->getGlobalPosition());
 		}
 	}
-	
+
 	ofDisableDepthTest();
 	ofDisableLighting();
-	
+
 	ofPopStyle();
-	
+
 	//end the camera
 	camera->end();
 }
@@ -189,11 +198,15 @@ Light* Scene::getLight(unsigned int index) {
 	return getFromVecByIndex<Light>(lights, index);
 }
 
-void Scene::setViewport(float x, float y, float w, float h)
-{
+void Scene::setViewport(float x, float y, float w, float h) {
 	hasViewport = true;
 	viewport.set(x, y, w, h);
 }
+
+void Scene::setLightningEnabled(bool state) {
+	doLightning = state;
+}
+
 
 }
 } //end namespace

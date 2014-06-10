@@ -622,6 +622,11 @@ public:
 				if(layer >= 0) {
 					object->layer = &scene->layers[layer];
 				}
+				
+				//check if the object is a light
+				if(object->type == LIGHT){
+					scene->setLightningEnabled(true);
+				}
 			}
 
 			//cout << next.readStructure("object").setStructure("id").readString("name") << endl;

@@ -172,6 +172,7 @@ public:
 	void exportStructure(string path="structure.html");
 	unsigned int getNumberOfScenes();
 	Scene* getScene(unsigned int index);
+	Scene* getScene(string sceneName);
 	unsigned int getNumberOfObjects();
 	Object* getObject(unsigned int index);
 
