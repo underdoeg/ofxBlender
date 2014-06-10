@@ -7,7 +7,7 @@ Camera::Camera() {
 	type = CAMERA;
 	//camera.setParent(*this);
 
-	debugMesh = ofMesh::cone(.5, 2, 6, 2, 1);
+	debugMesh = ofMesh::cone(1, 3, 6, 2, 1);
 }
 
 Camera::~Camera() {

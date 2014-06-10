@@ -622,9 +622,9 @@ public:
 				if(layer >= 0) {
 					object->layer = &scene->layers[layer];
 				}
-				
+
 				//check if the object is a light
-				if(object->type == LIGHT){
+				if(object->type == LIGHT) {
 					scene->setLightningEnabled(true);
 				}
 			}
@@ -648,7 +648,100 @@ public:
 		//cout << reader.readStructure("base").readStructure("object").setStructure("id").readString("name") << endl;
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	struct TempKeyFrame {
+		unsigned long long time;
+		short ipo;
+		std::vector<ofVec3f> points;
+	};
+
+	static std::vector<TempKeyFrame> parseKeyframes(DNAStructureReader curve) {
+		std::vector<TempKeyFrame> ret;
+		int numPoints = curve.read<int>("totvert");
+		DNAStructureReader bezier = curve.readStructure("bezt");
+		for(int i=0; i<numPoints; i++) {
+			TempKeyFrame key;
+			key.points = bezier.readVec3fArray("vec");
+
+			key.ipo = bezier.read<short>("ipo");
+
+			//TODO: read proper frame rate
+			float fps = 24; //default blender frame rate
+
+			key.time = 1./fps * key.points[1][0];
+			key.time *= 1000;
+
+
+			ret.push_back(key);
+			bezier.nextBlock();
+		}
+		return ret;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	static void parseAnimationData(DNAStructureReader reader, Timeline* timeline) {
+
+		unsigned long animDataAddress = reader.readAddress("adt");
+		if(animDataAddress == 0)
+			return;
+
+
+		DNAStructureReader animReader(reader.file->getBlockByAddress(animDataAddress));
+		if(animReader.readAddress("action") == 0)
+			return;
+
+		//load all curves
+		vector<DNAStructureReader> curves = animReader.readStructure("action").readLinkedList("curves");
+		for(DNAStructureReader& curve: curves) {
+			string rnaPath = curve.readString("rna_path");
+			int arrayIndex = curve.read<int>("array_index");
+			string address = rnaPath;
+			int channel = arrayIndex;
+
+			//cout << address << endl;
+
+			//if the channel is rotation, scale or translate, add an X
+			std::vector<TempKeyFrame> keyframes = parseKeyframes(curve);
+
+			//float type animations
+			if(address == "location" || address == "rotation" || address == "scale" || address=="rotation_euler") {
+
+				//create the animation, arrayIndex
+				Animation<float>* anim = new Animation<float>(address, arrayIndex);
+				for(TempKeyFrame& key: keyframes) {
+					if(key.ipo == 1)
+						anim->addKeyframe(key.time, key.points[1][1]);
+					else if(key.ipo == 2)
+						anim->addKeyframe(key.time, key.points[1][1], key.points[1], key.points[0], key.points[2]);
+					else if(key.ipo == 0)
+						anim->addKeyframe(key.time, key.points[1][1], CONSTANT);
+				}
+				timeline->add(anim);
+
+			} else if(address == "hide_render") {
+				Animation<bool>* anim = new Animation<bool>(address, arrayIndex);
+
+				for(TempKeyFrame& key: keyframes) {
+
+					bool value = false;
+					if(key.points[1][1] > 0)
+						value = true;
+
+					if(key.ipo == 1)
+						anim->addKeyframe(key.time, value, LINEAR);
+					else if(key.ipo == 2)
+						anim->addKeyframe(key.time, value, key.points[1], key.points[0], key.points[2]);
+					else if(key.ipo == 0)
+						anim->addKeyframe(key.time, value, CONSTANT);
+				}
+				timeline->add(anim);
+			} else {
+				ofLogNotice(OFX_BLENDER) << "Unknown rna path " << rnaPath;
+			}
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void parseObject(DNAStructureReader& reader, Object* object) {
 		reader.setStructure("id");
 		object->name = reader.readString("name");
@@ -681,74 +774,16 @@ public:
 		}
 
 		//parse the anim data
-		unsigned long animDataAddress = reader.readAddress("adt");
-		if(animDataAddress != 0) {
-			DNAStructureReader animReader(reader.file->getBlockByAddress(animDataAddress));
-			if(animReader.readAddress("action") != 0) {
-				DNAStructureReader actionReader = animReader.readStructure("action");
-				//actionReader.setStructure("id");
-				//actionReader.reset();
-
-				//load all curves
-				vector<DNAStructureReader> curves = actionReader.readLinkedList("curves");
-				for(DNAStructureReader& curve: curves) {
-					string rnaPath = curve.readString("rna_path");
-					int arrayIndex = curve.read<int>("array_index");
-					string address = rnaPath;
-					int channel = arrayIndex;
-					//if the channel is rotation, scale or translate, add an X
-					if(address == "location" || address == "rotation" || address == "scale" || address=="rotation_euler") {
-
-						//create the animation
-						BezierAnimation<float>* animation = new BezierAnimation<float>(address, channel);
-
-						//add keyframes
-						int numPoints = curve.read<int>("totvert");
-						DNAStructureReader bezier = curve.readStructure("bezt");
-						for(int i=0; i<numPoints; i++) {
-							std::vector<ofVec3f> points = bezier.readVec3fArray("vec");
-
-							short ipo = bezier.read<short>("ipo");
-
-							//beziers come in this array [handle1X, handle1Y, 0], [Frame, Value, 0], [handle2X, handle2Y, 0]
-
-							//TODO: read proper frame rate
-							float fps = 24; //default blender frame rate
-
-							unsigned long long time = 1./fps * points[1][0];
-							time *= 1000;
-
-							if(ipo == 1)
-								animation->addKeyframe(time, points[1][1]);
-							else if(ipo == 2)
-								animation->addKeyframe(time, points[1][1], points[1], points[0], points[2]);
-							else if(ipo == 0)
-								ofLogWarning(OFX_BLENDER) << "Constant Keyframes are not yet supported";
-							bezier.nextBlock();
-						}
-
-						//DNAStructureReader fpt = curve.readStructure("fpt");
-
-						//set the listener
-						object->timeline.add(animation);
-
-					} else {
-						ofLogWarning(OFX_BLENDER) << "Unknown rna path " << rnaPath;
-					}
-				}
-			}
-
-			//cout << curves[0].readStructure("driver").readString("expression") << endl;
-		}
+		parseAnimationData(reader, &object->timeline);
 	}
-	
+
 	static void parseEmpty(DNAStructureReader& reader, Object* empty) {
 		//pass
 	}
-	
+
 #define ME_SMOOTH 1
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void parseMesh(DNAStructureReader& reader, Mesh* mesh) {
 		reader.setStructure("id");
 		mesh->meshName = reader.readString("name");
@@ -778,13 +813,13 @@ public:
 
 		//get address of the polygon blocks
 		DNAStructureReader polyReader = reader.readStructure("mpoly");
-		
+
 		//get address of the loops blocks
 		DNAStructureReader loopReader = reader.readStructure("mloop");
-		
+
 		//get address of the vertices blocks
 		DNAStructureReader vertReader = reader.readStructure("mvert");
-		
+
 		//get address of the edge blocks
 		//DNAStructureReader edgeReader = reader.readStructure("medge");
 		//get address of the material blocks
@@ -827,7 +862,7 @@ public:
 			DNAStructureReader layerReader = reader.readStructure("layers");
 			for(int i=0; i<numLayers; i++) {
 				DNAStructureReader layerData = layerReader.readStructure("data");
-				
+
 				//only interested in CD_MLOOPUV types (could also be CD_MPOLY)
 				if(layerData.getType() == "MLoopUV") {
 					string layerName = layerReader.readString("name");
@@ -845,7 +880,7 @@ public:
 
 		//get the total number of polygons
 		int totalPolys = reader.read<int>("totpoly");
-		
+
 		ofVec3f e0, e1;
 		//build triangles
 		for(int i=0; i<totalPolys; i++) {
@@ -865,7 +900,7 @@ public:
 			if(polyReader.read<char>("flag") & ME_SMOOTH) {
 				shading = SMOOTH;
 			}
-						
+
 			mesh->pushShading(shading);
 
 			//pick the material
@@ -884,7 +919,7 @@ public:
 						uvLayer = &uvLayers[material->textures[0]->uvLayerName];
 				}
 			}
-			
+
 			if(!uvLayer && hasUV)
 				uvLayer = &defaultUvs;
 
@@ -937,7 +972,7 @@ public:
 
 					mesh->addTriangle(tri2);
 				}
-				
+
 			} else {
 				loopReader.blockAt(loopStart);
 				unsigned int index0 = loopReader.read<int>("v");
@@ -1048,7 +1083,7 @@ public:
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void parseCamera(DNAStructureReader& reader, Camera* cam) {
 		ofCamera* camera = &cam->camera;
 		float fov = ofRadToDeg(2 * atan(16 / reader.read<float>("lens")));

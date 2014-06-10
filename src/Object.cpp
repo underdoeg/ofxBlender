@@ -11,7 +11,8 @@ Object::Object() {
 	parent = NULL;
 	visible = true;
 	layer = NULL;
-	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationDataFloat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	timeline.setDefaultHandler<bool>(std::bind(&Object::onAnimationDataBool, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 Object::~Object() {
@@ -74,7 +75,7 @@ void Object::toggleVisibility() {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-void Object::onAnimationData(float value, string address, int channel) {
+void Object::onAnimationDataFloat(float value, string address, int channel) {
 	//cout << channel << ":" << address << endl;
 	//cout << "MY VALUES : " << value << endl;
 	if(address == "location") {
@@ -119,6 +120,17 @@ void Object::onAnimationData(float value, string address, int channel) {
 		//quat.set(axis.x, axis.y, axis.z, value);
 		///setOrientation(quat);
 		setOrientation(rot);
+	}
+}
+
+void Object::onAnimationDataBool(bool value, string address, int channel) {
+	if(address == "hide_render"){
+		cout << "SHOW HIDE " << name << " - " << value << endl;
+		if(value){
+			hide();
+		}else{
+			show();
+		}
 	}
 }
 

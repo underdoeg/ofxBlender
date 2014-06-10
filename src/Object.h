@@ -8,12 +8,12 @@
 namespace ofx {
 namespace blender {
 
-enum ObjectType{
+enum ObjectType {
     UNDEFINED,
     MESH,
     LIGHT,
-	CAMERA,
-	TEXT
+    CAMERA,
+    TEXT
 };
 
 class Scene;
@@ -21,31 +21,34 @@ class Layer;
 
 class Object: public ofNode {
 public:
-    Object();
-    ~Object();
-	
+	Object();
+	~Object();
+
 	void draw();
-	
+
 	virtual void customDraw();
-	
+
 	void addChild(Object* child);
 	bool hasParent();
 	bool isVisible();
 	void show();
 	void hide();
 	void toggleVisibility();
-	
+
 	string name;
-    ObjectType type;
+	ObjectType type;
 	Timeline timeline;
 	Scene* scene;
 	Layer* layer;
+
+protected:
+	virtual void onAnimationDataFloat(float value, string address, int channel);
+	virtual void onAnimationDataBool(bool value, string address, int channel);
 
 private:
 	bool visible;
 	Object* parent;
 	std::vector<Object*> children;
-	void onAnimationData(float value, string address, int channel);
 };
 
 }

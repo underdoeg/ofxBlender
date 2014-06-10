@@ -25,7 +25,6 @@ public:
 	public:
 		typedef std::function<void(Type&, string, int)> Listener;
 		DefaultHandler(Listener _listener) {
-
 			listener = _listener;
 		}
 
@@ -131,17 +130,74 @@ protected:
 template<typename Type>
 class Animation:public Animation_ {
 public:
+
 	class Keyframe: public Animation_::Keyframe {
 	public:
-		Keyframe(unsigned long long _time, Type v):Animation_::Keyframe(_time) {
+		Keyframe(unsigned long long _time, Type v, ofVec2f p, ofVec2f h1, ofVec2f h2):Animation_::Keyframe(_time) {
+			point = p;
+			handle1 = h1;
+			handle2 = h2;
+			interpolation = BEZIER;
 			value = v;
 		}
+
+		Keyframe(unsigned long long _time, Type v, InterpolationType type):Animation_::Keyframe(_time) {
+			interpolation = type;
+			value = v;
+		}
+
+		ofVec2f point;
+		ofVec2f handle1;
+		ofVec2f handle2;
 		Type value;
+		InterpolationType interpolation;
+		//bool isLinear;
 	};
 
 	Animation(string address, int channel):Animation_(address, channel) {
 		oldValueSet = false;
 	};
+
+	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
+
+		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
+		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
+
+		//check if we have a key1, otherwise I don't know how to calculate this
+		if(!key1)
+			return;
+
+		//if there is no key in the future, then the value has to be key1
+		if(!key2) {
+			Animation<Type>::triggerListeners(key1->value);
+			return;
+		}
+
+		//both keys are around, let's tween
+		double step = key2->time - key1->time;
+		float stepRel = (timeNow - key1->time) / step;
+
+		switch(key1->interpolation){
+		case BEZIER:
+			Animation<Type>::triggerListeners(Interpolation::linear(stepRel, key1->value, key2->value));
+		break;
+		case LINEAR:
+			Animation<Type>::triggerListeners(Interpolation::bezier(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
+			break;
+		case CONSTANT:
+			Animation<Type>::triggerListeners(key1->value);
+		}
+	}
+
+	void addKeyframe(double time, Type value, ofVec2f p, ofVec2f h1, ofVec2f h2) {
+		Keyframe* key = new Keyframe(time, value, p, h1, h2);
+		Animation_::addKeyframe(key);
+	}
+
+	void addKeyframe(double time, Type value, InterpolationType type = LINEAR) {
+		Keyframe* key = new Keyframe(time, value, type);
+		Animation_::addKeyframe(key);
+	}
 
 	typedef std::function<void(Type&, string, int)> Listener;
 	void addListener(Listener listener) {
@@ -164,126 +220,10 @@ public:
 		oldValueSet = true;
 	}
 
-
 private:
 	std::vector<Listener> listeners;
 	Type oldValue;
 	bool oldValueSet;
-};
-
-//TODO: implement
-template<typename Type>
-class TweenAnimation: public Animation<Type> {
-public:
-	enum TweenType {
-	    LINEAR
-	};
-
-	class Keyframe: public Animation<Type>::Keyframe {
-	public:
-		Keyframe(unsigned long long _time, Type v, TweenType _tweenType):Animation<Type>::Keyframe(_time, v) {
-			tweenType = _tweenType;
-		}
-		TweenType tweenType;
-	};
-
-	TweenAnimation(string address, int channel_=0):Animation<Type>(address, channel_) {
-	};
-
-	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-
-		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
-		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
-
-		//check if we have a key1, otherwise I don't know how to calculate this
-		if(!key1)
-			return;
-
-		//if there is no key in the future, then the value has to be key1
-		if(!key2) {
-			Animation<Type>::triggerListeners(key1->value);
-			return;
-		}
-
-		//both keys are around, let's tween
-		double step = key2->time - key1->time;
-		float stepRel = (timeNow - key1->time) / step;
-
-		//TODO: not just linear please
-		Type value;
-		switch(key1->tweenType) {
-		case LINEAR:
-			value = Interpolation::linear(stepRel, key1->value, key2->value);
-			break;
-		}
-		Animation<Type>::triggerListeners(value);
-	}
-
-	void addKeyframe(double time, Type value, TweenType tweenType=LINEAR) {
-		Keyframe* key = new Keyframe(time, value, tweenType);
-		Animation_::addKeyframe(key);
-	}
-};
-
-template<typename Type>
-class BezierAnimation: public Animation<Type> {
-public:
-	class Keyframe: public Animation<Type>::Keyframe {
-	public:
-		Keyframe(unsigned long long _time, Type v, ofVec2f p, ofVec2f h1, ofVec2f h2):Animation<Type>::Keyframe(_time, v) {
-			point = p;
-			handle1 = h1;
-			handle2 = h2;
-			isLinear = false;
-		}
-
-		Keyframe(unsigned long long _time, Type v):Animation<Type>::Keyframe(_time, v) {
-			isLinear = true;
-		}
-
-		ofVec2f point;
-		ofVec2f handle1;
-		ofVec2f handle2;
-		bool isLinear;
-	};
-
-	BezierAnimation(string address, int channel_=0):Animation<Type>(address, channel_) {
-	};
-
-	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-
-		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
-		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
-
-		//check if we have a key1, otherwise I don't know how to calculate this
-		if(!key1)
-			return;
-
-		//if there is no key in the future, then the value has to be key1
-		if(!key2) {
-			Animation<Type>::triggerListeners(key1->value);
-			return;
-		}
-
-		//both keys are around, let's tween
-		double step = key2->time - key1->time;
-		float stepRel = (timeNow - key1->time) / step;
-
-		if(key1->isLinear)
-			Animation<Type>::triggerListeners(Interpolation::linear(stepRel, key1->value, key2->value));
-		else
-			Animation<Type>::triggerListeners(Interpolation::bezier(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
-	}
-
-	void addKeyframe(double time, Type value, ofVec2f p, ofVec2f h1, ofVec2f h2) {
-		Keyframe* key = new Keyframe(time, value, p, h1, h2);
-		Animation_::addKeyframe(key);
-	}
-
-	void addKeyframe(double time, Type value) {
-		Keyframe* key = new Keyframe(time, value);
-		Animation_::addKeyframe(key);
-	}
 };
 
 

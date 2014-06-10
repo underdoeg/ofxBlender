@@ -5,8 +5,14 @@ namespace ofx {
 
 namespace blender {
 
+enum InterpolationType {
+    LINEAR,
+    BEZIER,
+    CONSTANT
+};
+
 class Interpolation {
-		public:
+public:
 
 	//taken from http://devmag.org.za/2011/04/05/bzier-curves-a-tutorial/
 	static float bezier(float t, ofVec2f p0, ofVec2f p1, ofVec2f p2, ofVec2f p3) {
