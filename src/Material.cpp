@@ -25,7 +25,6 @@ void Material::begin() {
 
 	if(!isLightningEnabled) {
 		ofSetColor(material.getDiffuseColor());
-		cout << "COLOR " << material.getDiffuseColor() << endl;
 		return;
 	}
 
