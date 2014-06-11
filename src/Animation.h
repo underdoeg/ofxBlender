@@ -109,7 +109,7 @@ protected:
 				return lastKey;
 			lastKey = key;
 		}
-		return NULL;
+		return lastKey;
 	}
 
 	Keyframe* getKeyframeAfter(unsigned long long time) {
@@ -163,6 +163,10 @@ public:
 		
 		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
 		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
+		
+		//cout << timeNow << " - " << key1 << endl;
+		
+		cout << key1 << endl;
 
 		//check if we have a key1, otherwise I don't know how to calculate this
 		if(!key1)
