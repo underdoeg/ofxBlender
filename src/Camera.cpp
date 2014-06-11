@@ -6,7 +6,7 @@ namespace blender {
 Camera::Camera() {
 	type = CAMERA;
 	//camera.setParent(*this);
-
+		
 	debugMesh = ofMesh::cone(1, 3, 6, 2, 1);
 }
 
@@ -36,5 +36,20 @@ void Camera::onPositionChanged() {
 void Camera::updateCamPos() {
 }
 
+void Camera::setLens(float lens)
+{
+	float fov = ofRadToDeg(2 * atan(16 / lens));
+	camera.setFov(fov);
+}
+
+void Camera::onAnimationDataFloat(float value, string address, int channel) {
+	Object::onAnimationDataFloat(value, address, channel);
+	
+	if(address == "lens"){
+		setLens(value);
+	}
+}
+
 }
 }
+

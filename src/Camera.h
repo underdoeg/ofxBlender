@@ -14,9 +14,11 @@ public:
 	void customDraw();
 	void onPositionChanged();
 	void onOrientationChanged();
+	void setLens(float lens);
 	//void onScaleChanged();
 	ofCamera camera;
 private:
+	void onAnimationDataFloat(float value, string address, int channel);
 	void updateCamPos();
 	ofMesh debugMesh;
 };
