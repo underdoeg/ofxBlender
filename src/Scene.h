@@ -27,6 +27,7 @@ public:
 	Object* getObject(string name);
 	Mesh* getMesh(unsigned int index);
 	Mesh* getMesh(string name);
+	std::vector<Mesh*> getMeshes();
 	Camera* getCamera(string name);
 	Camera* getCamera(unsigned int index);
 	Light* getLight(string name);
@@ -44,10 +45,11 @@ public:
     Timeline timeline;
 	string name;
 	std::map<int, Layer> layers;
+	ofEasyCam debugCam;
+
 private:
 	bool hasObject(Object* obj);
 	Camera* activeCamera;
-	ofEasyCam debugCam;
     std::vector<Object*> objects;
     std::vector<Mesh*> meshes;
 	std::vector<Camera*> cameras;

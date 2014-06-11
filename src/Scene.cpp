@@ -77,7 +77,7 @@ void Scene::customDraw() {
 		bool drawIt = true;
 		if(obj->hasParent() && hasObject(obj->getParent()))
 			drawIt = false;
-		
+
 		if(doDebug) {
 			if(drawIt)
 				obj->draw();
@@ -182,6 +182,10 @@ Mesh* Scene::getMesh(unsigned int index) {
 	return getFromVecByIndex<Mesh>(meshes, index);
 }
 
+std::vector<Mesh*> Scene::getMeshes() {
+	return meshes;
+}
+
 Camera* Scene::getCamera(string name) {
 	return getFromVecByName<Camera>(cameras, name);
 }
@@ -218,7 +222,6 @@ void Scene::setViewport(float x, float y, float w, float h) {
 void Scene::setLightningEnabled(bool state) {
 	doLightning = state;
 }
-
 
 }
 } //end namespace
