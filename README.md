@@ -2,9 +2,8 @@
 
 This addon enables native loading of Blenders blend file format. It translates the data into extended of core objects like ofNode, ofMesh, ofCamera.
 
-Most objects have an inheritance structure like this
-
-[ADD IMAGE HERE]
+Most objects extend ofNode and have ofLight, ofCamera etc as a child object.
+   
 
 ## Features
 
@@ -16,9 +15,6 @@ Most objects have an inheritance structure like this
 * animation data (position, rotation, scale)
 * cameras
 * lights
-
-### planned
-
 * scene hierarchy 
 
 ## limitations
@@ -27,4 +23,4 @@ Most objects have an inheritance structure like this
 
 ## platforms
 
-Developed and tested on linux (Arch 64bit), but should also work on Mac & Windows.
+Developed and tested on linux (Arch 64bit), but should also work on Mac & Windows. Requires c++11.
