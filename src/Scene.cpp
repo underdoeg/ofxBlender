@@ -60,13 +60,22 @@ void Scene::customDraw() {
 
 	ofEnableDepthTest();
 
-	if(lights.size()>0) {
-		ofSetSmoothLighting(true);
-		ofEnableLighting();
+	//update the material properties 
+	//TODO: could be optimized
+
+	for(Material* material: materials){
+		material->lights = lights;
+		material->isLightningEnabled = doLightning;
 	}
 
 	//lights
 	if(doLightning) {
+		
+		if(lights.size()>0) {
+			ofSetSmoothLighting(true);
+			ofEnableLighting();
+		}
+		
 		for(Light* light: lights) {
 			light->begin();
 		}
@@ -129,6 +138,12 @@ void Scene::addObject(Object* obj) {
 	switch(obj->type) {
 	case MESH:
 		meshes.push_back(static_cast<Mesh*>(obj));
+		
+		for(Material* material: meshes.back()->materials){
+			if(material && std::find(materials.begin(), materials.end(), material)==materials.end())
+				materials.push_back(material);
+		}
+
 		break;
 	case CAMERA:
 		cameras.push_back(static_cast<Camera*>(obj));

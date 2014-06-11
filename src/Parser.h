@@ -671,7 +671,6 @@ public:
 			key.time = 1./fps * key.points[1][0];
 			key.time *= 1000;
 
-
 			ret.push_back(key);
 			bezier.nextBlock();
 		}
@@ -1013,7 +1012,6 @@ public:
 		}
 
 
-
 		//export uv layers
 		//for(unsigned int i=0; i<mesh->getNumUVLayers(); i++) {
 		//cout << "EXPORT" << endl;
@@ -1042,9 +1040,9 @@ public:
 
 
 		//TODO: why are those colors flipped?
-		material->material.setSpecularColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
+		material->material.setDiffuseColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
 		material->material.setAmbientColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
-		material->material.setDiffuseColor(ofFloatColor(reader.read<float>("specr"), reader.read<float>("specg"), reader.read<float>("specb")));
+		material->material.setSpecularColor(ofFloatColor(reader.read<float>("specr"), reader.read<float>("specg"), reader.read<float>("specb")));
 
 		std::vector<DNAStructureReader> textures = reader.readStructureArray("mtex");
 		for(DNAStructureReader& texReader: textures) {

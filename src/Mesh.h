@@ -12,6 +12,8 @@ enum Shading {
     SMOOTH
 };
 
+class Scene;
+
 class Mesh: public ofx::blender::Object {
 public:
 	Mesh();
@@ -80,7 +82,9 @@ public:
 
 	ofVec3f boundsMin;
 	ofVec3f boundsMax;
+
 private:
+	friend class Scene;
 	class Part {
 	public:
 		Part(Material* mat, Shading shade, bool hasUvs_) {
@@ -109,6 +113,7 @@ private:
 	std::vector<ofVec3f> normals;
 	std::vector<Triangle> triangles;
 	std::vector<Part> parts;
+	std::vector<Material*> materials;
 };
 
 }

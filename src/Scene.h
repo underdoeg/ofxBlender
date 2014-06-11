@@ -54,6 +54,7 @@ private:
     std::vector<Mesh*> meshes;
 	std::vector<Camera*> cameras;
 	std::vector<Light*> lights;
+	std::vector<Material*> materials;
 	bool hasViewport;
 	ofRectangle viewport;
 	bool doDebug;

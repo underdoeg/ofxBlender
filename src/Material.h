@@ -2,6 +2,7 @@
 #define MATERIAL_H
 
 #include "Utils.h"
+#include "Light.h"
 
 namespace ofx {
 namespace blender {
@@ -26,9 +27,12 @@ public:
 
 	ofMaterial material;
 	std::vector<Texture*> textures;
-	Scene* scene;
 	string name;
 	bool useShader;
+
+private:
+	friend class Scene;
+	std::vector<Light*> lights;
 	bool isLightningEnabled;
 	bool isTwoSided;
 };

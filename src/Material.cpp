@@ -5,7 +5,6 @@ namespace ofx {
 namespace blender {
 
 Material::Material() {
-	scene = NULL;
 	useShader = false;
 	isLightningEnabled = true;
 	isTwoSided = false;
@@ -15,26 +14,38 @@ Material::~Material() {
 }
 
 void Material::begin() {
-	if(!useShader){
-		ofEnableNormalizedTexCoords();
-		
-		if(textures.size()>0) {
-			if(textures[0]->img.isAllocated()) {
-				textures[0]->img.getTextureReference().bind();
-			}
+	ofEnableNormalizedTexCoords();
+	
+	ofSetColor(255);
+	if(textures.size()>0) {
+		if(textures[0]->img.isAllocated()) {
+			textures[0]->img.getTextureReference().bind();
 		}
+	}
+
+	if(!isLightningEnabled) {
+		ofSetColor(material.getDiffuseColor());
+		cout << "COLOR " << material.getDiffuseColor() << endl;
+		return;
+	}
+
+	if(!useShader) {
 		material.begin();
 	}
 }
 
 void Material::end() {
-	if(!useShader){
-		material.end();
-		if(textures.size()>0) {
-			if(textures[0]->img.isAllocated()) {
-				textures[0]->img.getTextureReference().unbind();
-			}
+	if(textures.size()>0) {
+		if(textures[0]->img.isAllocated()) {
+			textures[0]->img.getTextureReference().unbind();
 		}
+	}
+
+	if(!isLightningEnabled)
+		return;
+
+	if(!useShader) {
+		material.end();
 	}
 }
 

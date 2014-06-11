@@ -182,6 +182,10 @@ void Mesh::build() {
 			mesh.addTexCoord(tri.uvs[0].c);
 		}
 		mesh.addTriangle(curIndex, curIndex+1, curIndex+2);
+		
+		//add the material to the used materials
+		if(part.material && std::find(materials.begin(), materials.end(), part.material)==materials.end())
+			materials.push_back(part.material);
 	}
 
 	//cout << "NUMBER OF PARTS " << parts.size() << endl;
@@ -189,6 +193,7 @@ void Mesh::build() {
 
 void Mesh::clear() {
 	parts.clear();
+	materials.clear();
 }
 
 void Mesh::exportUVs(int h, int w, unsigned int layer, string path) {
