@@ -39,6 +39,9 @@ bool Scene::isDebugEnabled() {
 
 void Scene::update() {
 	timeline.step();
+	for(Object* obj: objects) {
+		obj->update();
+	}
 }
 
 void Scene::customDraw() {

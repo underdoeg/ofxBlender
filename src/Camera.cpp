@@ -24,11 +24,13 @@ void Camera::customDraw() {
 }
 
 void Camera::onOrientationChanged() {
-	camera.setOrientation(getOrientationQuat());
+	Object::onOrientationChanged();
+	camera.setOrientation(getGlobalOrientation());
 }
 
 void Camera::onPositionChanged() {
-	camera.setPosition(getPosition());
+	Object::onPositionChanged();
+	camera.setPosition(getGlobalPosition());
 }
 
 void Camera::updateCamPos() {

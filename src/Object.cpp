@@ -11,11 +11,19 @@ Object::Object() {
 	parent = NULL;
 	visible = true;
 	layer = NULL;
+	lookAtTarget = NULL;
+	lookAtUp.set(0, 1, 0);
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationDataFloat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<bool>(std::bind(&Object::onAnimationDataBool, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 Object::~Object() {
+}
+
+void Object::update() {
+	for(Constraint* constraint:constraints) {
+		constraint->onUpdate();
+	}
 }
 
 void Object::draw() {
@@ -26,8 +34,8 @@ void Object::draw() {
 		if(!layer->isVisible())
 			return;
 	}
-	
-	
+
+
 	ofNode::transformGL();
 	customDraw();
 	for(Object* child: children) {
@@ -50,8 +58,7 @@ bool Object::hasParent() {
 	return parent != NULL;
 }
 
-Object* Object::getParent()
-{
+Object* Object::getParent() {
 	return parent;
 }
 
@@ -74,6 +81,39 @@ void Object::toggleVisibility() {
 		hide();
 	else
 		show();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+void Object::addConstraint(Constraint* constraint) {
+	constraint->setup(this);
+	constraints.push_back(constraint);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+void Object::onPositionChanged() {
+	for(Constraint* constraint: constraints) {
+		constraint->onPositionChanged();
+	}
+	Object* s = this;
+	ofNotifyEvent(positionChanged, s);
+}
+
+void Object::onOrientationChanged() {
+	for(Constraint* constraint: constraints) {
+		constraint->onOrientationChanged();
+	}
+	Object* s = this;
+	ofNotifyEvent(orientationChanged, s);
+}
+
+void Object::onScaleChanged() {
+	for(Constraint* constraint: constraints) {
+		constraint->onScaleChanged();
+	}
+	Object* s = this;
+	ofNotifyEvent(scaleChanged, s);
 }
 
 
@@ -128,11 +168,10 @@ void Object::onAnimationDataFloat(float value, string address, int channel) {
 }
 
 void Object::onAnimationDataBool(bool value, string address, int channel) {
-	if(address == "hide_render"){
-		cout << "SHOW IT " << name << " _ " << value << endl;
-		if(value){
+	if(address == "hide_render") {
+		if(value) {
 			hide();
-		}else{
+		} else {
 			show();
 		}
 	}
@@ -140,4 +179,3 @@ void Object::onAnimationDataBool(bool value, string address, int channel) {
 
 }
 }
-

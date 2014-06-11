@@ -719,9 +719,9 @@ public:
 				timeline->add(anim);
 
 			} else if(address == "hide_render") {
-				
-				
-				
+
+
+
 				Animation<bool>* anim = new Animation<bool>(address, arrayIndex);
 
 				for(TempKeyFrame& key: keyframes) {
@@ -729,7 +729,7 @@ public:
 					bool value = false;
 					if(key.points[1][1] > 0)
 						value = true;
-						
+
 					cout << address << value << " " << key.time << endl;
 
 					/*
@@ -779,6 +779,30 @@ public:
 				object->setTransformMatrix(mat * ofMatrix4x4::getInverseOf(parent->getGlobalTransformMatrix()));
 			}
 		}
+
+		//check for constraints
+		for(DNAStructureReader& constraintReader: reader.readLinkedList("constraints")) {
+			string name = constraintReader.readString("name");
+			
+			DNAStructureReader data = constraintReader.readStructure("data");
+			if(data.getType() == "bTrackToConstraint"){
+				
+				Object* target = static_cast<Object*>(data.readStructure("tar").parse());
+				
+				if(target){
+					ofLogNotice(OFX_BLENDER) << "Creating Track To Constraint " << object->name << " -> " << target->name;
+					
+					TrackToConstraint* constraint = new TrackToConstraint(target, ofVec3f(0, 0, 1));
+					object->addConstraint(constraint);
+				}
+			}
+		}
+		
+		/*
+		for(DNAStructureReader& constraintReader: reader.readLinkedList("constraintChannels")) {
+			//cout << constraintReader.getType() << endl;
+		}
+		*/
 
 		//parse the anim data
 		parseAnimationData(reader, &object->timeline);
