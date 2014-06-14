@@ -8,6 +8,7 @@ Timeline::Timeline() {
 	timeOffset = ofGetElapsedTimeMillis();
 	loop = false;
 	duration = 1000000;
+	isPlaying = true;
 }
 
 Timeline::~Timeline() {
@@ -24,18 +25,35 @@ void Timeline::step() {
 }
 
 void Timeline::setTime(unsigned long long t) {
+	if(!isPlaying)
+		return;
+
 	t = t - timeOffset;
-	if(loop)
+	if(loop) {
 		time = t % duration;
-	else
+		if(time < timeOld) {
+			Timeline* _this = this;
+			ofNotifyEvent(ended, _this);
+			ofNotifyEvent(started, _this);
+		}
+	} else {
 		time = t;
-		
+		if(time > duration) {
+			Timeline* _this = this;
+			ofNotifyEvent(ended, _this);
+			stop();
+		}
+	}
+
+
 	for(Animation_* animation: animations) {
 		animation->step(time);
 	}
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
+	
+	timeOld = time;
 }
 
 void Timeline::add(Timeline* timeline) {
@@ -44,19 +62,22 @@ void Timeline::add(Timeline* timeline) {
 }
 
 void Timeline::start() {
-	
+	isPlaying = true;
+	Timeline* _this = this;
+	ofNotifyEvent(started, _this);
 }
 
-void Timeline::setDuration(unsigned long long d)
-{
+void Timeline::stop() {
+	isPlaying = false;
+}
+
+void Timeline::setDuration(unsigned long long d) {
 	duration = d;
 }
 
-void Timeline::setLoop(bool loopState)
-{
+void Timeline::setLoop(bool loopState) {
 	loop = loopState;
 }
 
 }
 }
-

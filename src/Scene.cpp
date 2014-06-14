@@ -57,6 +57,7 @@ void Scene::customDraw() {
 
 	//basics
 	ofPushStyle();
+	ofEnableNormalizedTexCoords();
 
 	ofEnableDepthTest();
 
@@ -116,6 +117,7 @@ void Scene::customDraw() {
 
 	ofDisableDepthTest();
 	ofDisableLighting();
+	ofDisableNormalizedTexCoords();
 
 	//draw object names
 	if(doDebug) {
@@ -129,6 +131,8 @@ void Scene::customDraw() {
 
 	//end the camera
 	camera->end();
+	
+
 }
 
 void Scene::addObject(Object* obj) {
@@ -240,3 +244,5 @@ void Scene::setLightningEnabled(bool state) {
 
 }
 } //end namespace
+
+

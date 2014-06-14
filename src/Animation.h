@@ -243,19 +243,26 @@ public:
 
 	void start();
 	void step();
+	void stop();
+	//void pause();
 
 	void setDuration(unsigned long long duration);
 	void setLoop(bool loopState);
-
+	
+	ofEvent<Timeline*> started;
+	ofEvent<Timeline*> ended;
+	
 private:
 	Animation_::DefaultHandlerContainer defaultHandler;
 	void setTime(unsigned long long time);
 	std::vector<Animation_*> animations;
 	std::vector<Timeline*> children;
 	unsigned long long time;
+	unsigned long long timeOld;
 	unsigned long long duration;
 	unsigned long long timeOffset;
 	bool loop;
+	bool isPlaying;
 };
 
 }

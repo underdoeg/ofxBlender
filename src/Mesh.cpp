@@ -15,7 +15,6 @@ Mesh::~Mesh() {
 }
 
 void Mesh::customDraw() {
-
 	if(isTwoSided) {
 		glDisable(GL_CULL_FACE);
 		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
@@ -24,7 +23,8 @@ void Mesh::customDraw() {
 		glCullFace(GL_BACK);
 		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 	}
-
+	
+	
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();

@@ -14,7 +14,6 @@ Material::~Material() {
 }
 
 void Material::begin() {
-	ofEnableNormalizedTexCoords();
 	
 	ofSetColor(255);
 	if(textures.size()>0) {
@@ -46,6 +45,7 @@ void Material::end() {
 	if(!useShader) {
 		material.end();
 	}
+	
 }
 
 }
