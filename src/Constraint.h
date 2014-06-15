@@ -39,6 +39,9 @@ public:
 	ofVec3f up;
 };
 
+//some people might like this name more
+typedef TrackToConstraint LookAtConstraint;
+
 }
 
 }

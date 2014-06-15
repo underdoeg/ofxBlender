@@ -40,6 +40,12 @@ public:
 	
 	void addConstraint(Constraint* constraint);
 	
+	void animateTo(Object* obj, float time, InterpolationType interpolation=LINEAR);
+	void animatePositionTo(ofVec3f pos, float time, InterpolationType interpolation=LINEAR);
+	void animateRotationTo(ofVec3f rot, float time, InterpolationType interpolation=LINEAR);
+	void animateRotationTo(ofQuaternion rot, float time, InterpolationType interpolation=LINEAR);
+	void animateScaleTo(ofVec3f scale, float time, InterpolationType interpolation=LINEAR);
+	
 	string name;
 	ObjectType type;
 	Timeline timeline;
@@ -53,6 +59,8 @@ public:
 protected:
 	virtual void onAnimationDataFloat(float value, string address, int channel);
 	virtual void onAnimationDataBool(bool value, string address, int channel);
+	virtual void onAnimationDataVec3f(ofVec3f vec, string address, int channel);
+	virtual void onAnimationDataQuat(ofQuaternion quat, string address, int channel);
 
 	void onOrientationChanged();
 	void onPositionChanged();

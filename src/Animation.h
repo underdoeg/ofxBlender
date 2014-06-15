@@ -60,8 +60,8 @@ public:
 	};
 	/////////////////////////////////////////////////////////////////////
 
-	Animation_(string address_, int channel_) {
-		loop = false;
+	Animation_(string address_, int channel_): type(typeid(void)){
+		isLoop = false;
 		internalTime = 0;
 		timeOffset = 0;
 		timeLast = timeOffset;
@@ -75,12 +75,22 @@ public:
 		onStep(timeNow, timeLast);
 		timeLast = timeNow;
 	};
+	
+	template<typename Type>
+	bool isType() {
+		return std::type_index(typeid(Type)) == type;
+	}
+	
+	void clear(){
+		keyframes.clear();
+	}
 
 	int channel;
 	string address;
-	bool loop;
+	bool isLoop;
 	unsigned long long timeOffset;
 	unsigned long long timeLast;
+	std::type_index type;
 
 protected:
 	class Keyframe {
@@ -155,6 +165,7 @@ public:
 
 	Animation(string address, int channel):Animation_(address, channel) {
 		oldValueSet = false;
+		type = std::type_index(typeid(Type));
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
@@ -177,11 +188,11 @@ public:
 		float stepRel = (timeNow - key1->time) / step;
 
 		switch(key1->interpolation) {
-			case BEZIER:
-				Animation<Type>::triggerListeners(Interpolation::linear(stepRel, key1->value, key2->value));
-				break;
 			case LINEAR:
-				Animation<Type>::triggerListeners(Interpolation::bezier(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
+				Animation<Type>::triggerListeners(Interpolation::linear<Type>(stepRel, key1->value, key2->value));
+				break;
+			case BEZIER:
+				Animation<Type>::triggerListeners(Interpolation::bezier<Type>(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
 				break;
 			case CONSTANT:
 				Animation<Type>::triggerListeners(key1->value);
@@ -240,6 +251,21 @@ public:
 
 	void add(Timeline* timeline);
 	void add(Animation_* animation);
+	
+	template<typename Type>
+	Animation<Type>* getAnimation(string address, int channel=0){
+		for(Animation_* anim: animations){
+			//
+			if(anim->channel == channel && anim->address == address){
+				if(anim->isType<Type>()){
+					return static_cast<Animation<Type>* >(anim);
+				}
+			}
+		}
+		Animation<Type>* newAnim = new Animation<Type>(address, channel);
+		add(newAnim);
+		return newAnim;
+	}
 
 	void start();
 	void step();
@@ -248,6 +274,21 @@ public:
 
 	void setDuration(unsigned long long duration);
 	void setLoop(bool loopState);
+	void setEndless(bool endlessState);
+	
+	template<typename Type>
+	void animateTo(Type from, Type to, float duration, string address, int channel=0, InterpolationType interpolation=LINEAR){
+		if(!isEndless){
+			ofLogWarning(OFX_BLENDER) << "animateTo: timeline is not endless, this might in abrupt repeats or stops";
+		}
+		
+		Animation<Type>* anim = getAnimation<Type>(address, channel);
+		anim->clear();
+		anim->addKeyframe(getTime(), from);
+		anim->addKeyframe(getTime() + duration * 1000, to);
+	}
+	
+	unsigned long long getTime();
 	
 	ofEvent<Timeline*> started;
 	ofEvent<Timeline*> ended;
@@ -261,8 +302,9 @@ private:
 	unsigned long long timeOld;
 	unsigned long long duration;
 	unsigned long long timeOffset;
-	bool loop;
+	bool isLoop;
 	bool isPlaying;
+	bool isEndless;
 };
 
 }

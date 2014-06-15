@@ -55,6 +55,9 @@
         <File Name="../../src/Material.cpp"/>
         <File Name="../../src/Layer.h"/>
         <File Name="../../src/Layer.cpp"/>
+        <File Name="../../src/Interpolation.cpp"/>
+        <File Name="../../src/Constraint.cpp"/>
+        <File Name="../../src/Constraint.h"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

@@ -11,6 +11,9 @@ void ofApp::setup() {
 	file.exportStructure();
 	scene = file.getScene(0);
 	scene->setDebug(true);
+	scene->timeline.setEndless(true);
+	
+	scene->getActiveCamera()->addConstraint(new LookAtConstraint(scene->getMesh(0)));
 }
 
 void ofApp::update() {
@@ -29,7 +32,17 @@ void ofApp::keyPressed(int key) {
 }
 
 void ofApp::keyReleased(int key) {
-	scene->toggleDebug();
+	if(key == 'd')
+		scene->toggleDebug();
+	else if(key == 'a'){
+		//animate
+		scene->getMesh(0)->animatePositionTo(ofVec3f(ofRandom(-5, 5), ofRandom(-5, 5), ofRandom(-5, 5)), ofRandom(1, 5));
+		scene->getMesh(0)->animateRotationTo(ofVec3f(ofRandom(-5, 5), ofRandom(-5, 5), ofRandom(-5, 5)), ofRandom(1, 5));
+		scene->getMesh(0)->animateScaleTo(ofVec3f(ofRandom(-5, 5), ofRandom(-5, 5), ofRandom(-5, 5)), ofRandom(1, 5));
+	}else if(key == 's'){
+		//animate
+		scene->getMesh(0)->animateTo(scene->getMesh(1), 4);
+	}
 }
 
 void ofApp::mouseDragged(int x, int y, int button) {

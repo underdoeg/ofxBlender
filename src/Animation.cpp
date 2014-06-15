@@ -6,14 +6,14 @@ namespace blender {
 
 Timeline::Timeline() {
 	timeOffset = ofGetElapsedTimeMillis();
-	loop = false;
+	isLoop = false;
 	duration = 1000000;
 	isPlaying = true;
+	isEndless = true;
 }
 
 Timeline::~Timeline() {
 }
-
 
 void Timeline::add(Animation_* animation) {
 	animation->defaultHandler = &defaultHandler;
@@ -29,7 +29,7 @@ void Timeline::setTime(unsigned long long t) {
 		return;
 
 	t = t - timeOffset;
-	if(loop) {
+	if(isLoop && !isEndless) {
 		time = t % duration;
 		if(time < timeOld) {
 			Timeline* _this = this;
@@ -38,13 +38,12 @@ void Timeline::setTime(unsigned long long t) {
 		}
 	} else {
 		time = t;
-		if(time > duration) {
+		if(time > duration && !isEndless) {
 			Timeline* _this = this;
 			ofNotifyEvent(ended, _this);
 			stop();
 		}
 	}
-
 
 	for(Animation_* animation: animations) {
 		animation->step(time);
@@ -52,12 +51,15 @@ void Timeline::setTime(unsigned long long t) {
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
-	
+
 	timeOld = time;
 }
 
 void Timeline::add(Timeline* timeline) {
 	timeline->timeOffset = 0;
+	timeline->setDuration(duration);
+	timeline->setLoop(isLoop);
+	timeline->setEndless(isEndless);
 	children.push_back(timeline);
 }
 
@@ -73,10 +75,27 @@ void Timeline::stop() {
 
 void Timeline::setDuration(unsigned long long d) {
 	duration = d;
+	for(Timeline* child: children) {
+		child->setDuration(d);
+	}
 }
 
 void Timeline::setLoop(bool loopState) {
-	loop = loopState;
+	isLoop = loopState;
+	for(Timeline* child: children) {
+		child->setLoop(loopState);
+	}
+}
+
+void Timeline::setEndless(bool endlessState) {
+	isEndless = endlessState;
+	for(Timeline* child: children) {
+		child->setEndless(endlessState);
+	}
+}
+
+unsigned long long Timeline::getTime() {
+	return time;
 }
 
 }

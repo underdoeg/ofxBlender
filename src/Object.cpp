@@ -15,6 +15,8 @@ Object::Object() {
 	lookAtUp.set(0, 1, 0);
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationDataFloat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<bool>(std::bind(&Object::onAnimationDataBool, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	timeline.setDefaultHandler<ofVec3f>(std::bind(&Object::onAnimationDataVec3f, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	timeline.setDefaultHandler<ofQuaternion>(std::bind(&Object::onAnimationDataQuat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 Object::~Object() {
@@ -175,6 +177,44 @@ void Object::onAnimationDataBool(bool value, string address, int channel) {
 			show();
 		}
 	}
+}
+
+void Object::onAnimationDataVec3f(ofVec3f vec, string address, int channel) {
+	if(address == "loc")
+		setPosition(vec);
+	else if(address == "rot")
+		setOrientation(vec);
+	else if(address == "scale")
+		setScale(vec);
+}
+
+void Object::onAnimationDataQuat(ofQuaternion quat, string address, int channel) {
+	if(address == "rot")
+		setOrientation(quat);
+}
+
+//animate to
+void Object::animateTo(Object* obj, float duration, InterpolationType interpolation) {
+	animatePositionTo(obj->getPosition(), duration, interpolation);
+	animateRotationTo(obj->getOrientationQuat(), duration, interpolation);
+	animateScaleTo(obj->getScale(), duration, interpolation);
+
+}
+
+void Object::animatePositionTo(ofVec3f pos, float duration, InterpolationType interpolation) {
+	timeline.animateTo(getPosition(), pos, duration, "loc", 0, interpolation);
+}
+
+void Object::animateRotationTo(ofVec3f rot, float duration, InterpolationType interpolation) {
+	timeline.animateTo(getOrientationEuler(), rot, duration, "rot", 0, interpolation);
+}
+
+void Object::animateRotationTo(ofQuaternion rot, float duration, InterpolationType interpolation) {
+	timeline.animateTo(getOrientationQuat(), rot, duration, "rot", 0, interpolation);
+}
+
+void Object::animateScaleTo(ofVec3f scale, float duration, InterpolationType interpolation) {
+	timeline.animateTo(getScale(), scale, duration, "scale", 0, interpolation);
 }
 
 }
