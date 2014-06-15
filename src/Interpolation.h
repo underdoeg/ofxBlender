@@ -6,7 +6,7 @@
 namespace ofx {
 
 namespace blender {
-	
+
 enum InterpolationType {
     LINEAR,
     BEZIER,
@@ -22,8 +22,8 @@ public:
 		ofLogWarning(OFX_BLENDER) << "unsupported type passed to bezier, works only with float";
 		return Type();
 	}
-	
-	
+
+
 	template<typename Type>
 	static Type linear(float interpol, Type a, Type b) {
 		return a + (b - a) * interpol;
@@ -32,7 +32,8 @@ public:
 //};
 };
 
-
+template<>
+float Interpolation::bezier<float>(float t, ofVec2f p0, ofVec2f p1, ofVec2f p2, ofVec2f p3);
 
 }
 }
