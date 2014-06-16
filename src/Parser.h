@@ -602,7 +602,7 @@ public:
 		reader.setStructure("r");
 		short fps = reader.read<short>("frs_sec");
 		scene->timeline.setLoop(true);
-		scene->timeline.setDuration(1.f/(float)fps * (float)reader.read<int>("efra") * 1000);
+		scene->timeline.setDuration(1.f/(float)fps * (float)reader.read<int>("efra"));
 		reader.reset();
 
 		//Timeline infos
@@ -640,12 +640,18 @@ public:
 		if(reader.readAddress("camera") != 0) {
 			scene->setActiveCamera(static_cast<Camera*>(reader.file->getObjectByAddress(reader.readAddress("camera"))));
 		}
-
+		
 		//WORLD INFOS
 		DNAStructureReader worldReader = reader.readStructure("world");
 		scene->bgColor = ofFloatColor(worldReader.read<float>("horr"), worldReader.read<float>("horg"), worldReader.read<float>("horb"));
 		//cout << "COLOR MODEL " << worldReader.read<short>("colormodel") << endl;
 		//cout << reader.readStructure("base").readStructure("object").setStructure("id").readString("name") << endl;
+	
+	
+		//MARKERS
+		for(DNAStructureReader& markerReader: reader.readLinkedList("markers")){
+			scene->timeline.addMarker(1.f/(float)fps * (float)markerReader.read<int>("frame"), markerReader.readString("name"));
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////

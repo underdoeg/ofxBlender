@@ -15,12 +15,14 @@ public:
 	void onPositionChanged();
 	void onOrientationChanged();
 	void setLens(float lens);
-	//void onScaleChanged();
+	float getLens();
+	void animateLensTo(float targetLens, float duration, InterpolationType interpolation=LINEAR);
 	ofCamera camera;
 private:
 	void onAnimationDataFloat(float value, string address, int channel);
 	void updateCamPos();
 	ofMesh debugMesh;
+	float lens;
 };
 
 }

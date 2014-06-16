@@ -60,7 +60,7 @@ public:
 	};
 	/////////////////////////////////////////////////////////////////////
 
-	Animation_(string address_, int channel_): type(typeid(void)){
+	Animation_(string address_, int channel_): type(typeid(void)) {
 		isLoop = false;
 		internalTime = 0;
 		timeOffset = 0;
@@ -75,14 +75,18 @@ public:
 		onStep(timeNow, timeLast);
 		timeLast = timeNow;
 	};
-	
+
 	template<typename Type>
 	bool isType() {
 		return std::type_index(typeid(Type)) == type;
 	}
-	
-	void clear(){
+
+	void clear() {
 		keyframes.clear();
+	}
+
+	bool isRunning() {
+		return getKeyframeAfter(timeLast) != NULL;
 	}
 
 	int channel;
@@ -169,10 +173,10 @@ public:
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-				
+
 		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
 		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
-		
+
 		//check if we have a key1, otherwise I don't know how to calculate this
 		if(!key1)
 			return;
@@ -188,14 +192,14 @@ public:
 		float stepRel = (timeNow - key1->time) / step;
 
 		switch(key1->interpolation) {
-			case LINEAR:
-				Animation<Type>::triggerListeners(Interpolation::linear<Type>(stepRel, key1->value, key2->value));
-				break;
-			case BEZIER:
-				Animation<Type>::triggerListeners(Interpolation::bezier<Type>(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
-				break;
-			case CONSTANT:
-				Animation<Type>::triggerListeners(key1->value);
+		case LINEAR:
+			Animation<Type>::triggerListeners(Interpolation::linear<Type>(stepRel, key1->value, key2->value));
+			break;
+		case BEZIER:
+			Animation<Type>::triggerListeners(Interpolation::bezier<Type>(stepRel, key1->point, key1->handle2, key2->handle1, key2->point));
+			break;
+		case CONSTANT:
+			Animation<Type>::triggerListeners(key1->value);
 		}
 	}
 
@@ -237,6 +241,17 @@ private:
 };
 
 
+class Marker {
+public:
+	Marker(unsigned long long t, string n) {
+		time = t;
+		name = n;
+	}
+
+	unsigned long long time;
+	string name;
+};
+
 /////////////////////////////////////////////////// TIMELINE
 
 class Timeline {
@@ -251,13 +266,14 @@ public:
 
 	void add(Timeline* timeline);
 	void add(Animation_* animation);
-	
+	void addMarker(float time, string name);
+
 	template<typename Type>
-	Animation<Type>* getAnimation(string address, int channel=0){
-		for(Animation_* anim: animations){
+	Animation<Type>* getAnimation(string address, int channel=0) {
+		for(Animation_* anim: animations) {
 			//
-			if(anim->channel == channel && anim->address == address){
-				if(anim->isType<Type>()){
+			if(anim->channel == channel && anim->address == address) {
+				if(anim->isType<Type>()) {
 					return static_cast<Animation<Type>* >(anim);
 				}
 			}
@@ -267,37 +283,45 @@ public:
 		return newAnim;
 	}
 
-	void start();
+	void play();
+	void pause();
 	void step();
 	void stop();
+	void replay();
 	//void pause();
 
-	void setDuration(unsigned long long duration);
+	void setDuration(unsigned long duration);
 	void setLoop(bool loopState);
 	void setEndless(bool endlessState);
-	
+
+	bool isAnimating();
+
 	template<typename Type>
-	void animateTo(Type from, Type to, float duration, string address, int channel=0, InterpolationType interpolation=LINEAR){
-		if(!isEndless){
-			ofLogWarning(OFX_BLENDER) << "animateTo: timeline is not endless, this might in abrupt repeats or stops";
+	void animateTo(Type from, Type to, float duration, string address, int channel=0, InterpolationType interpolation=LINEAR) {
+		if(!isEndless) {
+			ofLogWarning(OFX_BLENDER) << "animateTo: timeline is not endless, this might result in abrupt repeats or stops";
 		}
-		
+
+		cout << "Animate from " << getTime() << " to " << (getTime() + duration * 1000) << endl;
+
 		Animation<Type>* anim = getAnimation<Type>(address, channel);
 		anim->clear();
 		anim->addKeyframe(getTime(), from);
 		anim->addKeyframe(getTime() + duration * 1000, to);
 	}
-	
+
 	unsigned long long getTime();
-	
+
 	ofEvent<Timeline*> started;
 	ofEvent<Timeline*> ended;
-	
+	ofEvent<std::string&> markerTriggered;
+
 private:
 	Animation_::DefaultHandlerContainer defaultHandler;
 	void setTime(unsigned long long time);
 	std::vector<Animation_*> animations;
 	std::vector<Timeline*> children;
+	std::vector<Marker> markers;
 	unsigned long long time;
 	unsigned long long timeOld;
 	unsigned long long duration;
@@ -305,6 +329,7 @@ private:
 	bool isLoop;
 	bool isPlaying;
 	bool isEndless;
+	bool isPaused;
 };
 
 }

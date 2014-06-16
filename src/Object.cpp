@@ -180,6 +180,8 @@ void Object::onAnimationDataBool(bool value, string address, int channel) {
 }
 
 void Object::onAnimationDataVec3f(ofVec3f vec, string address, int channel) {
+	cout << address << endl;
+	
 	if(address == "loc")
 		setPosition(vec);
 	else if(address == "rot")

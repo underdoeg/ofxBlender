@@ -10,6 +10,7 @@ Timeline::Timeline() {
 	duration = 1000000;
 	isPlaying = true;
 	isEndless = true;
+	isPaused = false;
 }
 
 Timeline::~Timeline() {
@@ -44,14 +45,19 @@ void Timeline::setTime(unsigned long long t) {
 			stop();
 		}
 	}
-
+	
+	for(Marker& marker: markers){
+		if(timeOld < marker.time && time > marker.time){
+			markerTriggered(marker.name);
+		}
+	}
+	
 	for(Animation_* animation: animations) {
 		animation->step(time);
 	}
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
-
 	timeOld = time;
 }
 
@@ -63,18 +69,33 @@ void Timeline::add(Timeline* timeline) {
 	children.push_back(timeline);
 }
 
-void Timeline::start() {
+void Timeline::play() {
+	timeOffset = ofGetElapsedTimeMillis();
 	isPlaying = true;
+	isPaused = false;
 	Timeline* _this = this;
+	for(Timeline* child: children) {
+		child->timeOffset = 0;
+		child->time = 0;
+	}
 	ofNotifyEvent(started, _this);
+}
+
+void Timeline::pause() {
+	isPaused = true;
+}
+
+void Timeline::replay() {
+	stop();
+	play();
 }
 
 void Timeline::stop() {
 	isPlaying = false;
 }
 
-void Timeline::setDuration(unsigned long long d) {
-	duration = d;
+void Timeline::setDuration(unsigned long d) {
+	duration = d * 1000;
 	for(Timeline* child: children) {
 		child->setDuration(d);
 	}
@@ -96,6 +117,18 @@ void Timeline::setEndless(bool endlessState) {
 
 unsigned long long Timeline::getTime() {
 	return time;
+}
+
+bool Timeline::isAnimating() {
+	for(Animation_* anim: animations) {
+		if(anim->isRunning())
+			return true;
+	}
+	return false;
+}
+
+void Timeline::addMarker(float time, string name) {
+	markers.push_back(Marker(time * 1000, name));
 }
 
 }
