@@ -311,6 +311,7 @@ public:
 	}
 
 	unsigned long long getTime();
+	unsigned long long getDuration();
 
 	ofEvent<Timeline*> started;
 	ofEvent<Timeline*> ended;

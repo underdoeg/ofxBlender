@@ -45,13 +45,13 @@ void Timeline::setTime(unsigned long long t) {
 			stop();
 		}
 	}
-	
-	for(Marker& marker: markers){
-		if(timeOld < marker.time && time > marker.time){
+
+	for(Marker& marker: markers) {
+		if(timeOld < marker.time && time > marker.time) {
 			markerTriggered(marker.name);
 		}
 	}
-	
+
 	for(Animation_* animation: animations) {
 		animation->step(time);
 	}
@@ -117,6 +117,10 @@ void Timeline::setEndless(bool endlessState) {
 
 unsigned long long Timeline::getTime() {
 	return time;
+}
+
+unsigned long long Timeline::getDuration() {
+	return duration;
 }
 
 bool Timeline::isAnimating() {
