@@ -12,10 +12,11 @@ Most objects extend ofNode and have ofLight, ofCamera etc as a child object.
 * scenes
 * meshes (tris and quads)
 * materials (colors & textures)
-* animation data (position, rotation, scale)
+* animation data (position, rotation, scale, camera lens, object visibility)
 * cameras
 * lights
 * scene hierarchy 
+* markers
 
 ## limitations
 
