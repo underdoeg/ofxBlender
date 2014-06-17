@@ -23,6 +23,7 @@ public:
     void customDraw();
     void update();
     void addObject(Object* obj);
+	bool hasObject(Object* obj);
 	Object* getObject(unsigned int index);
 	Object* getObject(string name);
 	Mesh* getMesh(unsigned int index);
@@ -48,7 +49,6 @@ public:
 	ofEasyCam debugCam;
 
 private:
-	bool hasObject(Object* obj);
 	Camera* activeCamera;
     std::vector<Object*> objects;
     std::vector<Mesh*> meshes;

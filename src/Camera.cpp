@@ -37,8 +37,8 @@ void Camera::updateCamPos() {
 }
 
 void Camera::setLens(float l) {
-	lens = l * 2;
-	float fov = ofRadToDeg(2 * atan(16 / lens));
+	lens = l;
+	float fov = ofRadToDeg(2 * atan(16.f / (lens * 2.f)));
 	camera.setFov(fov);
 }
 

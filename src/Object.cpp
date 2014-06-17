@@ -1,5 +1,6 @@
 #include "Object.h"
 #include "Layer.h"
+#include "Scene.h"
 
 namespace ofx {
 
@@ -32,11 +33,15 @@ void Object::draw() {
 	if(!visible)
 		return;
 
+	if(scene) {
+		if(!scene->hasObject(this))
+			return;
+	}
+
 	if(layer) {
 		if(!layer->isVisible())
 			return;
 	}
-
 
 	ofNode::transformGL();
 	customDraw();
@@ -54,6 +59,10 @@ void Object::addChild(Object* child) {
 	child->parent = this;
 	child->setParent(*this, true);
 	children.push_back(child);
+}
+
+std::vector<Object*> Object::getChildren() {
+	return children;
 }
 
 bool Object::hasParent() {
@@ -179,7 +188,7 @@ void Object::onAnimationDataBool(bool value, string address, int channel) {
 	}
 }
 
-void Object::onAnimationDataVec3f(ofVec3f vec, string address, int channel) {	
+void Object::onAnimationDataVec3f(ofVec3f vec, string address, int channel) {
 	if(address == "loc")
 		setPosition(vec);
 	else if(address == "rot")

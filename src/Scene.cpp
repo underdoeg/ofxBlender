@@ -40,6 +40,7 @@ bool Scene::isDebugEnabled() {
 void Scene::update() {
 	timeline.step();
 	for(Object* obj: objects) {
+		obj->scene = this;
 		obj->update();
 	}
 }
@@ -85,7 +86,7 @@ void Scene::customDraw() {
 	//action
 	for(Object* obj: objects) {
 		bool drawIt = true;
-		if(obj->hasParent() && hasObject(obj->getParent()))
+		if(obj->hasParent())
 			drawIt = false;
 
 		if(doDebug) {
@@ -136,9 +137,13 @@ void Scene::customDraw() {
 }
 
 void Scene::addObject(Object* obj) {
+	if(std::find(objects.begin(), objects.end(), obj) != objects.end()){
+		return;
+	}
+	
 	objects.push_back(obj);
 	timeline.add(&obj->timeline);
-	//obj->setParent(*this);
+
 	switch(obj->type) {
 	case MESH:
 		meshes.push_back(static_cast<Mesh*>(obj));
@@ -160,7 +165,10 @@ void Scene::addObject(Object* obj) {
 	}
 
 	ofLogNotice(OFX_BLENDER) << "Added object " << obj->name << " to scene " << name;
-
+	
+	for(Object* child: obj->getChildren()){
+		//addObject(child);
+	}
 }
 
 //templated helper to retrieve objects

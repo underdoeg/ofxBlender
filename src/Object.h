@@ -31,6 +31,7 @@ public:
 	virtual void customDraw();
 
 	void addChild(Object* child);
+	std::vector<Object*> getChildren();
 	Object* getParent();
 	bool hasParent();
 	bool isVisible();
