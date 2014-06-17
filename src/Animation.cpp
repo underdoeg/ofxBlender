@@ -30,6 +30,12 @@ void Timeline::setTime(unsigned long long t) {
 		return;
 
 	t = t - timeOffset;
+
+	if(isPaused) {
+		timeOffset += t - time;
+		return;
+	}
+
 	if(isLoop && !isEndless) {
 		time = t % duration;
 		if(time < timeOld) {
@@ -70,7 +76,9 @@ void Timeline::add(Timeline* timeline) {
 }
 
 void Timeline::play() {
-	timeOffset = ofGetElapsedTimeMillis();
+	if(!isPaused)
+		timeOffset = ofGetElapsedTimeMillis();
+
 	isPlaying = true;
 	isPaused = false;
 	Timeline* _this = this;
@@ -133,6 +141,10 @@ bool Timeline::isAnimating() {
 
 void Timeline::addMarker(float time, string name) {
 	markers.push_back(Marker(time * 1000, name));
+}
+
+std::vector<Marker> Timeline::getMarkers() {
+	return markers;
 }
 
 }

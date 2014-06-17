@@ -17,7 +17,6 @@ Camera::~Camera() {
 void Camera::customDraw() {
 	ofDrawAxis(.5);
 	ofSetColor(255);
-	//ofLine(0, 0, 0, 0, 0, -10);
 	ofPushMatrix();
 	ofRotateX(-90);
 	debugMesh.drawWireframe();
@@ -38,7 +37,7 @@ void Camera::updateCamPos() {
 }
 
 void Camera::setLens(float l) {
-	lens = l;
+	lens = l * 2;
 	float fov = ofRadToDeg(2 * atan(16 / lens));
 	camera.setFov(fov);
 }

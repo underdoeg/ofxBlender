@@ -309,7 +309,9 @@ public:
 		anim->addKeyframe(getTime(), from);
 		anim->addKeyframe(getTime() + duration * 1000, to);
 	}
-
+	
+	std::vector<Marker> getMarkers();
+	
 	unsigned long long getTime();
 	unsigned long long getDuration();
 
