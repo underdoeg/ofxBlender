@@ -315,7 +315,7 @@ public:
 
 	ofEvent<Timeline*> started;
 	ofEvent<Timeline*> ended;
-	ofEvent<std::string&> markerTriggered;
+	ofEvent<std::string> markerTriggered;
 
 private:
 	Animation_::DefaultHandlerContainer defaultHandler;
