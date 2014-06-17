@@ -94,7 +94,7 @@ void Timeline::stop() {
 	isPlaying = false;
 }
 
-void Timeline::setDuration(unsigned long d) {
+void Timeline::setDuration(double d) {
 	duration = d * 1000;
 	for(Timeline* child: children) {
 		child->setDuration(d);

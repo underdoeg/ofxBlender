@@ -290,7 +290,7 @@ public:
 	void replay();
 	//void pause();
 
-	void setDuration(unsigned long duration);
+	void setDuration(double duration);
 	void setLoop(bool loopState);
 	void setEndless(bool endlessState);
 

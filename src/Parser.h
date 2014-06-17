@@ -602,7 +602,8 @@ public:
 		reader.setStructure("r");
 		short fps = reader.read<short>("frs_sec");
 		scene->timeline.setLoop(true);
-		scene->timeline.setDuration(1.f/(float)fps * (float)reader.read<int>("efra"));
+		double duration = 1.f/(float)fps * (float)reader.read<int>("efra");
+		scene->timeline.setDuration(duration);
 		reader.reset();
 
 		//Timeline infos
