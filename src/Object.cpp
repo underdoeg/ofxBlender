@@ -29,12 +29,12 @@ void Object::update() {
 	}
 }
 
-void Object::draw() {
+void Object::draw(Scene* scn) {
 	if(!visible)
 		return;
 
-	if(scene) {
-		if(!scene->hasObject(this))
+	if(scn) {
+		if(!scn->hasObject(this))
 			return;
 	}
 
@@ -46,7 +46,7 @@ void Object::draw() {
 	ofNode::transformGL();
 	customDraw();
 	for(Object* child: children) {
-		child->draw();
+		child->draw(scn);
 	}
 	ofNode::restoreTransformGL();
 }

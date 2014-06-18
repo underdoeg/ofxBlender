@@ -86,7 +86,7 @@ void Scene::customDraw() {
 	//action
 	for(Object* obj: objects) {
 		bool drawIt = true;
-		if(obj->hasParent())
+		if(obj->hasParent() && hasObject(obj->getParent()))
 			drawIt = false;
 
 		if(doDebug) {
@@ -165,10 +165,6 @@ void Scene::addObject(Object* obj) {
 	}
 
 	ofLogNotice(OFX_BLENDER) << "Added object " << obj->name << " to scene " << name;
-	
-	for(Object* child: obj->getChildren()){
-		//addObject(child);
-	}
 }
 
 //templated helper to retrieve objects

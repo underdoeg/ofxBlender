@@ -26,7 +26,7 @@ public:
 	~Object();
 	
 	void update();
-	void draw();
+	void draw(Scene* scene=NULL);
 
 	virtual void customDraw();
 
