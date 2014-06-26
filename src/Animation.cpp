@@ -11,6 +11,9 @@ Timeline::Timeline() {
 	isPlaying = true;
 	isEndless = true;
 	isPaused = false;
+	timeOffset = 0;
+	time = 0;
+	timeOld = 0;
 }
 
 Timeline::~Timeline() {
@@ -30,11 +33,14 @@ void Timeline::setTime(unsigned long long t) {
 		return;
 
 	t = t - timeOffset;
-
+		
 	if(isPaused) {
 		timeOffset += t - time;
+		//time = t;
+		//timeOld = time;
 		return;
 	}
+	
 
 	if(isLoop && !isEndless) {
 		time = t % duration;
@@ -78,7 +84,8 @@ void Timeline::add(Timeline* timeline) {
 void Timeline::play() {
 	if(!isPaused)
 		timeOffset = ofGetElapsedTimeMillis();
-
+	
+	timeOld = time;
 	isPlaying = true;
 	isPaused = false;
 	Timeline* _this = this;
@@ -100,6 +107,7 @@ void Timeline::replay() {
 
 void Timeline::stop() {
 	isPlaying = false;
+	timeOffset = ofGetElapsedTimeMillis();
 }
 
 void Timeline::setDuration(double d) {
