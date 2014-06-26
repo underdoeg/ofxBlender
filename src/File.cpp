@@ -26,11 +26,11 @@ void align(ifstream& stream) {
 
 File::File() {
 	scale = 10;
+	skipTextures = false;
 	Parser::init();
 }
 
 File::~File() {
-
 }
 
 void File::seek(streamoff to) {

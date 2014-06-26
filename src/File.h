@@ -175,7 +175,9 @@ public:
 	Scene* getScene(string sceneName);
 	unsigned int getNumberOfObjects();
 	Object* getObject(unsigned int index);
-
+	
+	bool skipTextures;
+	
 private:
 	class Block
 	{
@@ -233,7 +235,7 @@ private:
 	DNACatalog catalog;
 	std::ifstream file;
 	float scale;
-
+		
 	//packed files
 	//std::map<string, ofPixels> packedImages;
 

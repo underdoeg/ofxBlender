@@ -641,16 +641,16 @@ public:
 		if(reader.readAddress("camera") != 0) {
 			scene->setActiveCamera(static_cast<Camera*>(reader.file->getObjectByAddress(reader.readAddress("camera"))));
 		}
-		
+
 		//WORLD INFOS
 		DNAStructureReader worldReader = reader.readStructure("world");
 		scene->bgColor = ofFloatColor(worldReader.read<float>("horr"), worldReader.read<float>("horg"), worldReader.read<float>("horb"));
 		//cout << "COLOR MODEL " << worldReader.read<short>("colormodel") << endl;
 		//cout << reader.readStructure("base").readStructure("object").setStructure("id").readString("name") << endl;
-	
-	
+
+
 		//MARKERS
-		for(DNAStructureReader& markerReader: reader.readLinkedList("markers")){
+		for(DNAStructureReader& markerReader: reader.readLinkedList("markers")) {
 			scene->timeline.addMarker(1.f/(float)fps * (float)markerReader.read<int>("frame"), markerReader.readString("name"));
 		}
 	}
@@ -778,21 +778,21 @@ public:
 		//check for constraints
 		for(DNAStructureReader& constraintReader: reader.readLinkedList("constraints")) {
 			string name = constraintReader.readString("name");
-			
+
 			DNAStructureReader data = constraintReader.readStructure("data");
-			if(data.getType() == "bTrackToConstraint"){
-				
+			if(data.getType() == "bTrackToConstraint") {
+
 				Object* target = static_cast<Object*>(data.readStructure("tar").parse());
-				
-				if(target){
+
+				if(target) {
 					ofLogNotice(OFX_BLENDER) << "Creating Track To Constraint " << object->name << " -> " << target->name;
-					
+
 					TrackToConstraint* constraint = new TrackToConstraint(target, ofVec3f(0, 0, 1));
 					object->addConstraint(constraint);
 				}
 			}
 		}
-		
+
 		/*
 		for(DNAStructureReader& constraintReader: reader.readLinkedList("constraintChannels")) {
 			//cout << constraintReader.getType() << endl;
@@ -907,15 +907,20 @@ public:
 		int totalPolys = reader.read<int>("totpoly");
 
 		ofVec3f e0, e1;
+		
+		///
+		bool vertCountTooBig = false;
+		bool vertCountTooSmall = false;
+
 		//build triangles
 		for(int i=0; i<totalPolys; i++) {
 			unsigned int vertCount = polyReader.read<int>("totloop");
 			if (vertCount<3) {
-				ofLogWarning(OFX_BLENDER) << "can't convert polygon with only 2 or less vertices";
+				vertCountTooSmall = true;
 				continue;
 			}
 			if (vertCount>4) {
-				ofLogWarning(OFX_BLENDER) << "can't convert polygon with more than 4 vertices";
+				vertCountTooBig = true;
 				continue;
 			}
 
@@ -1017,7 +1022,12 @@ public:
 			//done, let's advance to the next polygon
 			polyReader.nextBlock();
 		}
-
+		
+		//warnings
+		if(vertCountTooBig)
+			ofLogWarning(OFX_BLENDER) << "can't convert polygon with more than 4 vertices";
+		if(vertCountTooSmall)
+			ofLogWarning(OFX_BLENDER) << "can't convert polygon with only 2 or less vertices";
 
 		//export uv layers
 		//for(unsigned int i=0; i<mesh->getNumUVLayers(); i++) {
@@ -1051,14 +1061,17 @@ public:
 		material->material.setAmbientColor(ofFloatColor(reader.read<float>("r"), reader.read<float>("g"), reader.read<float>("b")));
 		material->material.setSpecularColor(ofFloatColor(reader.read<float>("specr"), reader.read<float>("specg"), reader.read<float>("specb")));
 
-		std::vector<DNAStructureReader> textures = reader.readStructureArray("mtex");
-		for(DNAStructureReader& texReader: textures) {
-			Texture* texture = static_cast<Texture*>(texReader.parse());
-			if(texture->isEnabled && texture->img.isAllocated())
-				material->textures.push_back(texture);
-		}
-		if(material->textures.size() > 1) {
-			ofLogNotice(OFX_BLENDER) << "Material \"" << material->name << "\" has more than 1 Texture, only the first one will be used";
+		//load textures
+		if(!reader.file->skipTextures) {
+			std::vector<DNAStructureReader> textures = reader.readStructureArray("mtex");
+			for(DNAStructureReader& texReader: textures) {
+				Texture* texture = static_cast<Texture*>(texReader.parse());
+				if(texture->isEnabled && texture->img.isAllocated())
+					material->textures.push_back(texture);
+			}
+			if(material->textures.size() > 1) {
+				ofLogNotice(OFX_BLENDER) << "Material \"" << material->name << "\" has more than 1 Texture, only the first one will be used";
+			}
 		}
 	}
 
@@ -1115,9 +1128,9 @@ public:
 
 		camera->setNearClip(reader.read<float>("clipsta"));
 		camera->setFarClip(reader.read<float>("clipend"));
-		
+
 		parseAnimationData(reader, &cam->timeline);
-		
+
 		//camera->setupPerspective(true, fov, 0, 1000000);
 	}
 

@@ -6,7 +6,6 @@ namespace blender {
 
 Layer::Layer() {
 	visible = true;
-	cout << "NEW LAYER" << endl;
 }
 
 Layer::~Layer() {
