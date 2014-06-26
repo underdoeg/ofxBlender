@@ -41,6 +41,8 @@ void Timeline::setTime(unsigned long long t) {
 		return;
 	}
 	
+	cout << t << endl;
+	
 
 	if(isLoop && !isEndless) {
 		time = t % duration;
@@ -94,6 +96,7 @@ void Timeline::play() {
 		child->time = 0;
 	}
 	ofNotifyEvent(started, _this);
+	step();
 }
 
 void Timeline::pause() {
@@ -107,6 +110,7 @@ void Timeline::replay() {
 
 void Timeline::stop() {
 	isPlaying = false;
+	timeOld = 0;
 	timeOffset = ofGetElapsedTimeMillis();
 }
 
