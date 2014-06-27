@@ -11,9 +11,10 @@ void ofApp::setup() {
 	file.exportStructure();
 	scene = file.getScene(0);
 	scene->setDebug(true);
-	scene->timeline.setEndless(true);
+	//scene->timeline.setLoop(true);
+	//scene->timeline.setEndless(true);
 	
-	scene->getActiveCamera()->addConstraint(new LookAtConstraint(scene->getMesh(0)));
+	//scene->getActiveCamera()->addConstraint(new LookAtConstraint(scene->getMesh(0)));
 }
 
 void ofApp::update() {

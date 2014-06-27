@@ -5,6 +5,7 @@
 #include "ofMain.h"
 #include "Animation.h"
 #include "Constraint.h"
+#include "ofxGLM.h"
 
 namespace ofx {
 namespace blender {
@@ -66,7 +67,10 @@ protected:
 	void onOrientationChanged();
 	void onPositionChanged();
 	void onScaleChanged();
-
+	
+	void onTimelinePreFrame(Timeline*&);
+	void onTimelinePostFrame(Timeline*&);
+	
 private:
 	Object* lookAtTarget;
 	ofVec3f lookAtUp;
@@ -74,6 +78,11 @@ private:
 	Object* parent;
 	std::vector<Object*> children;
 	std::vector<Constraint*> constraints;
+	
+	//helpers for euler rotation
+	bool animIsEuler;
+	//ofVec3f eulerRot;
+	glm::vec3 eulerRot;
 };
 
 }

@@ -31,7 +31,7 @@ void Timeline::step() {
 void Timeline::setTime(unsigned long long t) {
 	if(!isPlaying)
 		return;
-
+	
 	t = t - timeOffset;
 		
 	if(isPaused) {
@@ -40,9 +40,9 @@ void Timeline::setTime(unsigned long long t) {
 		//timeOld = time;
 		return;
 	}
-	
-	cout << t << endl;
-	
+
+	Timeline* _this = this;
+	ofNotifyEvent(preFrame, _this);
 
 	if(isLoop && !isEndless) {
 		time = t % duration;
@@ -72,6 +72,8 @@ void Timeline::setTime(unsigned long long t) {
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
+	
+	ofNotifyEvent(postFrame, _this);
 	timeOld = time;
 }
 

@@ -1,6 +1,7 @@
 #include "Object.h"
 #include "Layer.h"
 #include "Scene.h"
+#include "gtx/euler_angles.hpp"
 
 namespace ofx {
 
@@ -14,10 +15,16 @@ Object::Object() {
 	layer = NULL;
 	lookAtTarget = NULL;
 	lookAtUp.set(0, 1, 0);
+	
+	animIsEuler = false;
+	
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationDataFloat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<bool>(std::bind(&Object::onAnimationDataBool, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<ofVec3f>(std::bind(&Object::onAnimationDataVec3f, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<ofQuaternion>(std::bind(&Object::onAnimationDataQuat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+	ofAddListener(timeline.preFrame, this, &Object::onTimelinePreFrame);
+	ofAddListener(timeline.postFrame, this, &Object::onTimelinePostFrame);
 }
 
 Object::~Object() {
@@ -130,6 +137,24 @@ void Object::onScaleChanged() {
 
 /////////////////////////////////////////////////////////////////////////////////
 
+void Object::onTimelinePreFrame(Timeline*&) {
+	animIsEuler = false;
+	
+	//TODO: only trigger when there is an euler animation
+	glm::quat quat = toGlm(getOrientationQuat());
+	eulerRot = glm::eulerAngles(quat);
+}
+
+void Object::onTimelinePostFrame(Timeline*&) {
+
+	if(animIsEuler) {
+		ofQuaternion QuatAroundX = ofQuaternion(  eulerRot.x, ofVec3f(1.0,0.0,0.0) );
+		ofQuaternion QuatAroundY = ofQuaternion( eulerRot.y, ofVec3f(0.0,1.0,0.0) );
+		ofQuaternion QuatAroundZ = ofQuaternion( eulerRot.z, ofVec3f(0.0,0.0,1.0) );
+		setOrientation(QuatAroundX * QuatAroundY * QuatAroundZ);
+	}
+}
+
 void Object::onAnimationDataFloat(float value, string address, int channel) {
 	//cout << channel << ":" << address << endl;
 	//cout << "MY VALUES : " << value << endl;
@@ -154,27 +179,15 @@ void Object::onAnimationDataFloat(float value, string address, int channel) {
 		}
 		setScale(scale);
 	} else if(address == "rotation_euler") {
-		ofVec3f rot = getOrientationEuler();
-		//ofQuaternion quat = getOrientationQuat();
-		//ofVec3f axis;
-
 		value = ofRadToDeg(value);
 		if(channel == 0) {
-			//tilt(value);
-			rot.x = value;
-			//axis = getXAxis();
+			eulerRot.x = value;
 		} else if(channel == 1) {
-			rot.y = value;
-			//pan(value);
-			//axis = getYAxis();
+			eulerRot.y = value;
 		} else if(channel == 2) {
-			rot.z = value;
-			//roll(value);
-			//axis = getZAxis();
+			eulerRot.z = value;
 		}
-		//quat.set(axis.x, axis.y, axis.z, value);
-		///setOrientation(quat);
-		setOrientation(rot);
+		animIsEuler = true;
 	}
 }
 

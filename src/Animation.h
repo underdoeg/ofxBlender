@@ -315,8 +315,11 @@ public:
 	unsigned long long getTime();
 	unsigned long long getDuration();
 
+	
 	ofEvent<Timeline*> started;
 	ofEvent<Timeline*> ended;
+	ofEvent<Timeline*> preFrame;
+	ofEvent<Timeline*> postFrame;
 	ofEvent<std::string> markerTriggered;
 
 private:
