@@ -53,6 +53,8 @@ public:
 	void animateRotationTo(ofQuaternion rot, float time, InterpolationType interpolation=LINEAR);
 	void animateScaleTo(ofVec3f scale, float time, InterpolationType interpolation=LINEAR);
 	
+	ofVec2f getPositionOnScreen(ofRectangle viewport = ofGetCurrentViewport());
+	
 	string name;
 	ObjectType type;
 	Timeline timeline;

@@ -239,7 +239,6 @@ void Object::animateTo(Object* obj, float duration, InterpolationType interpolat
 	animatePositionTo(obj->getPosition(), duration, interpolation);
 	animateRotationTo(obj->getOrientationQuat(), duration, interpolation);
 	animateScaleTo(obj->getScale(), duration, interpolation);
-
 }
 
 void Object::animatePositionTo(ofVec3f pos, float duration, InterpolationType interpolation) {
@@ -256,6 +255,26 @@ void Object::animateRotationTo(ofQuaternion rot, float duration, InterpolationTy
 
 void Object::animateScaleTo(ofVec3f scale, float duration, InterpolationType interpolation) {
 	timeline.animateTo(getScale(), scale, duration, "scale", 0, interpolation);
+}
+
+ofVec2f Object::getPositionOnScreen(ofRectangle viewport) {
+	ofVec2f ret;
+	if(!scene){
+		ofLogWarning(OFX_BLENDER) << "Object::getPositionOnScreen - scene not set";
+		return ret;
+	}
+	
+	if(scene->isDebugEnabled()){
+		return scene->getDebugCamera()->worldToScreen(getGlobalPosition(), viewport);
+	}
+	
+	Camera* cam = scene->getActiveCamera();
+	if(!cam){
+		ofLogWarning(OFX_BLENDER) << "Object::getPositionOnScreen - scene not set";
+		return ret;
+	}
+	
+	return cam->camera.worldToScreen(getGlobalPosition(), viewport);
 }
 
 }

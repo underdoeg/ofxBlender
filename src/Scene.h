@@ -36,6 +36,7 @@ public:
 	void setLightningEnabled(bool state);
 
 	Camera* getActiveCamera();
+	ofCamera* getDebugCamera();
 	void setActiveCamera(Camera* cam);
 	void disableCamera();
 	

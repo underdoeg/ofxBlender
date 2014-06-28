@@ -62,22 +62,22 @@ void Scene::customDraw() {
 
 	ofEnableDepthTest();
 
-	//update the material properties 
+	//update the material properties
 	//TODO: could be optimized
 
-	for(Material* material: materials){
+	for(Material* material: materials) {
 		material->lights = lights;
 		material->isLightningEnabled = doLightning;
 	}
 
 	//lights
 	if(doLightning) {
-		
+
 		if(lights.size()>0) {
 			ofSetSmoothLighting(true);
 			ofEnableLighting();
 		}
-		
+
 		for(Light* light: lights) {
 			light->begin();
 		}
@@ -132,23 +132,23 @@ void Scene::customDraw() {
 
 	//end the camera
 	camera->end();
-	
+
 
 }
 
 void Scene::addObject(Object* obj) {
-	if(std::find(objects.begin(), objects.end(), obj) != objects.end()){
+	if(std::find(objects.begin(), objects.end(), obj) != objects.end()) {
 		return;
 	}
-	
+
 	objects.push_back(obj);
 	timeline.add(&obj->timeline);
 
 	switch(obj->type) {
 	case MESH:
 		meshes.push_back(static_cast<Mesh*>(obj));
-		
-		for(Material* material: meshes.back()->materials){
+
+		for(Material* material: meshes.back()->materials) {
 			if(material && std::find(materials.begin(), materials.end(), material)==materials.end())
 				materials.push_back(material);
 		}
@@ -229,6 +229,10 @@ Camera* Scene::getActiveCamera() {
 	return activeCamera;
 }
 
+ofCamera* Scene::getDebugCamera() {
+	return &debugCam;
+}
+
 Light* Scene::getLight(string name) {
 	return getFromVecByName<Light>(lights, name);
 }
@@ -248,5 +252,3 @@ void Scene::setLightningEnabled(bool state) {
 
 }
 } //end namespace
-
-
