@@ -673,10 +673,10 @@ public:
 			key.ipo = bezier.read<short>("ipo");
 
 			//TODO: read proper frame rate
-			float fps = 24; //default blender frame rate
+			double fps = 24; //default blender frame rate
 
-			key.time = 1./fps * key.points[1][0];
-			key.time *= 1000;
+			double time = 1./fps * key.points[1][0];
+			key.time = time * 1000;
 
 			ret.push_back(key);
 			bezier.nextBlock();
@@ -686,11 +686,9 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	static void parseAnimationData(DNAStructureReader reader, Timeline* timeline) {
-
 		unsigned long animDataAddress = reader.readAddress("adt");
 		if(animDataAddress == 0)
 			return;
-
 
 		DNAStructureReader animReader(reader.file->getBlockByAddress(animDataAddress));
 		if(animReader.readAddress("action") == 0)
@@ -907,7 +905,7 @@ public:
 		int totalPolys = reader.read<int>("totpoly");
 
 		ofVec3f e0, e1;
-		
+
 		///
 		bool vertCountTooBig = false;
 		bool vertCountTooSmall = false;
@@ -1022,7 +1020,7 @@ public:
 			//done, let's advance to the next polygon
 			polyReader.nextBlock();
 		}
-		
+
 		//warnings
 		if(vertCountTooBig)
 			ofLogWarning(OFX_BLENDER) << "can't convert polygon with more than 4 vertices";

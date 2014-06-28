@@ -10,7 +10,7 @@ void ofApp::setup() {
 	file.load("test.blend");
 	file.exportStructure();
 	scene = file.getScene(0);
-	scene->setDebug(true);
+	//scene->setDebug(true);
 	//scene->timeline.setLoop(true);
 	//scene->timeline.setEndless(true);
 	

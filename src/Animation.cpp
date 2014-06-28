@@ -31,9 +31,9 @@ void Timeline::step() {
 void Timeline::setTime(unsigned long long t) {
 	if(!isPlaying)
 		return;
-	
+
 	t = t - timeOffset;
-		
+
 	if(isPaused) {
 		timeOffset += t - time;
 		//time = t;
@@ -72,7 +72,7 @@ void Timeline::setTime(unsigned long long t) {
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
-	
+
 	ofNotifyEvent(postFrame, _this);
 	timeOld = time;
 }
@@ -88,7 +88,7 @@ void Timeline::add(Timeline* timeline) {
 void Timeline::play() {
 	if(!isPaused)
 		timeOffset = ofGetElapsedTimeMillis();
-	
+
 	timeOld = time;
 	isPlaying = true;
 	isPaused = false;
@@ -159,6 +159,26 @@ void Timeline::addMarker(float time, string name) {
 
 std::vector<Marker> Timeline::getMarkers() {
 	return markers;
+}
+
+
+//check if animation exists
+bool Timeline::hasAnimation(string key) {
+	for(Animation_* anim:animations){
+		if(anim->address == key){
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Timeline::hasAnimation(string key, int channel) {
+	for(Animation_* anim:animations){
+		if(anim->channel == channel && anim->address == key){
+			return true;
+		}
+	}
+	return false;
 }
 
 }

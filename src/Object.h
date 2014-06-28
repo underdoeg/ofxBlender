@@ -5,7 +5,6 @@
 #include "ofMain.h"
 #include "Animation.h"
 #include "Constraint.h"
-#include "ofxGLM.h"
 
 namespace ofx {
 namespace blender {
@@ -20,6 +19,12 @@ enum ObjectType {
 
 class Scene;
 class Layer;
+
+struct VecDouble{
+	double x;
+	double y;
+	double z;
+};
 
 class Object: public ofNode {
 public:
@@ -72,6 +77,7 @@ protected:
 	void onTimelinePostFrame(Timeline*&);
 	
 private:
+	ofVec3f originalRotation;
 	Object* lookAtTarget;
 	ofVec3f lookAtUp;
 	bool visible;
@@ -81,8 +87,7 @@ private:
 	
 	//helpers for euler rotation
 	bool animIsEuler;
-	//ofVec3f eulerRot;
-	glm::vec3 eulerRot;
+	ofVec3f eulerRot;
 };
 
 }

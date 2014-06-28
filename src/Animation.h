@@ -240,6 +240,7 @@ private:
 	bool oldValueSet;
 };
 
+//////////////////////////////////////////////////// MARKER
 
 class Marker {
 public:
@@ -295,6 +296,8 @@ public:
 	void setEndless(bool endlessState);
 
 	bool isAnimating();
+	bool hasAnimation(string key);
+	bool hasAnimation(string key, int channel);
 
 	template<typename Type>
 	void animateTo(Type from, Type to, float duration, string address, int channel=0, InterpolationType interpolation=LINEAR) {

@@ -1,7 +1,6 @@
 #include "Object.h"
 #include "Layer.h"
 #include "Scene.h"
-#include "gtx/euler_angles.hpp"
 
 namespace ofx {
 
@@ -15,9 +14,9 @@ Object::Object() {
 	layer = NULL;
 	lookAtTarget = NULL;
 	lookAtUp.set(0, 1, 0);
-	
+
 	animIsEuler = false;
-	
+
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationDataFloat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<bool>(std::bind(&Object::onAnimationDataBool, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<ofVec3f>(std::bind(&Object::onAnimationDataVec3f, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -137,20 +136,40 @@ void Object::onScaleChanged() {
 
 /////////////////////////////////////////////////////////////////////////////////
 
+void threeaxisrot(double r11, double r12, double r21, double r31, double r32, ofVec3f& res) {
+	res.x = atan2( r31, r32 );
+	res.y = asin ( r21 );
+	res.z = atan2( r11, r12 );
+}
+
 void Object::onTimelinePreFrame(Timeline*&) {
 	animIsEuler = false;
-	
-	//TODO: only trigger when there is an euler animation
-	glm::quat quat = toGlm(getOrientationQuat());
-	eulerRot = glm::eulerAngles(quat);
+
+	if(timeline.hasAnimation("rotation_euler")) {
+		ofQuaternion quat = getOrientationQuat();
+		double w = quat.w();
+		double x = quat.x();
+		double y = quat.y();
+		double z = quat.z();
+		double sqw = w*w;
+		double sqx = x*x;
+		double sqy = y*y;
+		double sqz = z*z;
+
+		//if(!timeline.hasAnimation("rotation_euler", 0))
+		eulerRot.x =  float(atan2(2.0 * (y*z + x*w),(-sqx - sqy + sqz + sqw)) * (180.0f/PI));
+		//if(!timeline.hasAnimation("rotation_euler", 1))
+		eulerRot.y = float(asin(-2.0 * (x*z - y*w)) * (180.0f/PI));
+		//if(!timeline.hasAnimation("rotation_euler", 2))
+		eulerRot.z = float(atan2(2.0 * (x*y + z*w),(sqx - sqy - sqz + sqw)) * (180.0f/PI));
+	}
 }
 
 void Object::onTimelinePostFrame(Timeline*&) {
-
 	if(animIsEuler) {
-		ofQuaternion QuatAroundX = ofQuaternion(  eulerRot.x, ofVec3f(1.0,0.0,0.0) );
-		ofQuaternion QuatAroundY = ofQuaternion( eulerRot.y, ofVec3f(0.0,1.0,0.0) );
-		ofQuaternion QuatAroundZ = ofQuaternion( eulerRot.z, ofVec3f(0.0,0.0,1.0) );
+		ofQuaternion QuatAroundX = ofQuaternion( eulerRot.x, ofVec3f(1.0, 0.0, 0.0) );
+		ofQuaternion QuatAroundY = ofQuaternion( eulerRot.y, ofVec3f(0.0, 1.0, 0.0) );
+		ofQuaternion QuatAroundZ = ofQuaternion( eulerRot.z, ofVec3f(0.0, 0.0, 1.0) );
 		setOrientation(QuatAroundX * QuatAroundY * QuatAroundZ);
 	}
 }
