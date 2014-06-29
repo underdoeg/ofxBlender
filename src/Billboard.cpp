@@ -11,7 +11,7 @@ Billboard::Billboard() {
 Billboard::~Billboard() {
 }
 
-void Billboard::customDraw() {
+void Billboard::preDraw() {
 	if(!scene)
 		return;
 	ofCamera* cam = NULL;
@@ -19,8 +19,13 @@ void Billboard::customDraw() {
 		cam = scene->getDebugCamera();
 	else if(scene->getActiveCamera())
 		cam = &scene->getActiveCamera()->camera;
-	if(cam)
-		lookAt(cam->getGlobalPosition(), cam->getUpDir());
+	if(cam){
+		ofVec3f up = cam->getUpDir();
+		//up.z *= -1;
+		lookAt(cam->getGlobalPosition(), up);
+		//rotate(180, cam->getUpDir());
+	}
+//
 }
 
 }

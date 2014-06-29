@@ -33,9 +33,11 @@ public:
 	
 	void update();
 	void draw(Scene* scene=NULL);
-
+	
+	virtual void preDraw(){};
 	virtual void customDraw();
-
+	virtual void postDraw(){};
+	
 	void addChild(Object* child);
 	std::vector<Object*> getChildren();
 	Object* getParent();

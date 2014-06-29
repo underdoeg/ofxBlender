@@ -48,17 +48,20 @@ void Object::draw(Scene* scn) {
 		if(!layer->isVisible())
 			return;
 	}
-
+	
+	preDraw();
+	
 	ofNode::transformGL();
 	customDraw();
 	for(Object* child: children) {
 		child->draw(scn);
 	}
 	ofNode::restoreTransformGL();
+	
+	postDraw();
 }
 
 void Object::customDraw() {
-
 }
 
 void Object::addChild(Object* child) {
@@ -102,9 +105,9 @@ void Object::toggleVisibility() {
 
 void Object::setVisible(bool state){
 	if(state)
-		hide();
-	else
 		show();
+	else
+		hide();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

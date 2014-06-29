@@ -15,7 +15,7 @@ public:
 	Billboard();
 	~Billboard();
 	
-	virtual void customDraw();
+	virtual void preDraw();
 };
 
 }
