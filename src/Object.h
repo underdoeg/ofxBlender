@@ -41,6 +41,7 @@ public:
 	Object* getParent();
 	bool hasParent();
 	bool isVisible();
+	void setVisible(bool state);
 	void show();
 	void hide();
 	void toggleVisibility();

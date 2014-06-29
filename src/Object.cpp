@@ -100,6 +100,13 @@ void Object::toggleVisibility() {
 		show();
 }
 
+void Object::setVisible(bool state){
+	if(state)
+		hide();
+	else
+		show();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 void Object::addConstraint(Constraint* constraint) {
