@@ -10,11 +10,15 @@ Material::Material() {
 	isTwoSided = false;
 }
 
+Material::Material(string imagePath):Material() {
+	textures.push_back(new Texture(imagePath));
+}
+
 Material::~Material() {
 }
 
 void Material::begin() {
-	
+
 	ofSetColor(255);
 	if(textures.size()>0) {
 		if(textures[0]->img.isAllocated()) {
@@ -45,7 +49,7 @@ void Material::end() {
 	if(!useShader) {
 		material.end();
 	}
-	
+
 }
 
 }

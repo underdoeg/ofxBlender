@@ -23,8 +23,8 @@ void Mesh::customDraw() {
 		glCullFace(GL_BACK);
 		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 	}
-	
-	
+
+
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();
@@ -101,6 +101,48 @@ void Mesh::addVertex(ofVec3f pos, ofVec3f norm) {
 	normals.push_back(norm);
 }
 
+void Mesh::addMesh(ofMesh& mesh) {
+	std::vector<ofVec3f>& verts = mesh.getVertices();
+	std::vector<ofVec3f>& normals = mesh.getNormals();
+	//std::vector<ofVec3f>& colors = mesh.getColors();
+	std::vector<ofVec2f>& uvs = mesh.getTexCoords();
+	std::vector<ofIndexType>& indices = mesh.getIndices();
+
+	for(unsigned int i=0; i<verts.size(); i++) {
+		if(normals.size() > i)
+			addVertex(verts[i], normals[i]);
+		else
+			addVertex(verts[i]);
+	}
+
+	ofPrimitiveMode mode = mesh.getMode();
+	switch(mode) {
+	case OF_PRIMITIVE_TRIANGLES:
+		for(unsigned int i=2; i<indices.size(); i+=3) {
+			Triangle tri(indices[i-2], indices[i-1], indices[i]);
+			if(uvs.size() > tri.c) {
+				TriangleUVs triUv(uvs[tri.a], uvs[tri.b], uvs[tri.c]);
+				tri.uvs.push_back(triUv);
+			}
+			addTriangle(tri);
+		}
+		break;
+	case OF_PRIMITIVE_TRIANGLE_STRIP:
+		for(unsigned int i=2; i<indices.size(); i++) {
+			Triangle tri(indices[i-2], indices[i-1], indices[i]);
+			if(uvs.size() > tri.c) {
+				TriangleUVs triUv(uvs[tri.a], uvs[tri.b], uvs[tri.c]);
+				tri.uvs.push_back(triUv);
+			}
+			addTriangle(tri);
+		}
+		break;
+	default:
+		ofLogWarning(OFX_BLENDER) << "Mesh::addMesh - mesh mode not supported";
+	}
+}
+
+
 ofVec3f& Mesh::getVertex(unsigned int pos) {
 	return vertices[pos];
 }
@@ -127,6 +169,10 @@ Mesh::Part& Mesh::getPart(Material* mat, Shading shading, bool hasUvs) {
 	}
 	parts.push_back(Part(mat, shading, hasUvs));
 	return parts.back();
+}
+
+std::vector<Mesh::Part>& Mesh::getParts() {
+	return parts;
 }
 
 void Mesh::pushMaterial(Material* material) {
@@ -182,7 +228,7 @@ void Mesh::build() {
 			mesh.addTexCoord(tri.uvs[0].c);
 		}
 		mesh.addTriangle(curIndex, curIndex+1, curIndex+2);
-		
+
 		//add the material to the used materials
 		if(part.material && std::find(materials.begin(), materials.end(), part.material)==materials.end())
 			materials.push_back(part.material);

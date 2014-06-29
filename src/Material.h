@@ -10,6 +10,7 @@ namespace blender {
 class Texture {
 public:
 	Texture():isEnabled(true) {}
+	Texture(string imgPath):isEnabled(true) {img.loadImage(imgPath);}
 	string name;
 	ofImage img;
 	string uvLayerName;
@@ -20,6 +21,7 @@ class Scene;
 class Material {
 public:
 	Material();
+	Material(string imagePath);
 	~Material();
 
 	void begin();

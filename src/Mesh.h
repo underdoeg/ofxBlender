@@ -16,9 +16,6 @@ class Scene;
 
 class Mesh: public ofx::blender::Object {
 public:
-	Mesh();
-	~Mesh();
-
 	class TriangleUVs {
 	public:
 		TriangleUVs(ofVec2f a_, ofVec2f b_, ofVec2f c_) {
@@ -39,7 +36,7 @@ public:
 			b = b_;
 			c = c_;
 		}
-		
+
 		Triangle(unsigned int a_, unsigned int b_, unsigned int c_, ofVec2f uv1, ofVec2f uv2, ofVec2f uv3) {
 			Triangle(a_, b_, c_);
 			addUVs(uv1, uv2, uv3);
@@ -56,35 +53,7 @@ public:
 		Shading shading;
 		std::vector<TriangleUVs> uvs;
 	};
-	
-	void pushMaterial(Material* material);
-	void pushShading(Shading shading);
 
-	void addVertex(ofVec3f pos, ofVec3f norm=ofVec3f());
-	void addTriangle(Triangle triangle);
-
-	ofVec3f& getVertex(unsigned int index);
-	ofVec3f& getNormal(unsigned int index);
-	Triangle& getTriangle(unsigned int index);
-
-	void exportUVs(int w=1024, int h=1024, unsigned int layer=0, string path="");
-
-	void clear();
-
-	void build();
-
-	void customDraw();
-	void drawNormals(float length=1);
-
-	string meshName;
-
-	bool isTwoSided;
-
-	ofVec3f boundsMin;
-	ofVec3f boundsMax;
-
-private:
-	friend class Scene;
 	class Part {
 	public:
 		Part(Material* mat, Shading shade, bool hasUvs_) {
@@ -104,6 +73,42 @@ private:
 		bool hasTriangles;
 		bool hasUvs;
 	};
+
+	///////////////////////////////////////////////////////////////
+	Mesh();
+	~Mesh();
+
+	void pushMaterial(Material* material);
+	void pushShading(Shading shading);
+
+	void addVertex(ofVec3f pos, ofVec3f norm=ofVec3f());
+	void addTriangle(Triangle triangle);
+	void addMesh(ofMesh& mesh);
+
+	ofVec3f& getVertex(unsigned int index);
+	ofVec3f& getNormal(unsigned int index);
+	Triangle& getTriangle(unsigned int index);
+
+	void exportUVs(int w=1024, int h=1024, unsigned int layer=0, string path="");
+
+	std::vector<Part>& getParts();
+
+	void clear();
+
+	void build();
+
+	void customDraw();
+	void drawNormals(float length=1);
+
+	string meshName;
+
+	bool isTwoSided;
+
+	ofVec3f boundsMin;
+	ofVec3f boundsMax;
+
+private:
+	friend class Scene;
 
 	Part& getPart(Material* mat, Shading shading, bool hasUvs);
 
