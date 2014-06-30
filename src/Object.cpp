@@ -166,12 +166,12 @@ void Object::onTimelinePreFrame(Timeline*&) {
 		double sqy = y*y;
 		double sqz = z*z;
 
-		//if(!timeline.hasAnimation("rotation_euler", 0))
-		eulerRot.x =  float(atan2(2.0 * (y*z + x*w),(-sqx - sqy + sqz + sqw)) * (180.0f/PI));
-		//if(!timeline.hasAnimation("rotation_euler", 1))
-		eulerRot.y = float(asin(-2.0 * (x*z - y*w)) * (180.0f/PI));
-		//if(!timeline.hasAnimation("rotation_euler", 2))
-		eulerRot.z = float(atan2(2.0 * (x*y + z*w),(sqx - sqy - sqz + sqw)) * (180.0f/PI));
+		if(!timeline.hasAnimation("rotation_euler", 0))
+			eulerRot.x =  float(atan2(2.0 * (y*z + x*w),(-sqx - sqy + sqz + sqw)) * (180.0f/PI));
+		if(!timeline.hasAnimation("rotation_euler", 1))
+			eulerRot.y = float(asin(-2.0 * (x*z - y*w)) * (180.0f/PI));
+		if(!timeline.hasAnimation("rotation_euler", 2))
+			eulerRot.z = float(atan2(2.0 * (x*y + z*w),(sqx - sqy - sqz + sqw)) * (180.0f/PI));
 	}
 }
 

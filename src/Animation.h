@@ -85,6 +85,8 @@ public:
 		keyframes.clear();
 	}
 
+	virtual void reset() {};
+
 	bool isRunning() {
 		return getKeyframeAfter(timeLast) != NULL;
 	}
@@ -173,13 +175,15 @@ public:
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-
+		
 		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
 		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
 
 		//check if we have a key1, otherwise I don't know how to calculate this
-		if(!key1)
+				
+		if(!key1) {
 			return;
+		}
 
 		//if there is no key in the future, then the value has to be key1
 		if(!key2 || key1->interpolation == CONSTANT) {
@@ -219,9 +223,11 @@ public:
 	}
 
 	void triggerListeners(Type value) {
+
 		//don't do unnecessary triggers
-		if(oldValueSet && oldValue == value)
+		if(oldValueSet && oldValue == value) {
 			return;
+		}
 
 		//call teh default handler
 		if(defaultHandler)
@@ -232,6 +238,10 @@ public:
 		}
 		oldValue = value;
 		oldValueSet = true;
+	}
+
+	void reset() {
+		oldValueSet = false;
 	}
 
 private:
@@ -305,20 +315,20 @@ public:
 			ofLogWarning(OFX_BLENDER) << "animateTo: timeline is not endless, this might result in abrupt repeats or stops";
 		}
 
-		cout << "Animate from " << getTime() << " to " << (getTime() + duration * 1000) << endl;
+		//cout << "Animate from " << getTime() << " to " << (getTime() + duration * 1000) << endl;
 
 		Animation<Type>* anim = getAnimation<Type>(address, channel);
 		anim->clear();
 		anim->addKeyframe(getTime(), from);
 		anim->addKeyframe(getTime() + duration * 1000, to);
 	}
-	
+
 	std::vector<Marker> getMarkers();
-	
+
 	unsigned long long getTime();
 	unsigned long long getDuration();
 
-	
+
 	ofEvent<Timeline*> started;
 	ofEvent<Timeline*> ended;
 	ofEvent<Timeline*> preFrame;

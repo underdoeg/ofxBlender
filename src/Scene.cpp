@@ -10,7 +10,7 @@ Scene::Scene() {
 	//setScale(10);
 	doDebug = false;
 	isFirstDebugEnable = true;
-	hasViewport = false;
+	bHasViewport = false;
 	doLightning = false;
 }
 
@@ -24,6 +24,7 @@ void Scene::setDebug(bool state) {
 		debugCam.setGlobalPosition(activeCamera->getGlobalPosition());
 		debugCam.setGlobalOrientation(activeCamera->getGlobalOrientation());
 		debugCam.setDistance(debugCam.getTarget().getGlobalPosition().distance(activeCamera->getGlobalPosition()));
+		debugCam.setFov(activeCamera->camera.getFov());
 	}
 	doDebug = state;
 	isFirstDebugEnable = false;
@@ -48,10 +49,17 @@ void Scene::update() {
 void Scene::customDraw() {
 	//camera
 	ofCamera* camera = &debugCam;
-	if(activeCamera && !doDebug)
-		camera = &activeCamera->camera;
-
-	if(!hasViewport)
+	if(activeCamera){
+		
+		activeCamera->updateLens();
+		
+		if(!doDebug)
+			camera = &activeCamera->camera;
+		else
+			debugCam.setFov(activeCamera->camera.getFov());
+	}
+	
+	if(!bHasViewport)
 		camera->begin();
 	else
 		camera->begin(viewport);
@@ -163,7 +171,9 @@ void Scene::addObject(Object* obj) {
 	default:
 		break;
 	}
-
+	
+	obj->scene = this;
+	
 	ofLogNotice(OFX_BLENDER) << "Added object " << obj->name << " to scene " << name;
 }
 
@@ -241,13 +251,24 @@ Light* Scene::getLight(unsigned int index) {
 	return getFromVecByIndex<Light>(lights, index);
 }
 
-void Scene::setViewport(float x, float y, float w, float h) {
-	hasViewport = true;
-	viewport.set(x, y, w, h);
-}
-
 void Scene::setLightningEnabled(bool state) {
 	doLightning = state;
+}
+
+//viewport
+void Scene::setViewport(float x, float y, float w, float h) {
+	bHasViewport = true;
+	viewport.set(x, y, w, h);
+	if(activeCamera)
+		activeCamera->updateLens();
+}
+
+ofRectangle& Scene::getViewport() {
+	return viewport;
+}
+
+bool Scene::hasViewport() {
+	return bHasViewport;
 }
 
 }

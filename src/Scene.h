@@ -34,29 +34,33 @@ public:
 	Light* getLight(string name);
 	Light* getLight(unsigned int index);
 	void setLightningEnabled(bool state);
-
+	
 	Camera* getActiveCamera();
 	ofCamera* getDebugCamera();
 	void setActiveCamera(Camera* cam);
 	void disableCamera();
 	
 	void setViewport(float x, float y, float w, float h);
-
+	ofRectangle& getViewport();
+	bool hasViewport();
+	
 	ofFloatColor bgColor;
 
     Timeline timeline;
 	string name;
 	std::map<int, Layer> layers;
 	ofEasyCam debugCam;
-
+	
 private:
+	void onWindowResize(ofResizeEventArgs& args);
+	
 	Camera* activeCamera;
     std::vector<Object*> objects;
     std::vector<Mesh*> meshes;
 	std::vector<Camera*> cameras;
 	std::vector<Light*> lights;
 	std::vector<Material*> materials;
-	bool hasViewport;
+	bool bHasViewport;
 	ofRectangle viewport;
 	bool doDebug;
 	bool doLightning;

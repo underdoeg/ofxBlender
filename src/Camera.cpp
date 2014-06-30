@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Scene.h"
 
 namespace ofx {
 namespace blender {
@@ -14,6 +15,10 @@ Camera::Camera() {
 Camera::~Camera() {
 }
 
+void Camera::preDraw() {
+	setLens(lens);
+}
+
 void Camera::customDraw() {
 	ofDrawAxis(.5);
 	ofSetColor(255);
@@ -21,6 +26,7 @@ void Camera::customDraw() {
 	ofRotateX(-90);
 	debugMesh.drawWireframe();
 	ofPopMatrix();
+	//cout << name << ": " << getGlobalPosition() << endl;
 }
 
 void Camera::onOrientationChanged() {
@@ -38,7 +44,25 @@ void Camera::updateCamPos() {
 
 void Camera::setLens(float l) {
 	lens = l;
-	float fov = ofRadToDeg(2 * atan(16.f / (lens * 2.f)));
+	updateLens();
+}
+
+void Camera::updateLens(){
+	float w = 1920;
+	float h = 1080;
+	
+	if(scene){
+		if(scene->hasViewport()){
+			w = scene->getViewport().width;
+			h = scene->getViewport().height;
+		}
+	}
+	
+	float factor = lens / 32.0f;
+	float pr = float(w) / float(h);
+	//float fovx = atan(.5/factor);
+	float fovy = atan(.5f/pr/factor);
+	float fov = fovy * 360 /PI;
 	camera.setFov(fov);
 }
 

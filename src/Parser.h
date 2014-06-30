@@ -671,6 +671,8 @@ public:
 			key.points = bezier.readVec3fArray("vec");
 
 			key.ipo = bezier.read<short>("ipo");
+			if(key.ipo > 4)
+				key.ipo = bezier.read<char>("ipo");
 
 			//TODO: read proper frame rate
 			double fps = 24; //default blender frame rate
@@ -693,7 +695,7 @@ public:
 		DNAStructureReader animReader(reader.file->getBlockByAddress(animDataAddress));
 		if(animReader.readAddress("action") == 0)
 			return;
-
+		
 		//load all curves
 		vector<DNAStructureReader> curves = animReader.readStructure("action").readLinkedList("curves");
 		for(DNAStructureReader& curve: curves) {
@@ -706,7 +708,7 @@ public:
 
 			//if the channel is rotation, scale or translate, add an X
 			std::vector<TempKeyFrame> keyframes = parseKeyframes(curve);
-
+			
 			//float type animations
 			if(address == "location" || address == "rotation" || address == "scale" || address=="rotation_euler" || address=="lens") {
 
@@ -719,6 +721,8 @@ public:
 						anim->addKeyframe(key.time, key.points[1][1], key.points[1], key.points[0], key.points[2]);
 					else if(key.ipo == 0)
 						anim->addKeyframe(key.time, key.points[1][1], CONSTANT);
+					else
+						ofLogWarning(OFX_BLENDER) << "Parser:: addKeyframe (unknown ipo type: " << key.ipo << ")";
 				}
 				timeline->add(anim);
 

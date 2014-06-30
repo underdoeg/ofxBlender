@@ -9,7 +9,7 @@ Timeline::Timeline() {
 	isLoop = false;
 	duration = 1000000;
 	isPlaying = true;
-	isEndless = true;
+	isEndless = false;
 	isPaused = false;
 	timeOffset = 0;
 	time = 0;
@@ -40,7 +40,7 @@ void Timeline::setTime(unsigned long long t) {
 		//timeOld = time;
 		return;
 	}
-
+	
 	Timeline* _this = this;
 	ofNotifyEvent(preFrame, _this);
 
@@ -93,8 +93,10 @@ void Timeline::play() {
 	isPaused = false;
 	Timeline* _this = this;
 	for(Timeline* child: children) {
+		child->play();
 		child->timeOffset = 0;
 		child->time = 0;
+		child->timeOld = 0;
 	}
 	ofNotifyEvent(started, _this);
 	step();
@@ -113,6 +115,12 @@ void Timeline::stop() {
 	isPlaying = false;
 	timeOld = 0;
 	timeOffset = ofGetElapsedTimeMillis();
+	for(Animation_* animation: animations) {
+		animation->reset();
+	}
+	for(Timeline* child: children) {
+		child->stop();
+	}
 }
 
 void Timeline::setDuration(double d) {
