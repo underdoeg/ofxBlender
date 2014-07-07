@@ -772,8 +772,8 @@ public:
 			DNAStructureReader parentReader = reader.readStructure("parent");
 			Object* parent = static_cast<Object*>(parentReader.parse());
 			if(parent != NULL) {
-				parent->addChild(object);
 				object->setTransformMatrix(mat * ofMatrix4x4::getInverseOf(parent->getGlobalTransformMatrix()));
+				parent->addChild(object, false);
 			}
 		}
 

@@ -38,7 +38,7 @@ public:
 	virtual void customDraw();
 	virtual void postDraw(){};
 	
-	void addChild(Object* child);
+	void addChild(Object* child, bool keepGlobalTransform=false);
 	std::vector<Object*> getChildren();
 	Object* getParent();
 	bool hasParent();

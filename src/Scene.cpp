@@ -80,7 +80,6 @@ void Scene::customDraw() {
 
 	//lights
 	if(doLightning) {
-
 		if(lights.size()>0) {
 			ofSetSmoothLighting(true);
 			ofEnableLighting();

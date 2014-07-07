@@ -53,10 +53,11 @@ void Object::draw(Scene* scn) {
 	
 	ofNode::transformGL();
 	customDraw();
+	ofNode::restoreTransformGL();
+	
 	for(Object* child: children) {
 		child->draw(scn);
 	}
-	ofNode::restoreTransformGL();
 	
 	postDraw();
 }
@@ -64,9 +65,9 @@ void Object::draw(Scene* scn) {
 void Object::customDraw() {
 }
 
-void Object::addChild(Object* child) {
+void Object::addChild(Object* child, bool keepGlobalTransform) {
 	child->parent = this;
-	child->setParent(*this, true);
+	child->setParent(*this, keepGlobalTransform);
 	children.push_back(child);
 }
 

@@ -23,14 +23,14 @@ void Mesh::customDraw() {
 		glCullFace(GL_BACK);
 		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 	}
-
-
+	
+	//ofDrawBox(0, 0, 0, 1);
+	
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();
 	}
 }
-
 
 void Mesh::drawNormals(float length) {
 	bool lightOn = ofGetLightingEnabled();
