@@ -227,6 +227,7 @@ Camera* Scene::getCamera(unsigned int index) {
 }
 
 void Scene::setActiveCamera(Camera* cam) {
+	addObject(cam);
 	activeCamera = cam;
 }
 
