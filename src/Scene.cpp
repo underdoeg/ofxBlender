@@ -51,6 +51,7 @@ void Scene::customDraw() {
 	ofCamera* camera = &debugCam;
 	if(activeCamera){
 		
+		activeCamera->updateCamPos();
 		activeCamera->updateLens();
 		
 		if(!doDebug)

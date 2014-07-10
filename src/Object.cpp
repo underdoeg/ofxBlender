@@ -48,17 +48,17 @@ void Object::draw(Scene* scn) {
 		if(!layer->isVisible())
 			return;
 	}
-	
+
 	preDraw();
-	
+
 	ofNode::transformGL();
 	customDraw();
 	ofNode::restoreTransformGL();
-	
+
 	for(Object* child: children) {
 		child->draw(scn);
 	}
-	
+
 	postDraw();
 }
 
@@ -66,9 +66,23 @@ void Object::customDraw() {
 }
 
 void Object::addChild(Object* child, bool keepGlobalTransform) {
+	if(hasChild(child))
+		return;
 	child->parent = this;
 	child->setParent(*this, keepGlobalTransform);
 	children.push_back(child);
+}
+
+void Object::removeChild(Object* child) {
+	if(!hasChild(child))
+		return;
+	
+	child->clearParent();
+	children.erase(std::remove(children.begin(), children.end(), child), children.end());
+}
+
+bool Object::hasChild(Object* obj) {
+	return (std::find(children.begin(), children.end(), obj) != children.end());
 }
 
 std::vector<Object*> Object::getChildren() {
@@ -104,7 +118,7 @@ void Object::toggleVisibility() {
 		show();
 }
 
-void Object::setVisible(bool state){
+void Object::setVisible(bool state) {
 	if(state)
 		show();
 	else
@@ -270,21 +284,21 @@ void Object::animateScaleTo(ofVec3f scale, float duration, InterpolationType int
 
 ofVec2f Object::getPositionOnScreen(ofRectangle viewport) {
 	ofVec2f ret;
-	if(!scene){
+	if(!scene) {
 		ofLogWarning(OFX_BLENDER) << "Object::getPositionOnScreen - scene not set";
 		return ret;
 	}
-	
-	if(scene->isDebugEnabled()){
+
+	if(scene->isDebugEnabled()) {
 		return scene->getDebugCamera()->worldToScreen(getGlobalPosition(), viewport);
 	}
-	
+
 	Camera* cam = scene->getActiveCamera();
-	if(!cam){
+	if(!cam) {
 		ofLogWarning(OFX_BLENDER) << "Object::getPositionOnScreen - scene not set";
 		return ret;
 	}
-	
+
 	return cam->camera.worldToScreen(getGlobalPosition(), viewport);
 }
 

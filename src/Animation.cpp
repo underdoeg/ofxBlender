@@ -40,7 +40,7 @@ void Timeline::setTime(unsigned long long t) {
 		//timeOld = time;
 		return;
 	}
-	
+
 	Timeline* _this = this;
 	ofNotifyEvent(preFrame, _this);
 
@@ -168,11 +168,16 @@ std::vector<Marker> Timeline::getMarkers() {
 	return markers;
 }
 
+void Timeline::clear() {
+	for(Animation_* anim: animations) {
+		anim->clear();
+	}
+}
 
 //check if animation exists
 bool Timeline::hasAnimation(string key) {
-	for(Animation_* anim:animations){
-		if(anim->address == key){
+	for(Animation_* anim:animations) {
+		if(anim->address == key) {
 			return true;
 		}
 	}
@@ -180,8 +185,8 @@ bool Timeline::hasAnimation(string key) {
 }
 
 bool Timeline::hasAnimation(string key, int channel) {
-	for(Animation_* anim:animations){
-		if(anim->channel == channel && anim->address == key){
+	for(Animation_* anim:animations) {
+		if(anim->channel == channel && anim->address == key) {
 			return true;
 		}
 	}

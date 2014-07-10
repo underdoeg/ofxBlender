@@ -39,6 +39,9 @@ public:
 	virtual void postDraw(){};
 	
 	void addChild(Object* child, bool keepGlobalTransform=false);
+	void removeChild(Object* child);
+	bool hasChild(Object* obj);
+	
 	std::vector<Object*> getChildren();
 	Object* getParent();
 	bool hasParent();

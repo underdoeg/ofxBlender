@@ -304,6 +304,7 @@ public:
 	void setDuration(double duration);
 	void setLoop(bool loopState);
 	void setEndless(bool endlessState);
+	void clear();
 
 	bool isAnimating();
 	bool hasAnimation(string key);

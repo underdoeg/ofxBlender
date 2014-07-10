@@ -17,6 +17,7 @@ Camera::~Camera() {
 
 void Camera::preDraw() {
 	setLens(lens);
+	//updateCamPos();
 }
 
 void Camera::customDraw() {
@@ -30,16 +31,17 @@ void Camera::customDraw() {
 }
 
 void Camera::onOrientationChanged() {
-	Object::onOrientationChanged();
-	camera.setOrientation(getGlobalOrientation());
+	//Object::onOrientationChanged();
+	//camera.setOrientation(getGlobalOrientation());
 }
 
 void Camera::onPositionChanged() {
-	Object::onPositionChanged();
-	camera.setPosition(getGlobalPosition());
+	//Object::onPositionChanged();
+	//camera.setPosition(getGlobalPosition());
 }
 
 void Camera::updateCamPos() {
+	camera.setTransformMatrix(getGlobalTransformMatrix());
 }
 
 void Camera::setLens(float l) {
