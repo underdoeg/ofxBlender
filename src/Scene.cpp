@@ -99,10 +99,10 @@ void Scene::customDraw() {
 
 		if(doDebug) {
 			if(drawIt)
-				obj->draw();
+				obj->draw(this);
 		} else if(obj->type != CAMERA && obj->type != LIGHT) {
 			if(drawIt)
-				obj->draw();
+				obj->draw(this);
 		}
 	}
 
