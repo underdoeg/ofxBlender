@@ -60,7 +60,7 @@ void Timeline::setTime(unsigned long long t) {
 		}
 	}
 	for(Marker& marker: markers) {
-		if(timeOld < marker.time && time > marker.time) {
+		if(timeOld <= marker.time && time >= marker.time) {
 			markerTriggered(marker.name);
 		}
 	}

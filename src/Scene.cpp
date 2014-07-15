@@ -140,8 +140,8 @@ void Scene::customDraw() {
 
 	//end the camera
 	camera->end();
-
-
+	
+	
 }
 
 void Scene::addObject(Object* obj) {
