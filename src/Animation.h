@@ -342,6 +342,7 @@ private:
 	std::vector<Animation_*> animations;
 	std::vector<Timeline*> children;
 	std::vector<Marker> markers;
+	std::deque<string> markerQueue;
 	unsigned long long time;
 	unsigned long long timeOld;
 	unsigned long long duration;
