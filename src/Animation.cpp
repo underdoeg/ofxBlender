@@ -55,13 +55,13 @@ void Timeline::setTime(unsigned long long t) {
 		time = t;
 		if(time > duration && !isEndless) {
 			Timeline* _this = this;
-			ofNotifyEvent(ended, _this);
 			stop();
+			ofNotifyEvent(ended, _this);
 		}
 	}
 
 	for(Marker& marker: markers) {
-		if(timeOld <= marker.time && time >= marker.time) {
+		if(timeOld <= marker.time && time > marker.time) {
 			//markerTriggered(marker.name);
 			markerQueue.push_back(marker.name);
 		}
@@ -70,7 +70,6 @@ void Timeline::setTime(unsigned long long t) {
 	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching,
 	// this means loss of precision but easier handling
 	if(markerQueue.size() > 0) {
-		cout << markerQueue.size() << endl;
 		markerTriggered(markerQueue.front());
 		markerQueue.pop_front();
 	}
@@ -95,10 +94,12 @@ void Timeline::add(Timeline* timeline) {
 }
 
 void Timeline::play() {
-	if(!isPaused)
+	if(!isPaused){
 		timeOffset = ofGetElapsedTimeMillis();
-
-	timeOld = time;
+		timeOld = 0;
+	}else{
+		timeOld = time;
+	}
 	isPlaying = true;
 	isPaused = false;
 	Timeline* _this = this;
@@ -109,6 +110,7 @@ void Timeline::play() {
 		child->timeOld = 0;
 	}
 	ofNotifyEvent(started, _this);
+	//setTime(timeOffset);
 	step();
 }
 
@@ -193,6 +195,7 @@ void Timeline::clear() {
 	for(Animation_* anim: animations) {
 		anim->clear();
 	}
+	markerQueue.clear();
 }
 
 //check if animation exists
