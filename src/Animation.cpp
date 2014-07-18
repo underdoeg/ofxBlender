@@ -57,6 +57,7 @@ void Timeline::setTime(unsigned long long t) {
 			Timeline* _this = this;
 			stop();
 			ofNotifyEvent(ended, _this);
+			return;
 		}
 	}
 
@@ -126,13 +127,16 @@ void Timeline::replay() {
 void Timeline::stop() {
 	isPlaying = false;
 	timeOld = 0;
-	timeOffset = ofGetElapsedTimeMillis();
+	//timeOffset = ofGetElapsedTimeMillis();
 	for(Animation_* animation: animations) {
 		animation->reset();
 	}
 	for(Timeline* child: children) {
 		child->stop();
 	}
+	
+	//markerQueue.clear();
+	
 	while(markerQueue.size() > 0) {
 		markerTriggered(markerQueue.front());
 		markerQueue.pop_front();
