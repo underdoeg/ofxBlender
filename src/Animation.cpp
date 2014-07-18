@@ -59,17 +59,17 @@ void Timeline::setTime(unsigned long long t) {
 			stop();
 		}
 	}
-	
+
 	for(Marker& marker: markers) {
 		if(timeOld <= marker.time && time >= marker.time) {
 			//markerTriggered(marker.name);
 			markerQueue.push_back(marker.name);
 		}
 	}
-	
-	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching, 
+
+	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching,
 	// this means loss of precision but easier handling
-	if(markerQueue.size() > 0){
+	if(markerQueue.size() > 0) {
 		cout << markerQueue.size() << endl;
 		markerTriggered(markerQueue.front());
 		markerQueue.pop_front();
@@ -131,7 +131,7 @@ void Timeline::stop() {
 	for(Timeline* child: children) {
 		child->stop();
 	}
-	while(markerQueue.size() > 0){
+	while(markerQueue.size() > 0) {
 		markerTriggered(markerQueue.front());
 		markerQueue.pop_front();
 	}
@@ -174,8 +174,15 @@ bool Timeline::isAnimating() {
 	return false;
 }
 
+struct markerSort {
+	inline bool operator() (const Marker& k1, const Marker k2) {
+		return (k1.time < k2.time);
+	}
+};
+
 void Timeline::addMarker(float time, string name) {
 	markers.push_back(Marker(time * 1000, name));
+	std::sort(markers.begin(), markers.end(), markerSort());
 }
 
 std::vector<Marker> Timeline::getMarkers() {
