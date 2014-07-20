@@ -64,7 +64,7 @@ void Scene::customDraw() {
 		camera->begin();
 	else
 		camera->begin(viewport);
-
+		
 	//basics
 	ofPushStyle();
 	ofEnableNormalizedTexCoords();

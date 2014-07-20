@@ -99,7 +99,7 @@ void Timeline::play() {
 		timeOffset = ofGetElapsedTimeMillis();
 		timeOld = 0;
 	}else{
-		timeOld = time;
+		timeOld = ofGetElapsedTimeMillis() - timeOffset + 10;
 	}
 	isPlaying = true;
 	isPaused = false;
@@ -173,6 +173,10 @@ unsigned long long Timeline::getDuration() {
 }
 
 bool Timeline::isAnimating() {
+	if(isPaused)
+		return false;
+	if(!isPlaying)
+		return false;
 	for(Animation_* anim: animations) {
 		if(anim->isRunning())
 			return true;

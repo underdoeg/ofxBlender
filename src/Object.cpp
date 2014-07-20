@@ -7,7 +7,7 @@ namespace ofx {
 namespace blender {
 
 Object::Object() {
-	type = UNDEFINED;
+	type = EMPTY;
 	scene = NULL;
 	parent = NULL;
 	visible = true;
@@ -48,7 +48,7 @@ void Object::draw(Scene* scn) {
 		if(!layer->isVisible())
 			return;
 	}
-
+		
 	preDraw();
 
 	ofNode::transformGL();
@@ -56,7 +56,10 @@ void Object::draw(Scene* scn) {
 	ofNode::restoreTransformGL();
 
 	for(Object* child: children) {
-		child->draw(scn);
+		if(scn && scn->isDebugEnabled())
+			child->draw(scn);
+		else if(child->type != CAMERA && child->type != LIGHT)
+			child->draw(scn);
 	}
 
 	postDraw();
@@ -260,6 +263,19 @@ void Object::onAnimationDataQuat(ofQuaternion quat, string address, int channel)
 }
 
 //animate to
+void Object::interpolateTo(Object* obj, float t){
+	ofVec3f globalPos = getGlobalPosition();
+	setGlobalPosition(globalPos + (obj->getGlobalPosition() - globalPos) * t);
+	
+	ofQuaternion globalRot = getGlobalOrientation();
+	setGlobalOrientation(globalRot + (obj->getGlobalOrientation() - globalRot) * t);
+	
+	ofVec3f globalScale = getScale();
+	ofVec3f objScale = obj->getScale();
+	if(objScale != globalScale)
+		setScale(globalScale + (objScale - globalScale) * t);
+}
+
 void Object::animateTo(Object* obj, float duration, InterpolationType interpolation) {
 	animatePositionTo(obj->getPosition(), duration, interpolation);
 	animateRotationTo(obj->getOrientationQuat(), duration, interpolation);

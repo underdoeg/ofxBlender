@@ -19,6 +19,8 @@ public:
 	void updateLens();
 	void updateCamPos();
 	void animateLensTo(float targetLens, float duration, InterpolationType interpolation=LINEAR);
+	void interpolateLensTo(Camera* cam, float t);
+	void interpolateTo(Camera* cam, float t);
 	ofCamera camera;
 private:
 	void preDraw();

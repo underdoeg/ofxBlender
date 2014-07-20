@@ -45,6 +45,8 @@ void Camera::updateCamPos() {
 }
 
 void Camera::setLens(float l) {
+	if(l == lens)
+		return;
 	lens = l;
 	updateLens();
 }
@@ -72,6 +74,15 @@ float Camera::getLens() {
 	return lens;
 }
 
+void Camera::interpolateLensTo(Camera* cam, float t){
+	setLens(getLens() + (cam->getLens() - getLens())*t);
+}
+
+void Camera::interpolateTo(Camera* cam, float t){
+	Object::interpolateTo(cam, t);
+	interpolateLensTo(cam, t);
+}
+
 void Camera::onAnimationDataFloat(float value, string address, int channel) {
 	Object::onAnimationDataFloat(value, address, channel);
 
@@ -86,3 +97,4 @@ void Camera::animateLensTo(float targetLens, float duration, InterpolationType i
 
 }
 }
+

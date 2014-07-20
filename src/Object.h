@@ -10,7 +10,7 @@ namespace ofx {
 namespace blender {
 
 enum ObjectType {
-    UNDEFINED,
+    EMPTY,
     MESH,
     LIGHT,
     CAMERA,
@@ -53,6 +53,7 @@ public:
 	
 	void addConstraint(Constraint* constraint);
 	
+	void interpolateTo(Object* obj,  float t);
 	void animateTo(Object* obj, float time, InterpolationType interpolation=LINEAR);
 	void animatePositionTo(ofVec3f pos, float time, InterpolationType interpolation=LINEAR);
 	void animateRotationTo(ofVec3f rot, float time, InterpolationType interpolation=LINEAR);
