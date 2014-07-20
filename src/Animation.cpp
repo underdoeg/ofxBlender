@@ -8,12 +8,13 @@ Timeline::Timeline() {
 	timeOffset = ofGetElapsedTimeMillis();
 	isLoop = false;
 	duration = 1000000;
-	isPlaying = true;
-	isEndless = false;
-	isPaused = false;
+	bIsPlaying = true;
+	bIsEndless = false;
+	bIsPaused = false;
 	timeOffset = 0;
 	time = 0;
 	timeOld = 0;
+	lastMarker = NULL;
 }
 
 Timeline::~Timeline() {
@@ -29,12 +30,12 @@ void Timeline::step() {
 }
 
 void Timeline::setTime(unsigned long long t) {
-	if(!isPlaying)
+	if(!bIsPlaying)
 		return;
 
 	t = t - timeOffset;
 
-	if(isPaused) {
+	if(bIsPaused) {
 		timeOffset += t - time;
 		//time = t;
 		//timeOld = time;
@@ -44,16 +45,17 @@ void Timeline::setTime(unsigned long long t) {
 	Timeline* _this = this;
 	ofNotifyEvent(preFrame, _this);
 
-	if(isLoop && !isEndless) {
+	if(isLoop && !bIsEndless) {
 		time = t % duration;
 		if(time < timeOld) {
 			Timeline* _this = this;
 			ofNotifyEvent(ended, _this);
 			ofNotifyEvent(started, _this);
+			lastMarker = NULL;
 		}
 	} else {
 		time = t;
-		if(time > duration && !isEndless) {
+		if(time > duration && !bIsEndless) {
 			Timeline* _this = this;
 			stop();
 			ofNotifyEvent(ended, _this);
@@ -61,18 +63,19 @@ void Timeline::setTime(unsigned long long t) {
 		}
 	}
 
-	for(Marker& marker: markers) {
-		if(timeOld <= marker.time && time > marker.time) {
+	for(Marker* marker: markers) {
+		if(timeOld <= marker->time && time > marker->time && std::find(markerQueue.begin(), markerQueue.end(), marker) == markerQueue.end()) {
+			triggerMarker(marker);
 			//markerTriggered(marker.name);
-			markerQueue.push_back(marker.name);
+			//markerQueue.push_back(marker);
 		}
 	}
 
 	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching,
 	// this means loss of precision but easier handling
 	if(markerQueue.size() > 0) {
-		markerTriggered(markerQueue.front());
-		markerQueue.pop_front();
+		triggerMarker(markerQueue.front());
+		markerQueue.erase(markerQueue.begin());
 	}
 
 	for(Animation_* animation: animations) {
@@ -90,19 +93,19 @@ void Timeline::add(Timeline* timeline) {
 	timeline->timeOffset = 0;
 	timeline->setDuration(duration);
 	timeline->setLoop(isLoop);
-	timeline->setEndless(isEndless);
+	timeline->setEndless(bIsEndless);
 	children.push_back(timeline);
 }
 
 void Timeline::play() {
-	if(!isPaused){
+	if(!bIsPaused) {
 		timeOffset = ofGetElapsedTimeMillis();
 		timeOld = 0;
-	}else{
-		timeOld = ofGetElapsedTimeMillis() - timeOffset + 10;
+	} else {
+		timeOld = ofGetElapsedTimeMillis() - timeOffset;
 	}
-	isPlaying = true;
-	isPaused = false;
+	bIsPlaying = true;
+	bIsPaused = false;
 	Timeline* _this = this;
 	for(Timeline* child: children) {
 		child->play();
@@ -116,7 +119,11 @@ void Timeline::play() {
 }
 
 void Timeline::pause() {
-	isPaused = true;
+	while(markerQueue.size() > 0) {
+		triggerMarker(markerQueue.front());
+		markerQueue.erase(markerQueue.begin());
+	}
+	bIsPaused = true;
 }
 
 void Timeline::replay() {
@@ -125,7 +132,8 @@ void Timeline::replay() {
 }
 
 void Timeline::stop() {
-	isPlaying = false;
+	lastMarker = NULL;
+	bIsPlaying = false;
 	timeOld = 0;
 	//timeOffset = ofGetElapsedTimeMillis();
 	for(Animation_* animation: animations) {
@@ -134,12 +142,12 @@ void Timeline::stop() {
 	for(Timeline* child: children) {
 		child->stop();
 	}
-	
+
 	//markerQueue.clear();
-	
+
 	while(markerQueue.size() > 0) {
-		markerTriggered(markerQueue.front());
-		markerQueue.pop_front();
+		triggerMarker(markerQueue.front());
+		markerQueue.erase(markerQueue.begin());
 	}
 }
 
@@ -158,7 +166,7 @@ void Timeline::setLoop(bool loopState) {
 }
 
 void Timeline::setEndless(bool endlessState) {
-	isEndless = endlessState;
+	bIsEndless = endlessState;
 	for(Timeline* child: children) {
 		child->setEndless(endlessState);
 	}
@@ -173,9 +181,9 @@ unsigned long long Timeline::getDuration() {
 }
 
 bool Timeline::isAnimating() {
-	if(isPaused)
+	if(bIsPaused)
 		return false;
-	if(!isPlaying)
+	if(!bIsPlaying)
 		return false;
 	for(Animation_* anim: animations) {
 		if(anim->isRunning())
@@ -184,19 +192,37 @@ bool Timeline::isAnimating() {
 	return false;
 }
 
+bool ofx::blender::Timeline::isPaused() {
+	return bIsPaused;
+}
+
+bool ofx::blender::Timeline::isPlaying() {
+	return bIsPlaying;
+}
+
 struct markerSort {
-	inline bool operator() (const Marker& k1, const Marker k2) {
-		return (k1.time < k2.time);
+	inline bool operator() (const Marker* k1, const Marker* k2) {
+		return (k1->time < k2->time);
 	}
 };
 
 void Timeline::addMarker(float time, string name) {
-	markers.push_back(Marker(time * 1000, name));
+	markers.push_back(new Marker(time * 1000, name));
 	std::sort(markers.begin(), markers.end(), markerSort());
 }
 
-std::vector<Marker> Timeline::getMarkers() {
+std::vector<Marker*> Timeline::getMarkers() {
 	return markers;
+}
+
+void Timeline::triggerMarker(Marker* marker) {
+	if(lastMarker == marker)
+		return;
+	lastMarker = marker;
+	cout << marker << endl;
+	string markerName = std::string(marker->name);
+	cout << markerName << endl;
+	markerTriggered(markerName);
 }
 
 void Timeline::clear() {

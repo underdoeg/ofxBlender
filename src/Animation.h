@@ -305,14 +305,18 @@ public:
 	void setLoop(bool loopState);
 	void setEndless(bool endlessState);
 	void clear();
-
+	
+	bool isPlaying();
+	bool isPaused();
+	
+	
 	bool isAnimating();
 	bool hasAnimation(string key);
 	bool hasAnimation(string key, int channel);
 
 	template<typename Type>
 	void animateTo(Type from, Type to, float duration, string address, int channel=0, InterpolationType interpolation=LINEAR) {
-		if(!isEndless) {
+		if(!bIsEndless) {
 			ofLogWarning(OFX_BLENDER) << "animateTo: timeline is not endless, this might result in abrupt repeats or stops";
 		}
 
@@ -324,7 +328,7 @@ public:
 		anim->addKeyframe(getTime() + duration * 1000, to);
 	}
 
-	std::vector<Marker> getMarkers();
+	std::vector<Marker*> getMarkers();
 
 	unsigned long long getTime();
 	unsigned long long getDuration();
@@ -341,16 +345,19 @@ private:
 	void setTime(unsigned long long time);
 	std::vector<Animation_*> animations;
 	std::vector<Timeline*> children;
-	std::vector<Marker> markers;
-	std::deque<string> markerQueue;
+	std::vector<Marker*> markers;
+	void triggerMarker(Marker* marker);
+	Marker* lastMarker;
+	//TODO: fix marker queue
+	std::vector<Marker*> markerQueue;
 	unsigned long long time;
 	unsigned long long timeOld;
 	unsigned long long duration;
 	unsigned long long timeOffset;
 	bool isLoop;
-	bool isPlaying;
-	bool isEndless;
-	bool isPaused;
+	bool bIsPlaying;
+	bool bIsEndless;
+	bool bIsPaused;
 };
 
 }
