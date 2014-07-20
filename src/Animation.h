@@ -121,7 +121,7 @@ protected:
 	Keyframe* getKeyframeBefore(unsigned long long time) {
 		Keyframe* lastKey = NULL;
 		for(Keyframe* key: keyframes) {
-			if(key->time > time)
+			if(key->time >= time)
 				return lastKey;
 			lastKey = key;
 		}
@@ -181,8 +181,13 @@ public:
 
 		//check if we have a key1, otherwise I don't know how to calculate this
 				
-		if(!key1) {
+		if(!key1 && !key2) {
 			return;
+		}
+		
+		if(!key1 && key2){
+			key1 = key2;
+			key2 = NULL;
 		}
 
 		//if there is no key in the future, then the value has to be key1

@@ -63,13 +63,7 @@ void Timeline::setTime(unsigned long long t) {
 		}
 	}
 
-	for(Marker* marker: markers) {
-		if(timeOld <= marker->time && time > marker->time && std::find(markerQueue.begin(), markerQueue.end(), marker) == markerQueue.end()) {
-			triggerMarker(marker);
-			//markerTriggered(marker.name);
-			//markerQueue.push_back(marker);
-		}
-	}
+	
 
 	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching,
 	// this means loss of precision but easier handling
@@ -84,7 +78,15 @@ void Timeline::setTime(unsigned long long t) {
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
-
+	
+	for(Marker* marker: markers) {
+		if(timeOld <= marker->time && time > marker->time && std::find(markerQueue.begin(), markerQueue.end(), marker) == markerQueue.end()) {
+			triggerMarker(marker);
+			//markerTriggered(marker.name);
+			//markerQueue.push_back(marker);
+		}
+	}
+	
 	ofNotifyEvent(postFrame, _this);
 	timeOld = time;
 }
@@ -219,10 +221,7 @@ void Timeline::triggerMarker(Marker* marker) {
 	if(lastMarker == marker)
 		return;
 	lastMarker = marker;
-	cout << marker << endl;
-	string markerName = std::string(marker->name);
-	cout << markerName << endl;
-	markerTriggered(markerName);
+	markerTriggered(marker->name);
 }
 
 void Timeline::clear() {
