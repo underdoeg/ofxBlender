@@ -3,19 +3,23 @@
 
 #include "Object.h"
 
-namespace ofx
-{
+namespace ofx {
 
-namespace blender
-{
+namespace blender {
 
-class Billboard: public Object
-{
+class Billboard: public Object {
 public:
 	Billboard();
 	~Billboard();
-	
+
 	virtual void preDraw();
+
+	void setUpVector(float x, float y, float z);
+	void setUpVector(ofVec3f upVec);
+
+private:
+	bool bCustomUp;
+	ofVec3f customUp;
 };
 
 }
