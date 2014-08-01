@@ -18,6 +18,7 @@ public:
 };
 
 class Scene;
+class Mesh;
 class Material {
 public:
 	Material();
@@ -26,14 +27,19 @@ public:
 
 	void begin();
 	void end();
-
+	
+	bool hasTransparency();
+	
 	ofMaterial material;
 	std::vector<Texture*> textures;
 	string name;
 	bool useShader;
-
+	
+	
 private:
 	friend class Scene;
+	friend class Mesh;
+		
 	std::vector<Light*> lights;
 	bool isLightningEnabled;
 	bool isTwoSided;

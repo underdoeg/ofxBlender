@@ -9,6 +9,7 @@ Mesh::Mesh() {
 	isTwoSided = true;
 	boundsMin.set(std::numeric_limits<float>::max());
 	boundsMax.set(std::numeric_limits<float>::min());
+	hasTransparency = false;
 }
 
 Mesh::~Mesh() {
@@ -232,8 +233,13 @@ void Mesh::build() {
 		//add the material to the used materials
 		if(part.material && std::find(materials.begin(), materials.end(), part.material)==materials.end())
 			materials.push_back(part.material);
+		
 	}
-
+	
+	for(Material* mat: materials){
+		
+	}
+	
 	//cout << "NUMBER OF PARTS " << parts.size() << endl;
 }
 

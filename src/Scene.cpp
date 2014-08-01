@@ -49,22 +49,22 @@ void Scene::update() {
 void Scene::customDraw() {
 	//camera
 	ofCamera* camera = &debugCam;
-	if(activeCamera){
-		
+	if(activeCamera) {
+
 		activeCamera->updateCamPos();
 		activeCamera->updateLens();
-		
+
 		if(!doDebug)
 			camera = &activeCamera->camera;
 		else
 			debugCam.setFov(activeCamera->camera.getFov());
 	}
-	
+
 	if(!bHasViewport)
 		camera->begin();
 	else
 		camera->begin(viewport);
-		
+
 	//basics
 	ofPushStyle();
 	ofEnableNormalizedTexCoords();
@@ -140,8 +140,8 @@ void Scene::customDraw() {
 
 	//end the camera
 	camera->end();
-	
-	
+
+
 }
 
 void Scene::addObject(Object* obj) {
@@ -171,9 +171,9 @@ void Scene::addObject(Object* obj) {
 	default:
 		break;
 	}
-	
+
 	obj->scene = this;
-	
+
 	ofLogNotice(OFX_BLENDER) << "Added object " << obj->name << " to scene " << name;
 }
 
@@ -270,6 +270,10 @@ ofRectangle& Scene::getViewport() {
 
 bool Scene::hasViewport() {
 	return bHasViewport;
+}
+
+void Scene::enableAlphaOrdering() {
+	
 }
 
 }

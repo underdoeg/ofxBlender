@@ -300,6 +300,7 @@ public:
 	}
 
 	void play();
+	void playBackwards();
 	void pause();
 	void step();
 	void stop();
@@ -313,7 +314,6 @@ public:
 	
 	bool isPlaying();
 	bool isPaused();
-	
 	
 	bool isAnimating();
 	bool hasAnimation(string key);
@@ -334,7 +334,16 @@ public:
 	}
 
 	std::vector<Marker*> getMarkers();
+	Marker* getNextMarker();
+	Marker* getPrevMarker();
+	Marker* getMarkerBefore(Marker* marker);
 
+	void jumpToMarker(Marker* marker);
+	void jumpToMarker(std::string markerName);
+	void jumpToNextMarker();
+	void jumpToPrevMarker();
+	
+	void jumpToTime(unsigned long long time);
 	unsigned long long getTime();
 	unsigned long long getDuration();
 
@@ -363,6 +372,7 @@ private:
 	bool bIsPlaying;
 	bool bIsEndless;
 	bool bIsPaused;
+	bool bPlayBackwards;
 };
 
 }

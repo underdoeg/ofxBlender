@@ -15,6 +15,7 @@ Timeline::Timeline() {
 	time = 0;
 	timeOld = 0;
 	lastMarker = NULL;
+	bPlayBackwards = false;
 }
 
 Timeline::~Timeline() {
@@ -63,7 +64,7 @@ void Timeline::setTime(unsigned long long t) {
 		}
 	}
 
-	
+	cout << time << endl;
 
 	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching,
 	// this means loss of precision but easier handling
@@ -78,7 +79,7 @@ void Timeline::setTime(unsigned long long t) {
 	for(Timeline* child: children) {
 		child->setTime(time);
 	}
-	
+
 	for(Marker* marker: markers) {
 		if(timeOld <= marker->time && time > marker->time && std::find(markerQueue.begin(), markerQueue.end(), marker) == markerQueue.end()) {
 			triggerMarker(marker);
@@ -86,7 +87,7 @@ void Timeline::setTime(unsigned long long t) {
 			//markerQueue.push_back(marker);
 		}
 	}
-	
+
 	ofNotifyEvent(postFrame, _this);
 	timeOld = time;
 }
@@ -97,6 +98,12 @@ void Timeline::add(Timeline* timeline) {
 	timeline->setLoop(isLoop);
 	timeline->setEndless(bIsEndless);
 	children.push_back(timeline);
+}
+
+void ofx::blender::Timeline::playBackwards() {
+	play();
+	bPlayBackwards = true;
+	ofLogWarning(OFX_BLENDER) << "play backwards not yet implemented";
 }
 
 void Timeline::play() {
@@ -117,6 +124,7 @@ void Timeline::play() {
 	}
 	ofNotifyEvent(started, _this);
 	//setTime(timeOffset);
+	bPlayBackwards = false;
 	step();
 }
 
@@ -174,6 +182,19 @@ void Timeline::setEndless(bool endlessState) {
 	}
 }
 
+void Timeline::jumpToTime(unsigned long long t) {
+	bool pauseAfter = isPaused();
+	
+	if(pauseAfter)
+		play();
+	
+	timeOffset -= t - time;
+	step();
+	
+	if(pauseAfter)
+		pause();
+}
+
 unsigned long long Timeline::getTime() {
 	return time;
 }
@@ -199,7 +220,7 @@ bool ofx::blender::Timeline::isPaused() {
 }
 
 bool ofx::blender::Timeline::isPlaying() {
-	return bIsPlaying;
+	return bIsPlaying && !bIsPaused;
 }
 
 struct markerSort {
@@ -215,6 +236,61 @@ void Timeline::addMarker(float time, string name) {
 
 std::vector<Marker*> Timeline::getMarkers() {
 	return markers;
+}
+
+Marker* ofx::blender::Timeline::getNextMarker() {
+	for(Marker* marker: markers) {
+		if(marker->time > time) {
+			return marker;
+		}
+	}
+	return NULL;
+}
+
+Marker* ofx::blender::Timeline::getPrevMarker() {
+	Marker* lastMarker = NULL;
+	for(Marker* marker: markers) {
+		if(marker->time > time) {
+			return lastMarker;
+		}
+		lastMarker = marker;
+	}
+	return lastMarker;
+}
+
+Marker* Timeline::getMarkerBefore(Marker* pMarker) {
+	Marker* lastMarker = NULL;
+	for(Marker* marker: markers) {
+		if(marker == pMarker) {
+			return lastMarker;
+		}
+		lastMarker = marker;
+	}
+	return lastMarker;
+}
+
+void Timeline::jumpToMarker(Marker* marker) {
+	jumpToTime(marker->time);
+}
+
+void Timeline::jumpToMarker(std::string markerName) {
+	for(Marker* marker: markers) {
+		jumpToMarker(marker);
+	}
+}
+
+void Timeline::jumpToNextMarker() {
+	Marker* marker = getNextMarker();
+	if(marker) {
+		jumpToMarker(marker);
+	}
+}
+
+void Timeline::jumpToPrevMarker() {
+	Marker* marker = getPrevMarker();
+	if(marker) {
+		jumpToMarker(marker);
+	}
 }
 
 void Timeline::triggerMarker(Marker* marker) {

@@ -53,5 +53,21 @@ void Material::end() {
 
 }
 
+bool Material::hasTransparency() {
+	if(material.getDiffuseColor().a != 1.f){
+		return true;
+	}
+	if(material.getAmbientColor().a != 1.f){
+		return true;
+	}
+	if(material.getSpecularColor().a != 1.f){
+		return true;
+	}
+	if(textures.size() > 0){
+		//loop pixels
+		
+	}
+}
+
 }
 }

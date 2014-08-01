@@ -35,6 +35,9 @@ public:
 	Light* getLight(unsigned int index);
 	void setLightningEnabled(bool state);
 	
+	//will try to draw non alpha objects before alpha
+	void enableAlphaOrdering();
+	
 	Camera* getActiveCamera();
 	ofCamera* getDebugCamera();
 	void setActiveCamera(Camera* cam);
