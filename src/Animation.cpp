@@ -64,8 +64,6 @@ void Timeline::setTime(unsigned long long t) {
 		}
 	}
 
-	cout << time << endl;
-
 	//sometimes multiple markers can be called all at once if the fps is to low, the expected behaviour though is that they are triggered one after another, so we use a caching,
 	// this means loss of precision but easier handling
 	if(markerQueue.size() > 0) {
