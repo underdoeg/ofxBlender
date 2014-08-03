@@ -9,7 +9,7 @@ Mesh::Mesh() {
 	isTwoSided = true;
 	boundsMin.set(std::numeric_limits<float>::max());
 	boundsMax.set(std::numeric_limits<float>::min());
-	hasTransparency = false;
+	isTransparent = false;
 }
 
 Mesh::~Mesh() {
@@ -24,9 +24,9 @@ void Mesh::customDraw() {
 		glCullFace(GL_BACK);
 		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 	}
-	
+
 	//ofDrawBox(0, 0, 0, 1);
-	
+
 	for(Part& part: parts) {
 		if(part.hasTriangles)
 			part.draw();
@@ -233,14 +233,48 @@ void Mesh::build() {
 		//add the material to the used materials
 		if(part.material && std::find(materials.begin(), materials.end(), part.material)==materials.end())
 			materials.push_back(part.material);
-		
+	}
+
+	isTransparent = false;
+	for(Material* mat: materials) {
+		if(mat->hasTransparency())
+			isTransparent = true;
+	}
+
+	//check for transparency in texture
+	
+	int tCount = 0;
+	
+	if(!isTransparent) {
+
+		for(Triangle& tri: triangles) {
+						
+			//do we have textures?
+			if(tri.material && tri.material->textures.size() > 0) {
+				if(tri.uvs.size() >= 1){
+					
+					int imgW = tri.material->textures[0]->img.width;
+					int imgH = tri.material->textures[0]->img.height;
+					
+					//just randomly check some pixels within the triangle for transparency
+					//TODO: make more accurate
+					ofVec2f a = tri.uvs[0].a;
+					ofVec2f b = tri.uvs[0].b;
+					ofVec2f c = tri.uvs[0].c;
+
+					ofVec2f center = a.getInterpolated(b, .5).getInterpolated(c, .5);
+															
+					if(tri.material->textures[0]->img.getColor(roundf(center.x * imgW), roundf(center.y * imgH)).a < 220){
+						tCount++;
+					}
+				}
+			}
+		}
 	}
 	
-	for(Material* mat: materials){
-		
-	}
-	
-	//cout << "NUMBER OF PARTS " << parts.size() << endl;
+	if(tCount > triangles.size() * .1){
+		isTransparent = true;
+	}	
 }
 
 void Mesh::clear() {

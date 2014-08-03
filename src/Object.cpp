@@ -35,7 +35,7 @@ void Object::update() {
 	}
 }
 
-void Object::draw(Scene* scn) {
+void Object::draw(Scene* scn, bool drawChildren) {
 	if(!visible)
 		return;
 
@@ -48,18 +48,20 @@ void Object::draw(Scene* scn) {
 		if(!layer->isVisible())
 			return;
 	}
-		
+
 	preDraw();
 
 	ofNode::transformGL();
 	customDraw();
 	ofNode::restoreTransformGL();
 
-	for(Object* child: children) {
-		if(scn && scn->isDebugEnabled())
-			child->draw(scn);
-		else if(child->type != CAMERA && child->type != LIGHT)
-			child->draw(scn);
+	if(drawChildren) {
+		for(Object* child: children) {
+			if(scn && scn->isDebugEnabled())
+				child->draw(scn);
+			else if(child->type != CAMERA && child->type != LIGHT)
+				child->draw(scn);
+		}
 	}
 
 	postDraw();
@@ -79,7 +81,7 @@ void Object::addChild(Object* child, bool keepGlobalTransform) {
 void Object::removeChild(Object* child) {
 	if(!hasChild(child))
 		return;
-	
+
 	child->clearParent();
 	children.erase(std::remove(children.begin(), children.end(), child), children.end());
 }
@@ -263,13 +265,13 @@ void Object::onAnimationDataQuat(ofQuaternion quat, string address, int channel)
 }
 
 //animate to
-void Object::interpolateTo(Object* obj, float t){
+void Object::interpolateTo(Object* obj, float t) {
 	ofVec3f globalPos = getGlobalPosition();
 	setGlobalPosition(globalPos + (obj->getGlobalPosition() - globalPos) * t);
-	
+
 	ofQuaternion globalRot = getGlobalOrientation();
 	setGlobalOrientation(globalRot + (obj->getGlobalOrientation() - globalRot) * t);
-	
+
 	ofVec3f globalScale = getScale();
 	ofVec3f objScale = obj->getScale();
 	if(objScale != globalScale)

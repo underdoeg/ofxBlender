@@ -103,6 +103,7 @@ public:
 	string meshName;
 
 	bool isTwoSided;
+	bool isTransparent;
 
 	ofVec3f boundsMin;
 	ofVec3f boundsMax;
@@ -111,9 +112,7 @@ private:
 	friend class Scene;
 
 	Part& getPart(Material* mat, Shading shading, bool hasUvs);
-	
-	bool hasTransparency;
-	
+		
 	Material* curMaterial;
 	Shading curShading;
 	std::vector<ofVec3f> vertices;

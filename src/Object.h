@@ -32,7 +32,7 @@ public:
 	~Object();
 	
 	void update();
-	void draw(Scene* scene=NULL);
+	void draw(Scene* scene=NULL, bool drawChildren=true);
 	
 	virtual void preDraw(){};
 	virtual void customDraw();

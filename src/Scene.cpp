@@ -46,6 +46,18 @@ void Scene::update() {
 	}
 }
 
+struct sortByDistToCamera {
+
+	sortByDistToCamera(ofVec3f cp) {
+		camPos = cp;
+	}
+
+	ofVec3f camPos;
+	inline bool operator() (const Mesh* m1, const Mesh* m2) {
+		return (m1->getGlobalPosition().distanceSquared(camPos) > m2->getGlobalPosition().distanceSquared(camPos));
+	}
+};
+
 void Scene::customDraw() {
 	//camera
 	ofCamera* camera = &debugCam;
@@ -92,30 +104,42 @@ void Scene::customDraw() {
 	}
 
 	//action
-	for(Object* obj: objects) {
-		bool drawIt = true;
-		if(obj->hasParent() && hasObject(obj->getParent()))
-			drawIt = false;
 
-		if(doDebug) {
-			if(drawIt)
-				obj->draw(this);
-		} else if(obj->type != CAMERA && obj->type != LIGHT) {
-			if(drawIt)
-				obj->draw(this);
+	//draw other object types in debug
+	if(doDebug) {
+		for(Object* obj: objects) {
+			if(obj->type != MESH) {
+				obj->draw(this, false);
+			}
 		}
 	}
 
+	//collect meshes
+	std::vector<Mesh*> meshesNoTransp;
+	std::vector<Mesh*> meshesTransp;
+	for(Mesh* mesh:meshes) {
+		if(mesh->isTransparent)
+			meshesTransp.push_back(mesh);
+		else
+			meshesNoTransp.push_back(mesh);
+	}
+
+	//sort transparent meshes by zIndex
+	std::sort(meshesTransp.begin(), meshesTransp.end(), sortByDistToCamera(camera->getGlobalPosition()));
+
+	//draw meshes
+	for(Mesh* mesh:meshesNoTransp) {
+		mesh->draw(this, false);
+	}
+	
+	//draw meshes
+	for(Mesh* mesh:meshesTransp) {
+		mesh->draw(this, false);
+	}
+
+	//
 	glDisable(GL_CULL_FACE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-
-	/*
-	if(doDebug){
-		for(Mesh* mesh: meshes){
-			mesh->drawNormals();
-		}
-	}
-	*/
 
 	//kill the lights
 	if(doLightning) {
@@ -273,7 +297,7 @@ bool Scene::hasViewport() {
 }
 
 void Scene::enableAlphaOrdering() {
-	
+
 }
 
 }

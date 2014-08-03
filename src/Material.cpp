@@ -63,10 +63,8 @@ bool Material::hasTransparency() {
 	if(material.getSpecularColor().a != 1.f){
 		return true;
 	}
-	if(textures.size() > 0){
-		//loop pixels
-		
-	}
+
+	return false;
 }
 
 }
