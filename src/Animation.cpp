@@ -142,6 +142,7 @@ void Timeline::replay() {
 void Timeline::stop() {
 	lastMarker = NULL;
 	bIsPlaying = false;
+	jumpToTime(0);
 	timeOld = 0;
 	//timeOffset = ofGetElapsedTimeMillis();
 	for(Animation_* animation: animations) {
@@ -182,6 +183,8 @@ void Timeline::setEndless(bool endlessState) {
 
 void Timeline::jumpToTime(unsigned long long t) {
 	bool pauseAfter = isPaused();
+	
+	lastMarker = NULL;
 	
 	if(pauseAfter)
 		play();
