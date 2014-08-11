@@ -34,8 +34,14 @@ void Material::begin() {
 	}
 
 	for(ofShader* shader: shaders) {
-		if(shader->isLoaded())
+		if(shader->isLoaded()) {
 			shader->begin();
+			if(textures.size()>0) {
+				if(textures[0]->img.isAllocated()) {
+					shader->setUniformTexture("tex0", textures[0]->img.getTextureReference(), 0);
+				}
+			}
+		}
 	}
 }
 

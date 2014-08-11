@@ -109,6 +109,8 @@ bool Object::isVisible() {
 }
 
 void Object::hide() {
+	if(!visible)
+		return;
 	visible = false;
 	ObjectEventArgs args;
 	args.obj = this;
@@ -116,6 +118,8 @@ void Object::hide() {
 }
 
 void Object::show() {
+	if(visible)
+		return;
 	visible = true;
 	ObjectEventArgs args;
 	args.obj = this;
