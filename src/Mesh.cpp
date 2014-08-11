@@ -263,8 +263,8 @@ void Mesh::build() {
 					ofVec2f c = tri.uvs[0].c;
 
 					ofVec2f center = a.getInterpolated(b, .5).getInterpolated(c, .5);
-															
-					if(tri.material->textures[0]->img.getColor(roundf(center.x * imgW), roundf(center.y * imgH)).a < 220){
+				
+					if(tri.material->textures[0]->img.isAllocated() && tri.material->textures[0]->img.getColor(floorf(center.x * imgW), floorf(center.y * imgH)).a < 220){
 						tCount++;
 					}
 				}
