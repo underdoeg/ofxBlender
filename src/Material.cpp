@@ -29,11 +29,13 @@ void Material::begin() {
 
 	if(!isLightningEnabled) {
 		ofSetColor(material.getDiffuseColor());
-		return;
+	} else if(!useShader) {
+		material.begin();
 	}
 
-	if(!useShader) {
-		material.begin();
+	for(ofShader* shader: shaders) {
+		if(shader->isLoaded())
+			shader->begin();
 	}
 }
 
@@ -42,6 +44,11 @@ void Material::end() {
 		if(textures[0]->img.isAllocated()) {
 			textures[0]->img.getTextureReference().unbind();
 		}
+	}
+
+	for(ofShader* shader: shaders) {
+		if(shader->isLoaded())
+			shader->end();
 	}
 
 	if(!isLightningEnabled)
@@ -54,17 +61,22 @@ void Material::end() {
 }
 
 bool Material::hasTransparency() {
-	if(material.getDiffuseColor().a != 1.f){
+	if(material.getDiffuseColor().a != 1.f) {
 		return true;
 	}
-	if(material.getAmbientColor().a != 1.f){
+	if(material.getAmbientColor().a != 1.f) {
 		return true;
 	}
-	if(material.getSpecularColor().a != 1.f){
+	if(material.getSpecularColor().a != 1.f) {
 		return true;
 	}
 
 	return false;
+}
+
+
+void Material::addShader(ofShader* shader) {
+	shaders.push_back(shader);
 }
 
 }

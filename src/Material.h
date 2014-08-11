@@ -30,11 +30,14 @@ public:
 	
 	bool hasTransparency();
 	
+	void addShader(ofShader* shader);
+	
 	ofMaterial material;
 	std::vector<Texture*> textures;
 	string name;
 	bool useShader;
 	
+	std::vector<ofShader*> shaders;
 	
 private:
 	friend class Scene;

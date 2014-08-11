@@ -119,6 +119,7 @@ void Timeline::play() {
 		child->timeOffset = 0;
 		child->time = 0;
 		child->timeOld = 0;
+		
 	}
 	ofNotifyEvent(started, _this);
 	//setTime(timeOffset);
@@ -183,15 +184,15 @@ void Timeline::setEndless(bool endlessState) {
 
 void Timeline::jumpToTime(unsigned long long t) {
 	bool pauseAfter = isPaused();
-	
+
 	lastMarker = NULL;
-	
+
 	if(pauseAfter)
 		play();
-	
+
 	timeOffset -= t - time;
 	step();
-	
+
 	if(pauseAfter)
 		pause();
 }
@@ -326,6 +327,11 @@ bool Timeline::hasAnimation(string key, int channel) {
 	}
 	return false;
 }
+
+bool Timeline::hasAnimations() {
+	return animations.size() > 0;
+}
+
 
 }
 }

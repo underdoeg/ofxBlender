@@ -110,10 +110,16 @@ bool Object::isVisible() {
 
 void Object::hide() {
 	visible = false;
+	ObjectEventArgs args;
+	args.obj = this;
+	ofNotifyEvent(onHide, args);
 }
 
 void Object::show() {
 	visible = true;
+	ObjectEventArgs args;
+	args.obj = this;
+	ofNotifyEvent(onShow, args);
 }
 
 void Object::toggleVisibility() {
@@ -143,24 +149,27 @@ void Object::onPositionChanged() {
 	for(Constraint* constraint: constraints) {
 		constraint->onPositionChanged();
 	}
-	Object* s = this;
-	ofNotifyEvent(positionChanged, s);
+	ObjectEventArgs args;
+	args.obj = this;
+	ofNotifyEvent(positionChanged, args);
 }
 
 void Object::onOrientationChanged() {
 	for(Constraint* constraint: constraints) {
 		constraint->onOrientationChanged();
 	}
-	Object* s = this;
-	ofNotifyEvent(orientationChanged, s);
+	ObjectEventArgs args;
+	args.obj = this;
+	ofNotifyEvent(orientationChanged, args);
 }
 
 void Object::onScaleChanged() {
 	for(Constraint* constraint: constraints) {
 		constraint->onScaleChanged();
 	}
-	Object* s = this;
-	ofNotifyEvent(scaleChanged, s);
+	ObjectEventArgs args;
+	args.obj = this;
+	ofNotifyEvent(scaleChanged, args);
 }
 
 

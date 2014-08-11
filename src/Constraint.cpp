@@ -29,7 +29,7 @@ void TrackToConstraint::onPositionChanged() {
 	updateLookAt();
 }
 
-void TrackToConstraint::onTargetPositionChanged(Object*& obj) {
+void TrackToConstraint::onTargetPositionChanged(ObjectEventArgs& obj) {
 	updateLookAt();
 }
 

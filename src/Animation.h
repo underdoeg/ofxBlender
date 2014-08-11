@@ -185,6 +185,10 @@ public:
 			return;
 		}
 		
+		if(key1 == key2){
+			key2 = NULL;
+		}
+		
 		if(!key1 && key2){
 			key1 = key2;
 			key2 = NULL;
@@ -228,7 +232,7 @@ public:
 	}
 
 	void triggerListeners(Type value) {
-
+		
 		//don't do unnecessary triggers
 		if(oldValueSet && oldValue == value) {
 			return;
@@ -318,6 +322,7 @@ public:
 	bool isAnimating();
 	bool hasAnimation(string key);
 	bool hasAnimation(string key, int channel);
+	bool hasAnimations();
 
 	template<typename Type>
 	void animateTo(Type from, Type to, float duration, string address, int channel=0, InterpolationType interpolation=LINEAR) {
