@@ -204,7 +204,7 @@ public:
 		double step = key2->time - key1->time;
 		double stepRel = (timeNow - key1->time) / step;
 
-		if(stepRel < .01) {
+		if(stepRel < .002) {
 			Animation<Type>::triggerListeners(key1->value);
 			return;
 		}
