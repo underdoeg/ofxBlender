@@ -18,14 +18,14 @@ public:
 
 	//taken from http://devmag.org.za/2011/04/05/bzier-curves-a-tutorial/
 	template<typename Type>
-	static Type bezier(float t, ofVec2f p0, ofVec2f p1, ofVec2f p2, ofVec2f p3) {
+	static Type bezier(double t, ofVec2f p0, ofVec2f p1, ofVec2f p2, ofVec2f p3) {
 		ofLogWarning(OFX_BLENDER) << "unsupported type passed to bezier, works only with float";
 		return Type();
 	}
 
 
 	template<typename Type>
-	static Type linear(float interpol, Type a, Type b) {
+	static Type linear(double interpol, Type a, Type b) {
 		return a + (b - a) * interpol;
 	}
 
@@ -33,7 +33,7 @@ public:
 };
 
 template<>
-float Interpolation::bezier<float>(float t, ofVec2f p0, ofVec2f p1, ofVec2f p2, ofVec2f p3);
+float Interpolation::bezier<float>(double t, ofVec2f p0, ofVec2f p1, ofVec2f p2, ofVec2f p3);
 
 }
 }

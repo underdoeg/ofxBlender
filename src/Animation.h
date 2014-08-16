@@ -175,21 +175,21 @@ public:
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-		
+
 		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
 		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
 
 		//check if we have a key1, otherwise I don't know how to calculate this
-				
+
 		if(!key1 && !key2) {
 			return;
 		}
-		
-		if(key1 == key2){
+
+		if(key1 == key2) {
 			key2 = NULL;
 		}
-		
-		if(!key1 && key2){
+
+		if(!key1 && key2) {
 			key1 = key2;
 			key2 = NULL;
 		}
@@ -202,7 +202,12 @@ public:
 
 		//both keys are around, let's tween
 		double step = key2->time - key1->time;
-		float stepRel = (timeNow - key1->time) / step;
+		double stepRel = (timeNow - key1->time) / step;
+
+		if(stepRel < .01) {
+			Animation<Type>::triggerListeners(key1->value);
+			return;
+		}
 
 		switch(key1->interpolation) {
 		case LINEAR:
@@ -232,7 +237,7 @@ public:
 	}
 
 	void triggerListeners(Type value) {
-		
+
 		//don't do unnecessary triggers
 		if(oldValueSet && oldValue == value) {
 			return;
@@ -315,10 +320,10 @@ public:
 	void setLoop(bool loopState);
 	void setEndless(bool endlessState);
 	void clear();
-	
+
 	bool isPlaying();
 	bool isPaused();
-	
+
 	bool isAnimating();
 	bool hasAnimation(string key);
 	bool hasAnimation(string key, int channel);
@@ -347,7 +352,7 @@ public:
 	void jumpToMarker(std::string markerName);
 	void jumpToNextMarker();
 	void jumpToPrevMarker();
-	
+
 	void jumpToTime(unsigned long long time);
 	unsigned long long getTime();
 	unsigned long long getDuration();

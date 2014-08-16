@@ -15,7 +15,7 @@ void lerp(ofVec2f& dest, const ofVec2f& a, const ofVec2f& b, const float t)
 }
 	
 template<>
-float Interpolation::bezier<float>(float t, ofVec2f a, ofVec2f b, ofVec2f c, ofVec2f d) {
+float Interpolation::bezier<float>(double t, ofVec2f a, ofVec2f b, ofVec2f c, ofVec2f d) {
 	
 	/*
 	float u = 1 - t;
@@ -43,7 +43,9 @@ float Interpolation::bezier<float>(float t, ofVec2f a, ofVec2f b, ofVec2f c, ofV
     lerp(abbc, ab,bc,t);       // point between ab and bc (blue)
     lerp(bccd, bc,cd,t);       // point between bc and cd (blue)
     lerp(dest, abbc,bccd,t);   // point on the bezier-curve (black)
-
+	
+	//cout << dest.y << endl;
+	
 	return dest.y;
 }
 
