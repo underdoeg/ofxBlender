@@ -203,7 +203,7 @@ public:
 		//both keys are around, let's tween
 		double step = key2->time - key1->time;
 		double stepRel = (timeNow - key1->time) / step;
-
+		
 		if(stepRel < .002) {
 			Animation<Type>::triggerListeners(key1->value);
 			return;

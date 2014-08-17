@@ -87,7 +87,7 @@ void Camera::onAnimationDataFloat(float value, string address, int channel) {
 	Object::onAnimationDataFloat(value, address, channel);
 
 	if(address == "lens") {
-		setLens(value);
+			setLens(value);
 	}
 }
 

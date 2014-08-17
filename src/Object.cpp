@@ -16,6 +16,8 @@ Object::Object() {
 	lookAtUp.set(0, 1, 0);
 
 	animIsEuler = false;
+	
+	isEulerRotSet = false;
 
 	timeline.setDefaultHandler<float>(std::bind(&Object::onAnimationDataFloat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	timeline.setDefaultHandler<bool>(std::bind(&Object::onAnimationDataBool, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -188,7 +190,7 @@ void threeaxisrot(double r11, double r12, double r21, double r31, double r32, of
 void Object::onTimelinePreFrame(Timeline*&) {
 	animIsEuler = false;
 
-	if(timeline.hasAnimation("rotation_euler")) {
+	if(!isEulerRotSet && timeline.hasAnimation("rotation_euler")) {
 		ofQuaternion quat = getOrientationQuat();
 		double w = quat.w();
 		double x = quat.x();
@@ -214,6 +216,7 @@ void Object::onTimelinePostFrame(Timeline*&) {
 		ofQuaternion QuatAroundY = ofQuaternion( eulerRot.y, ofVec3f(0.0, 1.0, 0.0) );
 		ofQuaternion QuatAroundZ = ofQuaternion( eulerRot.z, ofVec3f(0.0, 0.0, 1.0) );
 		setOrientation(QuatAroundX * QuatAroundY * QuatAroundZ);
+		isEulerRotSet = true;
 	}
 }
 
@@ -243,13 +246,19 @@ void Object::onAnimationDataFloat(float value, string address, int channel) {
 	} else if(address == "rotation_euler") {
 		value = ofRadToDeg(value);
 		if(channel == 0) {
+			if(value != eulerRot.x)
+				animIsEuler = true;
 			eulerRot.x = value;
 		} else if(channel == 1) {
+			if(value != eulerRot.y)
+				animIsEuler = true;
 			eulerRot.y = value;
 		} else if(channel == 2) {
+			if(value != eulerRot.z)
+				animIsEuler = true;
 			eulerRot.z = value;
 		}
-		animIsEuler = true;
+		
 	}
 }
 

@@ -103,6 +103,7 @@ private:
 
 	//helpers for euler rotation
 	bool animIsEuler;
+	bool isEulerRotSet;
 	ofVec3f eulerRot;
 };
 
