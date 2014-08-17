@@ -207,6 +207,9 @@ public:
 		if(stepRel < .002) {
 			Animation<Type>::triggerListeners(key1->value);
 			return;
+		}else if(stepRel > .992) {
+			Animation<Type>::triggerListeners(key2->value);
+			return;
 		}
 
 		switch(key1->interpolation) {
