@@ -104,6 +104,13 @@ private:
 	//helpers for euler rotation
 	bool animIsEuler;
 	bool isEulerRotSet;
+	/*
+	struct DoubleVec{
+		double x;
+		double y;
+		double z;
+	};
+	*/
 	ofVec3f eulerRot;
 };
 

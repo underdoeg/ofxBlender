@@ -130,7 +130,7 @@ protected:
 
 	Keyframe* getKeyframeAfter(unsigned long long time) {
 		for(Keyframe* key: keyframes) {
-			if(key->time > time)
+			if(key->time >= time)
 				return key;
 		}
 		return NULL;
@@ -175,10 +175,12 @@ public:
 	};
 
 	void onStep(unsigned long long timeNow, unsigned long long timeLast) {
-
+		
+		
+				
 		Keyframe* key1 = static_cast<Keyframe*>(Animation_::getKeyframeBefore(timeNow));
 		Keyframe* key2 = static_cast<Keyframe*>(Animation_::getKeyframeAfter(timeNow));
-
+		
 		//check if we have a key1, otherwise I don't know how to calculate this
 
 		if(!key1 && !key2) {
@@ -203,6 +205,12 @@ public:
 		//both keys are around, let's tween
 		double step = key2->time - key1->time;
 		double stepRel = (timeNow - key1->time) / step;
+		
+		/*
+		if(channel == 2  && address == "rotation_euler"){
+			cout << stepRel << ": " <<  key1->value << " - " << key2->value << " " << timeNow << " - " << key1->time << " - " << key2->time << endl;
+		}
+		*/
 		
 		if(stepRel < .002) {
 			Animation<Type>::triggerListeners(key1->value);

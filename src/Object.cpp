@@ -190,7 +190,7 @@ void threeaxisrot(double r11, double r12, double r21, double r31, double r32, of
 void Object::onTimelinePreFrame(Timeline*&) {
 	animIsEuler = false;
 
-	if(!isEulerRotSet && timeline.hasAnimation("rotation_euler")) {
+	if(!timeline.hasAnimation("rotation_euler")) {
 		ofQuaternion quat = getOrientationQuat();
 		double w = quat.w();
 		double x = quat.x();
@@ -202,27 +202,28 @@ void Object::onTimelinePreFrame(Timeline*&) {
 		double sqz = z*z;
 
 		if(!timeline.hasAnimation("rotation_euler", 0))
-			eulerRot.x =  float(atan2(2.0 * (y*z + x*w),(-sqx - sqy + sqz + sqw)) * (180.0f/PI));
+			eulerRot.x =  float(atan2(2.0 * (y*z + x*w),(-sqx - sqy + sqz + sqw)));// * (180.0f/PI));
 		if(!timeline.hasAnimation("rotation_euler", 1))
-			eulerRot.y = float(asin(-2.0 * (x*z - y*w)) * (180.0f/PI));
+			eulerRot.y = float(asin(-2.0 * (x*z - y*w)));// * (180.0f/PI));
 		if(!timeline.hasAnimation("rotation_euler", 2))
-			eulerRot.z = float(atan2(2.0 * (x*y + z*w),(sqx - sqy - sqz + sqw)) * (180.0f/PI));
+			eulerRot.z = float(atan2(2.0 * (x*y + z*w),(sqx - sqy - sqz + sqw)));// * (180.0f/PI));
 	}
 }
 
 void Object::onTimelinePostFrame(Timeline*&) {
 	if(animIsEuler) {
-		ofQuaternion QuatAroundX = ofQuaternion( eulerRot.x, ofVec3f(1.0, 0.0, 0.0) );
-		ofQuaternion QuatAroundY = ofQuaternion( eulerRot.y, ofVec3f(0.0, 1.0, 0.0) );
-		ofQuaternion QuatAroundZ = ofQuaternion( eulerRot.z, ofVec3f(0.0, 0.0, 1.0) );
+		//cout << eulerRot << endl;
+		ofQuaternion QuatAroundX = ofQuaternion( ofRadToDeg(eulerRot.x), ofVec3f(1.0, 0.0, 0.0) );
+		ofQuaternion QuatAroundY = ofQuaternion( ofRadToDeg(eulerRot.y), ofVec3f(0.0, 1.0, 0.0) );
+		ofQuaternion QuatAroundZ = ofQuaternion( ofRadToDeg(eulerRot.z), ofVec3f(0.0, 0.0, 1.0) );
 		setOrientation(QuatAroundX * QuatAroundY * QuatAroundZ);
-		isEulerRotSet = true;
+		//isEulerRotSet = true;
 	}
 }
 
 void Object::onAnimationDataFloat(float value, string address, int channel) {
 	//cout << channel << ":" << address << endl;
-	//cout << "MY VALUES : " << value << endl;
+	//cout << "value: " << value << endl;
 	if(address == "location") {
 		ofVec3f loc = getPosition();
 		if(channel == 0) {
@@ -244,21 +245,15 @@ void Object::onAnimationDataFloat(float value, string address, int channel) {
 		}
 		setScale(scale);
 	} else if(address == "rotation_euler") {
-		value = ofRadToDeg(value);
+		//value = ofRadToDeg(value);
 		if(channel == 0) {
-			if(value != eulerRot.x)
-				animIsEuler = true;
 			eulerRot.x = value;
 		} else if(channel == 1) {
-			if(value != eulerRot.y)
-				animIsEuler = true;
 			eulerRot.y = value;
 		} else if(channel == 2) {
-			if(value != eulerRot.z)
-				animIsEuler = true;
 			eulerRot.z = value;
 		}
-		
+		animIsEuler = true;
 	}
 }
 
@@ -275,9 +270,14 @@ void Object::onAnimationDataBool(bool value, string address, int channel) {
 void Object::onAnimationDataVec3f(ofVec3f vec, string address, int channel) {
 	if(address == "loc")
 		setPosition(vec);
-	else if(address == "rot")
-		setOrientation(vec);
-	else if(address == "scale")
+	else if(address == "rot"){
+		//setOrientation(vec);
+		//eulerRot.set(vec);
+		eulerRot.x = vec.x;
+		eulerRot.y = vec.y;
+		eulerRot.z = vec.z;
+		animIsEuler = true;
+	}else if(address == "scale")
 		setScale(vec);
 }
 
