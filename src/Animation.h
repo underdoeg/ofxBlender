@@ -207,7 +207,7 @@ public:
 		if(stepRel < .002) {
 			Animation<Type>::triggerListeners(key1->value);
 			return;
-		}else if(stepRel > .992) {
+		}else if(stepRel > .998) {
 			Animation<Type>::triggerListeners(key2->value);
 			return;
 		}
