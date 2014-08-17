@@ -211,7 +211,7 @@ public:
 			cout << stepRel << ": " <<  key1->value << " - " << key2->value << " " << timeNow << " - " << key1->time << " - " << key2->time << endl;
 		}
 		*/
-		
+		/*
 		if(stepRel < .002) {
 			Animation<Type>::triggerListeners(key1->value);
 			return;
@@ -219,6 +219,7 @@ public:
 			Animation<Type>::triggerListeners(key2->value);
 			return;
 		}
+		*/
 
 		switch(key1->interpolation) {
 		case LINEAR:
